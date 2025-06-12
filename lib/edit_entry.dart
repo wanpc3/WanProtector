@@ -1,0 +1,245 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'database_helper.dart';
+
+class EditEntry extends StatefulWidget {
+  final Map<String, dynamic>? entry;
+
+  EditEntry({this.entry});
+
+  @override
+  _EditEntryState createState() => _EditEntryState();
+}
+
+class _EditEntryState extends State<EditEntry> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+
+  bool _obscurePassword = true;
+  final Databasehelper _dbHelper = Databasehelper();
+  bool _hasChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.entry != null) {
+      _titleController.text = widget.entry!['title'];
+      _usernameController.text = widget.entry!['username'];
+      _passwordController.text = widget.entry!['password'] ?? '';
+      _urlController.text = widget.entry!['url'] ?? '';
+      _notesController.text = widget.entry!['notes'] ?? '';
+    }
+
+    // Listen for changes in text fields
+    _titleController.addListener(_checkForChanges);
+    _usernameController.addListener(_checkForChanges);
+    _passwordController.addListener(_checkForChanges);
+    _urlController.addListener(_checkForChanges);
+    _notesController.addListener(_checkForChanges);
+  }
+
+  void _checkForChanges() {
+    final newState = _titleController.text != widget.entry!['title'] ||
+        _usernameController.text != widget.entry!['username'] ||
+        _passwordController.text != (widget.entry!['password'] ?? '') ||
+        _urlController.text != (widget.entry!['url'] ?? '') ||
+        _notesController.text != (widget.entry!['notes'] ?? '');
+
+    if (newState != _hasChanges) {
+      setState(() {
+        _hasChanges = newState;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.removeListener(_checkForChanges);
+    _usernameController.removeListener(_checkForChanges);
+    _passwordController.removeListener(_checkForChanges);
+    _urlController.removeListener(_checkForChanges);
+    _notesController.removeListener(_checkForChanges);
+    
+    _titleController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _urlController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges) return true;
+
+    final shouldPop = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Discard changes?'),
+        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Discard'),
+          ),
+        ],
+      ),
+    );
+
+    return shouldPop ?? false;
+  }
+
+  void _saveEntry() async {
+    if (_formKey.currentState!.validate()) {
+      final id = widget.entry!['id'];
+      final newTitle = _titleController.text.trim();
+      final newUsername = _usernameController.text.trim();
+      final newPassword = _passwordController.text.trim();
+      final newUrl = _urlController.text.trim();
+      final newNotes = _notesController.text.trim();
+
+      await _dbHelper.updateEntry(
+        id, 
+        newTitle, 
+        newUsername, 
+        newPassword, 
+        newUrl, 
+        newNotes
+      );
+
+      Navigator.pop(context, true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          title: Text("Edit Entry"),
+          leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () async {
+              final canPop = await _onWillPop();
+              if (canPop) {
+                Navigator.pop(context);
+              }
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveEntry,
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    
+                    // Title
+                    TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(labelText: "Title"),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter title";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Username
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(labelText: "Username"),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.copy),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: _usernameController.text)
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    
+                    SizedBox(height: 16),
+
+                    // Password
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(labelText: "Password"),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.copy),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: _passwordController.text)
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Url
+                    TextFormField(
+                      controller: _urlController,
+                      decoration: InputDecoration(labelText: "Url"),
+                    ),
+                    
+                    SizedBox(height: 16),
+
+                    // Notes
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(labelText: "Notes"),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
