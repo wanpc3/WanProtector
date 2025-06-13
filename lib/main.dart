@@ -66,7 +66,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   int _selectedIndex = 0;
-  static late List<Widget> _pageOptions;
+  late final List<Widget> _pageOptions;
 
   @override
   void initState() {
@@ -155,7 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: _pageOptions[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pageOptions,
+      ),
     );
   }
 }

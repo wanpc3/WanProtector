@@ -34,7 +34,6 @@ class _EditEntryState extends State<EditEntry> {
       _notesController.text = widget.entry!['notes'] ?? '';
     }
 
-    // Listen for changes in text fields
     _titleController.addListener(_checkForChanges);
     _usernameController.addListener(_checkForChanges);
     _passwordController.addListener(_checkForChanges);
@@ -98,6 +97,24 @@ class _EditEntryState extends State<EditEntry> {
 
   void _saveEntry() async {
     if (_formKey.currentState!.validate()) {
+
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Row(
+    //       children: [
+    //         CircularProgressIndicator(
+    //           valueColor: AlwaysStoppedAnimation(Colors.white)
+    //         ),
+    //         SizedBox(width: 12),
+    //         Text('Saving changes...'),
+    //       ],
+    //     ),
+    //     duration: Duration(milliseconds: 500),
+    //   ),
+    // );
+
+      await Future.delayed(Duration(microseconds: 300));
+
       final id = widget.entry!['id'];
       final newTitle = _titleController.text.trim();
       final newUsername = _usernameController.text.trim();
@@ -150,88 +167,117 @@ class _EditEntryState extends State<EditEntry> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    
-                    // Title
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: InputDecoration(labelText: "Title"),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter title";
-                        }
-                        return null;
-                      },
+                    // Title (with Hero)
+                    Hero(
+                      tag: 'title-${widget.entry!['id']}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: TextFormField(
+                          controller: _titleController,
+                          decoration: InputDecoration(labelText: "Title"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter title";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                     ),
 
                     SizedBox(height: 16),
 
-                    // Username
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _usernameController,
-                            decoration: InputDecoration(labelText: "Username"),
-                          ),
+                    // Username (with Hero)
+                    Hero(
+                      tag: 'username-${widget.entry!['id']}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _usernameController,
+                                decoration: InputDecoration(labelText: "Username"),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.copy),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: _usernameController.text)
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: Icon(Icons.copy),
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: _usernameController.text)
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    
-                    SizedBox(height: 16),
-
-                    // Password
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(labelText: "Password"),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.copy),
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: _passwordController.text)
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 16),
-
-                    // Url
-                    TextFormField(
-                      controller: _urlController,
-                      decoration: InputDecoration(labelText: "Url"),
+                      ),
                     ),
                     
                     SizedBox(height: 16),
 
-                    // Notes
-                    TextFormField(
-                      controller: _notesController,
-                      decoration: InputDecoration(labelText: "Notes"),
+                    // Password (with Hero)
+                    Hero(
+                      tag: 'password-${widget.entry!['id']}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                decoration: InputDecoration(labelText: "Password"),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.copy),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(text: _passwordController.text)
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Url (with Hero)
+                    Hero(
+                      tag: 'url-${widget.entry!['id']}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: TextFormField(
+                          controller: _urlController,
+                          decoration: InputDecoration(labelText: "Url"),
+                        ),
+                      ),
+                    ),
+                    
+                    SizedBox(height: 16),
+
+                    // Notes (with Hero)
+                    Hero(
+                      tag: 'notes-${widget.entry!['id']}',
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: TextFormField(
+                          controller: _notesController,
+                          decoration: InputDecoration(labelText: "Notes"),
+                        ),
+                      ),
                     ),
                   ],
                 ),

@@ -37,6 +37,10 @@ class _AddEntryState extends State<AddEntry> {
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+
+      //Hides keyboard right away
+      FocusScope.of(context).unfocus();
+
       if (widget.entry == null) {
           await _dbHelper.insertEntry(
           _titleController.text, 
@@ -55,6 +59,7 @@ class _AddEntryState extends State<AddEntry> {
           _notesController.text,
         );
       }
+
       Navigator.pop(context, true);
     }
   }
@@ -111,6 +116,7 @@ class _AddEntryState extends State<AddEntry> {
               //Password
               TextFormField(
                 controller: _passwordController,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: "Password",
                   suffixIcon: IconButton(
@@ -124,7 +130,6 @@ class _AddEntryState extends State<AddEntry> {
                     },
                   )
                 ),
-                obscureText: _obscurePassword,
               ),
 
               SizedBox(height: 16),

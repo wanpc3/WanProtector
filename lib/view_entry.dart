@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'database_helper.dart';
 import 'edit_entry.dart';
 
@@ -30,11 +31,15 @@ class _ViewEntryState extends State<ViewEntry> {
   @override
   void initState() {
     super.initState();
-    _entryFuture = _loadData();
+    _entryFuture = _loadDataAndSetControllers();
   }
 
-  Future<Map<String, dynamic>?> _loadData() async {
-    return await _dbHelper.getEntryById(widget.entryId);
+  Future<Map<String, dynamic>?> _loadDataAndSetControllers() async {
+    final entry = await _dbHelper.getEntryById(widget.entryId);
+    if (entry != null) {
+      _updateControllers(entry);
+    }
+    return entry;
   }
 
   void _updateControllers(Map<String, dynamic> entry) {
@@ -64,19 +69,51 @@ class _ViewEntryState extends State<ViewEntry> {
   void _navigateToEditEntry(Map<String, dynamic> entry) async {
     final result = await Navigator.push(
       context,
-        MaterialPageRoute(
-          builder: (context) => EditEntry(
-            entry: Map.from(entry)
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => EditEntry(
+          entry: Map.from(entry),
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.fastLinearToSlowEaseIn;
+        
+        return SlideTransition(
+          position: animation.drive(
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve))
           ),
-      )
+          child: ScaleTransition(
+            scale: animation.drive(
+              Tween(begin: 0.95, end: 1.0).chain(
+                CurveTween(curve: Curves.fastOutSlowIn)
+              ),
+            ),
+            child: FadeTransition(
+              opacity: animation.drive(
+                CurveTween(curve: const Interval(0.3, 1.0))
+              ),
+              child: child,
+            ),
+          ),
+        );
+      },
+        transitionDuration: Duration(milliseconds: 350),
+        reverseTransitionDuration: Duration(milliseconds: 350),
+      ),
     );
 
     if (result == true) {
       widget.onEntryUpdated?.call();
       setState(() {
-        _entryFuture = _loadData();
+        _entryFuture = _loadDataAndSetControllers();
       });
     }
+  }
+
+  //Date Formatter
+  String formatDateTime(String dateTimeString) {
+    final dt = DateTime.parse(dateTimeString).toLocal();
+    return DateFormat('dd MMM yyyy, hh:mm a').format(dt);
   }
 
   @override
@@ -131,103 +168,147 @@ class _ViewEntryState extends State<ViewEntry> {
             return Center(child: Text('Error loading entry'));
           }
           
-          if (!snapshot.hasData) {
+          if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text('Entry not found'));
           }
-          
-          _updateControllers(snapshot.data!);
+
+          final entry = snapshot.data!;
+          final createdAt = formatDateTime(entry['created_at']);
+          final lastUpdated = formatDateTime(entry['last_updated']);
           
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
 
-                //Title
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: "Title"),
-                  enabled: false,
+                // Title (with Hero)
+                Hero(
+                  tag: 'title-${widget.entryId}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: TextFormField(
+                      controller: _titleController,
+                      decoration: InputDecoration(labelText: "Title"),
+                      enabled: false,
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                //Username
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _usernameController,
-                        enabled: false,
-                        decoration: InputDecoration(labelText: "Username"),
-                      ),
+                // Username (with Hero)
+                Hero(
+                  tag: 'username-${widget.entryId}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _usernameController,
+                            enabled: false,
+                            decoration: InputDecoration(labelText: "Username"),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.copy),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: _usernameController.text),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Username copied to clipboard')),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.copy),
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _usernameController.text),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Username copied to clipboard')),
-                        );
-                      },
-                    ),
-                  ],
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                //Password
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _passwordController,
-                        enabled: false,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(labelText: "Password"),
-                      ),
+                // Password (with Hero)
+                Hero(
+                  tag: 'password-${widget.entryId}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _passwordController,
+                            enabled: false,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(labelText: "Password"),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.copy),
+                          onPressed: () {
+                            Clipboard.setData(
+                              ClipboardData(text: _passwordController.text),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Password copied to clipboard')),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.copy),
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _passwordController.text),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Password copied to clipboard')),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ],
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                //Url
-                TextFormField(
-                  controller: _urlController,
-                  decoration: InputDecoration(labelText: "Url"),
-                  enabled: false,
+                // Url (with Hero)
+                Hero(
+                  tag: 'url-${widget.entryId}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: TextFormField(
+                      controller: _urlController,
+                      decoration: InputDecoration(labelText: "Url"),
+                      enabled: false,
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                //Notes
-                TextFormField(
-                  controller: _notesController,
-                  decoration: InputDecoration(labelText: "Notes"),
-                  enabled: false,
+                // Notes (with Hero)
+                Hero(
+                  tag: 'notes-${widget.entryId}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(labelText: "Notes"),
+                      enabled: false,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Created and Updated 
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text("Created at: $createdAt"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text("Last updated at: $lastUpdated"),
                 ),
               ],
             ),

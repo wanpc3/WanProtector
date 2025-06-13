@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'database_helper.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
   final int oldId;
   final VoidCallback? onRestored;
+  final VoidCallback? onEntryUpdated;
 
   ViewDeletedEntry({
     required this.oldId,
-    this.onRestored
+    this.onRestored,
+    this.onEntryUpdated
   });
 
   @override
@@ -53,10 +56,39 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     return null;
   }
 
+  //To restore deleted entry
   void _restoreEntry() async {
     await _dbHelper.restoreEntry(widget.oldId);
     widget.onRestored?.call();
     Navigator.pop(context, true);
+  }
+
+  //To delete entry permanently
+  void _deleteEntryPermanently() async {
+    await _dbHelper.deleteEntryPermanently(widget.oldId);
+    widget.onRestored?.call();
+    Navigator.pop(context, true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('The entry has been permanently deleted')
+        ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _urlController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  //Date Formatter
+  String formatDateTime(String dateTimeString) {
+    final dt = DateTime.parse(dateTimeString).toLocal();
+    return DateFormat('dd MMM yyyy, hh:mm a').format(dt);
   }
 
   @override
@@ -65,32 +97,89 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       appBar: AppBar(
         title: Text('Deleted Entry'),
         actions: [
+
+          //Restore Icon
           IconButton(
             icon: Icon(Icons.restore_from_trash),
             onPressed: _restoreEntry,
+          ),
+
+          //Delete Permanently option
+          FutureBuilder<Map<String, dynamic>?>(
+            future: _entryFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container();
+              }
+              return PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) async {
+                  if (value == 'Delete Permanently') {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("Permanently Delete?"),
+                        content: Text('This action cannot be undone. Are you sure?'),
+                        actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false), 
+                              child: Text('Cancel')
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true), 
+                              child: Text('Delete')
+                            ),
+                          ],
+                        ),
+                      );
+
+                    if (confirm == true) {
+                      _deleteEntryPermanently();
+                    }
+                  }
+                },
+                itemBuilder: (_) => [
+                  const PopupMenuItem(
+                    value: 'Delete Permanently',
+                    child: Text("Delete Permanently"),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
         future: _entryFuture,
         builder: (context, snapshot) {
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
+
           if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text("No entry found"));
           }
+
+          final deletedEntry = snapshot.data!;
+          final createdAt = formatDateTime(deletedEntry['created_at']);
+          final lastUpdated = formatDateTime(deletedEntry['last_updated']);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+
+                //Title
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(labelText: "Title"),
                   enabled: false,
                 ),
+                
                 const SizedBox(height: 16),
+
+                //Username
                 Row(
                   children: [
                     Expanded(
@@ -113,7 +202,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
+
+                //Password
                 Row(
                   children: [
                     Expanded(
@@ -147,17 +239,33 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
+
+                //Url
                 TextFormField(
                   controller: _urlController,
                   decoration: InputDecoration(labelText: "Url"),
                   enabled: false,
                 ),
+
                 const SizedBox(height: 16),
+
+                //Notes
                 TextFormField(
                   controller: _notesController,
                   decoration: InputDecoration(labelText: "Notes"),
                   enabled: false,
+                ),
+
+                //Time created and last updated
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text("Created at: $createdAt"),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text("Last updated at: $lastUpdated"),
                 ),
               ],
             ),

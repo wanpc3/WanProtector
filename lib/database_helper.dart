@@ -138,6 +138,16 @@ class Databasehelper {
     return db.query('entry');
   }
 
+  Future<List<Map<String, dynamic>>> getEntriesPaginated(int limit, int offset) async {
+    final db = await database;
+    return db.query(
+      'entry',
+      limit: limit,
+      offset: offset,
+      orderBy: 'created_at DESC',
+    );
+  }
+
   //Update Entry
   Future<void> updateEntry(
     int id,
@@ -221,6 +231,16 @@ class Databasehelper {
     return db.query('deleted_entry');
   }
 
+  Future<List<Map<String, dynamic>>> getDeletedEntriesPaginated(int limit, int offset) async {
+    final db = await database;
+    return db.query(
+      'deleted_entry',
+      limit: limit,
+      offset: offset,
+      orderBy: 'created_at DESC',
+    );
+  }
+
   //Restore Deleted Entry
   Future<void> restoreEntry(int oldId) async {
     final db = await database;
@@ -244,6 +264,7 @@ class Databasehelper {
           'password': deletedEntry[0]['password'],
           'url': deletedEntry[0]['url'],
           'notes': deletedEntry[0]['notes'],
+          'last_updated': DateTime.now().toIso8601String(),
         },
       );
       
