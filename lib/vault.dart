@@ -236,6 +236,17 @@ class Vault {
     );
   }
 
+  Future<Map<String, dynamic>?> getDeletedEntryById(int id) async {
+    final db = await database;
+    final results = await db.query(
+      'deleted_entry',
+      where: 'deleted_id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return results.isEmpty ? null : results.first;
+  }
+
   //Restore Deleted Entry
   Future<void> restoreEntry(int oldId) async {
     final db = await database;

@@ -78,15 +78,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageOptions = [
       AllEntries(
         key: _allEntriesKey,
-        onEntryDeleted: (id) {
-          _deletedEntriesKey.currentState?.reload();
+        onEntryDeleted: (id) async {
+            await Future.delayed(const Duration(milliseconds: 100), () {
+            if (_allEntriesKey.currentState?.mounted ?? false) {
+              _allEntriesKey.currentState?.removeEntryWithAnimation(id);
+            }
+            
+            if (_deletedEntriesKey.currentState?.mounted ?? false) {
+              _deletedEntriesKey.currentState?.insertNewDeletedEntry(id);
+            }
+          });
         },
       ),
       PasswordGenerator(),
       DeletedEntries(
         key: _deletedEntriesKey,
         onEntryUpdated: () {
-          _allEntriesKey.currentState?.reload();
+          if (_allEntriesKey.currentState?.mounted ?? false) {
+            _allEntriesKey.currentState?.reload();
+          }
         },
       ),
       Settings(toggleTheme: widget.toggleTheme),

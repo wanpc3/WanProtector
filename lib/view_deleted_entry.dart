@@ -93,18 +93,21 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       ),
     );
 
-    await Future.wait([
-      Future.delayed(Duration(milliseconds: 300)),
-      _dbHelper.deleteEntryPermanently(widget.oldId),
-    ]);
+    await _dbHelper.deleteEntryPermanently(widget.oldId);
 
+    if (!mounted) return;
     Navigator.of(context).pop();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('The entry has been permanently deleted')),
     );
 
-    widget.onRestored?.call();
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    if (widget.onRestored != null) {
+      widget.onRestored!();
+    }
+
     Navigator.pop(context, true);
   }
 

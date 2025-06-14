@@ -57,18 +57,20 @@ class AllEntriesState extends State<AllEntries> {
         }
   }
 
-  void _loadEntries() async {
+  Future <void> _loadEntries() async {
     setState(() => _isLoading = true);
     _currentPage = 0;
-    final newEntries = await _dbHelper.getEntriesPaginated(_itemsPerPage, 0);
+    final newEntries = await _dbHelper.getEntriesPaginated(
+      _itemsPerPage, 
+      0
+    );
 
     if (!mounted) return;
 
     setState(() {
-      _entries = []; // Clear immediately
-      _entries.addAll(newEntries); // Add all new items
+      _entries = [];
+      _entries.addAll(newEntries);
       
-      // Only reset AnimatedList if we have items
       if (newEntries.isNotEmpty) {
         _listKey.currentState?.removeAllItems(
           (context, animation) => SizeTransition(sizeFactor: animation),
@@ -175,7 +177,10 @@ class AllEntriesState extends State<AllEntries> {
         pageBuilder: (_, __, ___) => ViewEntry(
           entryId: entry['id'],
           onEntryUpdated: _loadEntries,
-          onEntryDeleted: (id) => removeEntryWithAnimation(id),
+          onEntryDeleted: (id) {
+            removeEntryWithAnimation(id);
+            widget.onEntryDeleted?.call(id);
+          },
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
@@ -199,46 +204,46 @@ class AllEntriesState extends State<AllEntries> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading && _entries.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : _entries.isEmpty
-              ? Center(
-                  child: Text(
-                    'No entries found.',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                )
-              : NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification is ScrollEndNotification &&
-                        _scrollController.position.extentAfter == 0) {
-                      if (_hasMore && !_isLoading) {
-                        _loadMoreEntries();
+        body: _isLoading && _entries.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : _entries.isEmpty
+                ? Center(
+                    child: Text(
+                      'No entries found.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : NotificationListener<ScrollNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification is ScrollEndNotification &&
+                          _scrollController.position.extentAfter == 0) {
+                        if (_hasMore && !_isLoading) {
+                          _loadMoreEntries();
+                        }
                       }
-                    }
-                    return false;
-                  },
-                  child: AnimatedList(
-                    key: _listKey,
-                    controller: _scrollController,
-                    initialItemCount: _entries.length,
-                    itemBuilder: (context, index, animation) {
-                      if (index >= _entries.length) {
-                        return SizedBox.shrink();
-                      }
-                      final entry = _entries[index];
-                      return _buildAnimatedItem(entry, animation);
+                      return false;
                     },
+                    child: AnimatedList(
+                      key: _listKey,
+                      controller: _scrollController,
+                      initialItemCount: _entries.length,
+                      itemBuilder: (context, index, animation) {
+                        if (index >= _entries.length) {
+                          return SizedBox.shrink();
+                        }
+                        final entry = _entries[index];
+                        return _buildAnimatedItem(entry, animation);
+                      },
+                    ),
                   ),
-                ),
 
-      //FAB: FLoating Action Button  
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddEntry,
-        backgroundColor: const Color(0xFF085465),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
+        //FAB: FLoating Action Button  
+        floatingActionButton: FloatingActionButton(
+          onPressed: _navigateToAddEntry,
+          backgroundColor: const Color(0xFF085465),
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add),
+        ),
     );
   }
 
