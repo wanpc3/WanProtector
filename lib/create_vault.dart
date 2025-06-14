@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 import 'login_screen.dart';
 import 'policy/terms_of_service.dart';
 import 'policy/privacy_policy.dart';
@@ -45,7 +45,7 @@ class _CreateVaultScreen extends State<CreateVault> {
 
     //Save to SQLite storage
     final now = DateTime.now().toIso8601String();
-    await Databasehelper().insertMasterPassword(password, now, now);
+    await Vault().insertMasterPassword(password, now, now);
 
     //Navigate to login
     Navigator.pushReplacement(

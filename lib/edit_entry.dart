@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 
 class EditEntry extends StatefulWidget {
   final Map<String, dynamic>? entry;
@@ -20,7 +20,7 @@ class _EditEntryState extends State<EditEntry> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _obscurePassword = true;
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
   bool _hasChanges = false;
 
   @override
@@ -97,21 +97,6 @@ class _EditEntryState extends State<EditEntry> {
 
   void _saveEntry() async {
     if (_formKey.currentState!.validate()) {
-
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Row(
-    //       children: [
-    //         CircularProgressIndicator(
-    //           valueColor: AlwaysStoppedAnimation(Colors.white)
-    //         ),
-    //         SizedBox(width: 12),
-    //         Text('Saving changes...'),
-    //       ],
-    //     ),
-    //     duration: Duration(milliseconds: 500),
-    //   ),
-    // );
 
       await Future.delayed(Duration(microseconds: 300));
 

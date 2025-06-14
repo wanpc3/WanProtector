@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
   final int oldId;
@@ -27,7 +27,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _obscurePassword = true;
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
   late Future<Map<String, dynamic>?> _entryFuture;
 
   @override
@@ -58,22 +58,54 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
   //To restore deleted entry
   void _restoreEntry() async {
-    await _dbHelper.restoreEntry(widget.oldId);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    await Future.wait([
+      Future.delayed(Duration(milliseconds: 300)),
+      _dbHelper.restoreEntry(widget.oldId)
+    ]);
+
+    Navigator.of(context).pop();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("The entry has been restored"))
+    );
+
     widget.onRestored?.call();
     widget.onEntryUpdated?.call();
+
     Navigator.pop(context, true);
   }
 
   //To delete entry permanently
   void _deleteEntryPermanently() async {
-    await _dbHelper.deleteEntryPermanently(widget.oldId);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator()
+      ),
+    );
+
+    await Future.wait([
+      Future.delayed(Duration(milliseconds: 300)),
+      _dbHelper.deleteEntryPermanently(widget.oldId),
+    ]);
+
+    Navigator.of(context).pop();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('The entry has been permanently deleted')),
+    );
+
     widget.onRestored?.call();
     Navigator.pop(context, true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('The entry has been permanently deleted')
-        ),
-    );
   }
 
   @override

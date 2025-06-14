@@ -17,6 +17,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
 
+  //Setting contents
   final List<String> settings = <String>[
     'App Theme',
     'Auto-Lock',
@@ -28,56 +29,121 @@ class _SettingsState extends State<Settings> {
     'Report a Bug',
   ];
 
+  //leading icons
+  final List<IconData> leadingIcons = <IconData>[
+    Icons.palette,
+    Icons.lock_clock,
+    Icons.vpn_key,
+    Icons.lock_reset,
+    Icons.description,
+    Icons.privacy_tip,
+    Icons.star_rate,
+    Icons.bug_report,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: ListView.separated(
         padding: const EdgeInsets.all(8),
         itemCount: settings.length,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
+            leading: Icon(leadingIcons[index]),
             title: Text(settings[index]),
             onTap: () {
               if (settings[index] == 'App Theme') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => AppTheme(toggleTheme: widget.toggleTheme),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => AppTheme(
+                      toggleTheme: widget.toggleTheme
+                    ),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               } else if (settings[index] == 'Vault Settings') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => VaultSettings(),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => VaultSettings(),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               } else if (settings[index] == 'Change Master Password') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangeMp(toggleTheme: widget.toggleTheme),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => ChangeMp(
+                      toggleTheme: widget.toggleTheme
+                    ),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               } else if (settings[index] == 'Terms of Service') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => TermsOfService(),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => TermsOfService(),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               } else if (settings[index] == 'Privacy Policy') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => PrivacyPolicy(),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => PrivacyPolicy(),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
                   ),
                 );
               } else if (settings[index] == 'Rate us on Google Play') {

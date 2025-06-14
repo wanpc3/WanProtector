@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 
 class AddEntry extends StatefulWidget {
 
@@ -21,7 +21,7 @@ class _AddEntryState extends State<AddEntry> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _obscurePassword = true;
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
 
   @override
   void initState() {

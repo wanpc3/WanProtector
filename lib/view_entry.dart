@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 import 'edit_entry.dart';
 
 class ViewEntry extends StatefulWidget {
   final int entryId;
   final VoidCallback? onEntryUpdated;
-  final VoidCallback? onEntryDeleted;
+  final Function(int)? onEntryDeleted;
 
   ViewEntry({
     Key? key,
@@ -28,7 +28,7 @@ class _ViewEntryState extends State<ViewEntry> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _obscurePassword = true;
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
   late Future<Map<String, dynamic>?> _entryFuture;
 
   @override
@@ -63,10 +63,28 @@ class _ViewEntryState extends State<ViewEntry> {
     super.dispose();
   }
 
-  void _deleteEntry(int id) async {
+  //Entry removal
+  void _removeEntry(int id) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
     await _dbHelper.softDeleteEntry(id);
-    widget.onEntryUpdated?.call();
-    widget.onEntryDeleted?.call();
+
+    Navigator.of(context).pop();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("The entry has been removed"))
+    );
+
+    if (widget.onEntryDeleted != null) {
+      widget.onEntryDeleted!(id);
+    }
+
     Navigator.pop(context, true);
   }
 
@@ -141,7 +159,7 @@ class _ViewEntryState extends State<ViewEntry> {
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
                   if (value == 'Delete') {
-                    _deleteEntry(snapshot.data!['id']);
+                    _removeEntry(snapshot.data!['id']);
                   } else if (value == 'Edit') {
                     _navigateToEditEntry(snapshot.data!);
                   }

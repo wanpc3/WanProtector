@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
+import 'help.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -42,16 +43,20 @@ class _LoginScreenState extends State<LoginScreen> {
     final storedPassword = await _secureStorage.read(key: 'auth_token');
 
     if (enteredPassword == storedPassword) {
-      FocusScope.of(context).unfocus();
+      //FocusScope.of(context).unfocus();
       Navigator.pushReplacement(
-      context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)
+        context,
+        PageRouteBuilder(
+          transitionDuration: Duration(milliseconds: 300),
+          pageBuilder: (_, __, ___) => HomeScreen(toggleTheme: widget.toggleTheme),
+          transitionsBuilder: (_, animation, __, child) {
+            final offsetAnimation = Tween<Offset>(
+              begin: Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(animation);
+            return SlideTransition(position: offsetAnimation, child: child);
+          },
         ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid Master Password')),
       );
     }
   }
@@ -128,7 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Help()
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   foregroundColor: Colors.white,

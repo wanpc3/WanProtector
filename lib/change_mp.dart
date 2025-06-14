@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 import 'login_screen.dart';
 
 class ChangeMp extends StatefulWidget {
@@ -53,7 +53,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
     await _secureStorage.write(key: 'auth_token', value: newPassword);
 
     //Save to SQLite storage
-    await Databasehelper().updateMasterPassword(newPassword);
+    await Vault().updateMasterPassword(newPassword);
 
     //Alert user so they know they will be logged out
     showDialog(

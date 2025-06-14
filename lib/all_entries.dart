@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 import 'add_entry.dart';
 import 'view_entry.dart';
 
 class AllEntries extends StatefulWidget {
-  final VoidCallback? onEntryDeleted;
+  final Function(int)? onEntryDeleted;
 
   const AllEntries({
     Key? key,
@@ -16,13 +16,14 @@ class AllEntries extends StatefulWidget {
 }
 
 class AllEntriesState extends State<AllEntries> {
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
   List<Map<String, dynamic>> _entries = [];
   bool _isLoading = true;
   bool _hasMore = true;
   int _currentPage = 0;
   final int _itemsPerPage = 20;
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -59,31 +60,84 @@ class AllEntriesState extends State<AllEntries> {
   void _loadEntries() async {
     setState(() => _isLoading = true);
     _currentPage = 0;
-    final entries = await _dbHelper.getEntriesPaginated(_itemsPerPage, 0);
+    final newEntries = await _dbHelper.getEntriesPaginated(_itemsPerPage, 0);
+
+    if (!mounted) return;
+
     setState(() {
-      _entries = entries;
+      _entries = []; // Clear immediately
+      _entries.addAll(newEntries); // Add all new items
+      
+      // Only reset AnimatedList if we have items
+      if (newEntries.isNotEmpty) {
+        _listKey.currentState?.removeAllItems(
+          (context, animation) => SizeTransition(sizeFactor: animation),
+        );
+        
+        for (int i = 0; i < newEntries.length; i++) {
+          _listKey.currentState?.insertItem(i);
+        }
+      }
+      
       _isLoading = false;
-      _hasMore = entries.length == _itemsPerPage;
+      _hasMore = newEntries.length == _itemsPerPage;
     });
   }
 
   void _loadMoreEntries() async {
-    if (!_hasMore || _isLoading) return;
+    if (!_hasMore || _isLoading || !mounted) return;
 
     setState(() => _isLoading = true);
     _currentPage++;
-    final newEntries = await _dbHelper.getEntriesPaginated(
-      _itemsPerPage,
-      _currentPage * _itemsPerPage
-    );
+    
+    try {
+      final newEntries = await _dbHelper.getEntriesPaginated(
+        _itemsPerPage,
+        _currentPage * _itemsPerPage,
+      );
 
-    setState(() {
-      _isLoading = false;
-      if (newEntries.isNotEmpty) {
-        _entries.addAll(newEntries);
-        _hasMore = newEntries.length == _itemsPerPage;
-      } else {
-        _hasMore = false;
+      if (!mounted) return;
+
+      setState(() {
+        if (newEntries.isNotEmpty) {
+          final startIndex = _entries.length;
+          _entries.addAll(newEntries);
+          
+          for (int i = 0; i < newEntries.length; i++) {
+            _listKey.currentState?.insertItem(startIndex + i);
+          }
+          
+          _hasMore = newEntries.length == _itemsPerPage;
+        } else {
+          _hasMore = false;
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  //During removal process
+  void removeEntryWithAnimation(int id) {
+    if (!mounted || _entries.isEmpty || _isLoading) return;
+
+    final index = _entries.indexWhere((entry) => entry['id'] == id);
+    if (index == -1 || index >= _entries.length) return;
+
+    final removedEntry = _entries.removeAt(index);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _listKey.currentState?.mounted == true) {
+        _listKey.currentState?.removeItem(
+          index,
+          (context, animation) => _buildAnimatedItem(removedEntry, animation),
+          duration: const Duration(milliseconds: 300),
+        );
       }
     });
   }
@@ -92,8 +146,19 @@ class AllEntriesState extends State<AllEntries> {
   void _navigateToAddEntry() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddEntry()
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => AddEntry(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        }
       ),
     );
 
@@ -107,10 +172,10 @@ class AllEntriesState extends State<AllEntries> {
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => ViewEntry(
+        pageBuilder: (_, __, ___) => ViewEntry(
           entryId: entry['id'],
           onEntryUpdated: _loadEntries,
-          onEntryDeleted: widget.onEntryDeleted,
+          onEntryDeleted: (id) => removeEntryWithAnimation(id),
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
@@ -153,29 +218,16 @@ class AllEntriesState extends State<AllEntries> {
                     }
                     return false;
                   },
-                  child: ListView.builder(
+                  child: AnimatedList(
+                    key: _listKey,
                     controller: _scrollController,
-                    itemCount: _entries.length + (_hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
+                    initialItemCount: _entries.length,
+                    itemBuilder: (context, index, animation) {
                       if (index >= _entries.length) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
+                        return SizedBox.shrink();
                       }
                       final entry = _entries[index];
-                      return ListTile(
-                        leading: Icon(Icons.key, color: Colors.amber),
-                        title: Text(entry['title']),
-                        subtitle: Text(entry['username']),
-                        trailing: Text(
-                          _formatDate(entry['created_at']),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onTap: () => _navigateToViewEntry(entry),
-                      );
+                      return _buildAnimatedItem(entry, animation);
                     },
                   ),
                 ),
@@ -186,6 +238,24 @@ class AllEntriesState extends State<AllEntries> {
         backgroundColor: const Color(0xFF085465),
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  //Animated Item
+  Widget _buildAnimatedItem(Map<String, dynamic> entry, Animation<double> animation) {
+    return SizeTransition(
+      sizeFactor: animation,
+      child: ListTile(
+        key: ValueKey(entry['id']),
+        leading: Icon(Icons.key, color: Colors.amber),
+        title: Text(entry['title']),
+        subtitle: Text(entry['username']),
+        trailing: Text(
+          _formatDate(entry['created_at']),
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        onTap: () => _navigateToViewEntry(entry),
       ),
     );
   }

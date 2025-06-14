@@ -1,10 +1,10 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class Databasehelper {
-  static final Databasehelper _instance = Databasehelper._internal();
-  factory Databasehelper() => _instance;
-  Databasehelper._internal();
+class Vault {
+  static final Vault _instance = Vault._internal();
+  factory Vault() => _instance;
+  Vault._internal();
   static Database? _database;
 
   Future<Database> get database async {
@@ -76,13 +76,13 @@ class Databasehelper {
   }
 
   //Insert Master Password
-  Future<void> insertMasterPassword(
+  Future<int> insertMasterPassword(
     String password,
     String createdAt,
     String lastUpdated,
   ) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       'master_password',
       {
         'password': password,
@@ -94,11 +94,11 @@ class Databasehelper {
   }
 
   //Update Master Password
-  Future<void> updateMasterPassword(
+  Future<int> updateMasterPassword(
     String newPassword,
   ) async {
     final db = await database;
-    await db.update(
+    return await db.update(
       'master_password',
       {
         'password': newPassword,
@@ -109,7 +109,7 @@ class Databasehelper {
   }
 
   //Insert Entry
-  Future<void> insertEntry(
+  Future<int> insertEntry(
     String title,
     String username,
     String password,
@@ -117,7 +117,7 @@ class Databasehelper {
     String notes,
   ) async {
     final db = await database;
-    await db.insert(
+    return await db.insert(
       'entry', 
       {
         'title': title,
@@ -149,7 +149,7 @@ class Databasehelper {
   }
 
   //Update Entry
-  Future<void> updateEntry(
+  Future<int> updateEntry(
     int id,
     String newTitle,
     String newUsername,
@@ -158,7 +158,7 @@ class Databasehelper {
     String newNotes,
   ) async {
     final db = await database;
-    await db.update(
+    return await db.update(
       'entry',
       {
         'title': newTitle,
@@ -180,13 +180,8 @@ class Databasehelper {
       'entry',
       where: 'id = ?',
       whereArgs: [id],
-      limit: 1,
     );
-    if (result.isNotEmpty) {
-      return result.first;
-    } else {
-      return null;
-    }
+    return result.isNotEmpty ? result.first : null;
   }
 
   //Soft Delete

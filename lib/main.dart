@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wan_protector/database_helper.dart';
+import 'package:wan_protector/vault.dart';
 import 'all_entries.dart';
 import 'password_generator.dart';
 import 'deleted_entries.dart';
@@ -34,7 +34,7 @@ class _MainAppState extends State<MainApp> {
 
   //Check if user has created master password or not
   void _checkMasterPassword() async {
-    final dbHelper = Databasehelper();
+    final dbHelper = Vault();
     bool isSet = await dbHelper.isMasterPasswordSet();
     setState(() {
       _initialScreen = isSet
@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageOptions = [
       AllEntries(
         key: _allEntriesKey,
-        onEntryDeleted: () {
+        onEntryDeleted: (id) {
           _deletedEntriesKey.currentState?.reload();
         },
       ),
@@ -154,17 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: Icon(Icons.settings),
               title: Text('Settings'),
               selected: _selectedIndex == 3,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Settings(
-                      toggleTheme: widget.toggleTheme
-                    ),
-                  ),
-                );
-              },
+              onTap: () => _onItemTapped(3),
             ),
           ],
         ),

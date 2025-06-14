@@ -6,7 +6,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
-import 'database_helper.dart';
+import 'vault.dart';
 
 class VaultSettings extends StatefulWidget {
   @override
@@ -19,7 +19,7 @@ class _VaultSettingsState extends State<VaultSettings> {
     'Restore Vault',
   ];
 
-  final Databasehelper dbHelper = Databasehelper();
+  final Vault dbHelper = Vault();
   File? _file;
 
   // Backup Vault

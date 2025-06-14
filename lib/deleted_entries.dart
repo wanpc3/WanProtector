@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'view_deleted_entry.dart';
-import 'database_helper.dart';
+import 'vault.dart';
 
 class DeletedEntries extends StatefulWidget {
   final VoidCallback? onEntryUpdated;
@@ -15,7 +15,7 @@ class DeletedEntries extends StatefulWidget {
 }
 
 class DeletedEntriesState extends State<DeletedEntries> {
-  final Databasehelper _dbHelper = Databasehelper();
+  final Vault _dbHelper = Vault();
   List<Map<String, dynamic>> _deletedEntries = [];
   bool _isLoading = true;
   bool _hasMore = true;
