@@ -67,14 +67,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _selectedIndex = 0;
   late final List<Widget> _pageOptions;
+  late final GlobalKey<AllEntriesState> _allEntriesKey;
+  late final GlobalKey<DeletedEntriesState> _deletedEntriesKey;
 
   @override
   void initState() {
     super.initState();
+    _allEntriesKey = GlobalKey<AllEntriesState>();
+    _deletedEntriesKey = GlobalKey<DeletedEntriesState>();
     _pageOptions = [
-      AllEntries(),
+      AllEntries(
+        key: _allEntriesKey,
+        onEntryDeleted: () {
+          _deletedEntriesKey.currentState?.reload();
+        },
+      ),
       PasswordGenerator(),
-      DeletedEntries(),
+      DeletedEntries(
+        key: _deletedEntriesKey,
+        onEntryUpdated: () {
+          _allEntriesKey.currentState?.reload();
+        },
+      ),
       Settings(toggleTheme: widget.toggleTheme),
     ];
   }

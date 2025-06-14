@@ -4,11 +4,18 @@ import 'add_entry.dart';
 import 'view_entry.dart';
 
 class AllEntries extends StatefulWidget {
+  final VoidCallback? onEntryDeleted;
+
+  const AllEntries({
+    Key? key,
+    this.onEntryDeleted
+  }) : super(key: key);
+
   @override
-  _AllEntriesState createState() => _AllEntriesState();
+  AllEntriesState createState() => AllEntriesState();
 }
 
-class _AllEntriesState extends State<AllEntries> {
+class AllEntriesState extends State<AllEntries> {
   final Databasehelper _dbHelper = Databasehelper();
   List<Map<String, dynamic>> _entries = [];
   bool _isLoading = true;
@@ -25,9 +32,19 @@ class _AllEntriesState extends State<AllEntries> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadEntries();
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void reload() {
+    _loadEntries();
   }
 
   void _scrollListener() {
@@ -93,6 +110,7 @@ class _AllEntriesState extends State<AllEntries> {
         pageBuilder: (context, animation, secondaryAnimation) => ViewEntry(
           entryId: entry['id'],
           onEntryUpdated: _loadEntries,
+          onEntryDeleted: widget.onEntryDeleted,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);

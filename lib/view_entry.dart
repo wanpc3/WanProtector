@@ -7,11 +7,14 @@ import 'edit_entry.dart';
 class ViewEntry extends StatefulWidget {
   final int entryId;
   final VoidCallback? onEntryUpdated;
+  final VoidCallback? onEntryDeleted;
 
   ViewEntry({
+    Key? key,
     required this.entryId,
-    this.onEntryUpdated
-  });
+    required this.onEntryUpdated,
+    this.onEntryDeleted,
+  }): super(key: key);
 
   @override
   _ViewEntryState createState() => _ViewEntryState();
@@ -63,6 +66,7 @@ class _ViewEntryState extends State<ViewEntry> {
   void _deleteEntry(int id) async {
     await _dbHelper.softDeleteEntry(id);
     widget.onEntryUpdated?.call();
+    widget.onEntryDeleted?.call();
     Navigator.pop(context, true);
   }
 

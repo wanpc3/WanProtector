@@ -3,11 +3,18 @@ import 'view_deleted_entry.dart';
 import 'database_helper.dart';
 
 class DeletedEntries extends StatefulWidget {
+  final VoidCallback? onEntryUpdated;
+
+  const DeletedEntries({
+    Key? key,
+    this.onEntryUpdated
+  }) : super(key: key);
+
   @override
-  _DeletedEntriesState createState() => _DeletedEntriesState();
+  DeletedEntriesState createState() => DeletedEntriesState();
 }
 
-class _DeletedEntriesState extends State<DeletedEntries> {
+class DeletedEntriesState extends State<DeletedEntries> {
   final Databasehelper _dbHelper = Databasehelper();
   List<Map<String, dynamic>> _deletedEntries = [];
   bool _isLoading = true;
@@ -24,9 +31,19 @@ class _DeletedEntriesState extends State<DeletedEntries> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadDeletedEntries();
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void reload() {
+    _loadDeletedEntries();
   }
 
   void _scrollListener() {
@@ -77,11 +94,23 @@ class _DeletedEntriesState extends State<DeletedEntries> {
   void _navigateToViewDeletedEntry(Map<String, dynamic> oldEntry) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => ViewDeletedEntry(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => ViewDeletedEntry(
           oldId: oldEntry['deleted_id'],
           onRestored: _loadDeletedEntries,
-        )
+          onEntryUpdated: widget.onEntryUpdated,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        }
       ),
     );
     

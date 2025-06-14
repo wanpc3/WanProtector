@@ -60,6 +60,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   void _restoreEntry() async {
     await _dbHelper.restoreEntry(widget.oldId);
     widget.onRestored?.call();
+    widget.onEntryUpdated?.call();
     Navigator.pop(context, true);
   }
 
