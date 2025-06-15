@@ -9,10 +9,11 @@ class PolicyPage {
 
   //2. Information We Collect
   static const String info_collect_header = "2. Information We Collect";
-  static const String info_collect_text1 = "We collect the following personally identifiable information from users:";
-  static const String info_collect_text2 = "• Name or Username";
-  static const String info_collect_text3 = "• Email Address";
-  static const String info_collect_text4 = "• Password (used for authentication)";
+  static const String info_collect_text1 = "WanProtector does not collect or transmit any personally identifiable information. All data, including usernames, passwords, and vault contents, is securely stored on your device and never shared with the developer or third parties.
+";
+  // static const String info_collect_text2 = "• Name or Username";
+  // static const String info_collect_text3 = "• Email Address";
+  // static const String info_collect_text4 = "• Password (used for authentication)";
   static const String info_collect_text5 = "We also use local storage to store user data securely on the device.";
 
   //3. How We Use Your Information
