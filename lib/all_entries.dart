@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'all_entries_controller.dart';
 import 'vault.dart';
 import 'add_entry.dart';
 import 'view_entry.dart';
 
 class AllEntries extends StatefulWidget {
   final Function(int)? onEntryDeleted;
+  final AllEntriesController? controller;
 
   const AllEntries({
     Key? key,
-    this.onEntryDeleted
+    this.onEntryDeleted,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -25,9 +28,16 @@ class AllEntriesState extends State<AllEntries> {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
+  // Search-related state
+  bool _isSearching = false;
+  List<Map<String, dynamic>> _filteredEntries = [];
+
   @override
   void initState() {
     super.initState();
+    widget.controller?.exitSearch = _exitSearch;
+    widget.controller?.handleSearch = _handleSearch;
+    widget.controller?.navigateToAddEntry = _navigateToAddEntry;
     _scrollController.addListener(_scrollListener);
     _loadEntries();
   }
@@ -35,12 +45,15 @@ class AllEntriesState extends State<AllEntries> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadEntries();
+    if (_entries.isEmpty) {
+      _loadEntries();
+    }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    widget.controller?.dispose();
     super.dispose();
   }
 
@@ -49,45 +62,80 @@ class AllEntriesState extends State<AllEntries> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
-          if (_hasMore && !_isLoading) {
-            _loadMoreEntries();
-          }
-        }
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_hasMore && !_isLoading && !_isSearching) {
+        _loadMoreEntries();
+      }
+    }
   }
 
-  Future <void> _loadEntries() async {
+  //Search functionality
+  void _handleSearch(String query) async {
+    if (query.isEmpty) {
+      _exitSearch();
+      return;
+    }
+
+    final currentQuery = query;
+
+    await Future.delayed(const Duration(milliseconds: 300));
+  
+    if (currentQuery != query || !mounted) return;
+    
+    setState(() => _isLoading = true);
+    
+    try {
+      final results = await _dbHelper.searchEntries(query);
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _filteredEntries = results;
+        _isLoading = false;
+        _updateAnimatedList();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _exitSearch() {
+    setState(() {
+      _isSearching = false;
+      _filteredEntries = List.from(_entries);
+      _updateAnimatedList();
+    });
+  }
+
+  void _updateAnimatedList() {
+    _listKey.currentState?.removeAllItems(
+      (context, animation) => SizeTransition(sizeFactor: animation),
+    );
+    
+    for (int i = 0; i < _filteredEntries.length; i++) {
+      _listKey.currentState?.insertItem(i);
+    }
+  }
+
+  Future<void> _loadEntries() async {
     setState(() => _isLoading = true);
     _currentPage = 0;
-    final newEntries = await _dbHelper.getEntriesPaginated(
-      _itemsPerPage, 
-      0
-    );
+    final newEntries = await _dbHelper.getEntriesPaginated(_itemsPerPage, 0);
 
     if (!mounted) return;
 
     setState(() {
-      _entries = [];
-      _entries.addAll(newEntries);
-      
-      if (newEntries.isNotEmpty) {
-        _listKey.currentState?.removeAllItems(
-          (context, animation) => SizeTransition(sizeFactor: animation),
-        );
-        
-        for (int i = 0; i < newEntries.length; i++) {
-          _listKey.currentState?.insertItem(i);
-        }
-      }
-      
+      _entries = newEntries;
+      _filteredEntries = List.from(newEntries);
       _isLoading = false;
       _hasMore = newEntries.length == _itemsPerPage;
+      _updateAnimatedList();
     });
   }
 
   void _loadMoreEntries() async {
-    if (!_hasMore || _isLoading || !mounted) return;
+    if (!_hasMore || _isLoading || !mounted || _isSearching) return;
 
     setState(() => _isLoading = true);
     _currentPage++;
@@ -104,6 +152,7 @@ class AllEntriesState extends State<AllEntries> {
         if (newEntries.isNotEmpty) {
           final startIndex = _entries.length;
           _entries.addAll(newEntries);
+          _filteredEntries.addAll(newEntries);
           
           for (int i = 0; i < newEntries.length; i++) {
             _listKey.currentState?.insertItem(startIndex + i);
@@ -117,14 +166,11 @@ class AllEntriesState extends State<AllEntries> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
 
-  //During removal process
   void removeEntryWithAnimation(int id) {
     if (!mounted || _entries.isEmpty || _isLoading) return;
 
@@ -132,6 +178,7 @@ class AllEntriesState extends State<AllEntries> {
     if (index == -1 || index >= _entries.length) return;
 
     final removedEntry = _entries.removeAt(index);
+    _filteredEntries.removeWhere((entry) => entry['id'] == id);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _listKey.currentState?.mounted == true) {
@@ -144,7 +191,6 @@ class AllEntriesState extends State<AllEntries> {
     });
   }
 
-  //To add entry form
   void _navigateToAddEntry() async {
     final result = await Navigator.push(
       context,
@@ -164,12 +210,11 @@ class AllEntriesState extends State<AllEntries> {
       ),
     );
 
-    if (result == true) {
+    if (result == true && mounted) {
       _loadEntries();
     }
   }
 
-  //To view entry
   void _navigateToViewEntry(Map<String, dynamic> entry) async {
     final result = await Navigator.push(
       context,
@@ -196,7 +241,7 @@ class AllEntriesState extends State<AllEntries> {
       ),
     );
 
-    if (result == true) {
+    if (result == true && mounted) {
       _loadEntries();
     }
   }
@@ -204,50 +249,41 @@ class AllEntriesState extends State<AllEntries> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _isLoading && _entries.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : _entries.isEmpty
-                ? Center(
-                    child: Text(
-                      'No entries found.',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  )
-                : NotificationListener<ScrollNotification>(
-                    onNotification: (scrollNotification) {
-                      if (scrollNotification is ScrollEndNotification &&
-                          _scrollController.position.extentAfter == 0) {
-                        if (_hasMore && !_isLoading) {
-                          _loadMoreEntries();
-                        }
-                      }
-                      return false;
-                    },
-                    child: AnimatedList(
-                      key: _listKey,
-                      controller: _scrollController,
-                      initialItemCount: _entries.length,
-                      itemBuilder: (context, index, animation) {
-                        if (index >= _entries.length) {
-                          return SizedBox.shrink();
-                        }
-                        final entry = _entries[index];
-                        return _buildAnimatedItem(entry, animation);
-                      },
-                    ),
+      body: _isLoading && _filteredEntries.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : _filteredEntries.isEmpty
+              ? Center(
+                  child: Text(
+                    _isSearching ? 'No results found' : 'No entries found.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
-
-        //FAB: FLoating Action Button  
-        floatingActionButton: FloatingActionButton(
-          onPressed: _navigateToAddEntry,
-          backgroundColor: const Color(0xFF085465),
-          foregroundColor: Colors.white,
-          child: const Icon(Icons.add),
-        ),
+                )
+              : NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollEndNotification &&
+                        _scrollController.position.extentAfter == 0) {
+                      if (_hasMore && !_isLoading && !_isSearching) {
+                        _loadMoreEntries();
+                      }
+                    }
+                    return false;
+                  },
+                  child: AnimatedList(
+                    key: _listKey,
+                    controller: _scrollController,
+                    initialItemCount: _filteredEntries.length,
+                    itemBuilder: (context, index, animation) {
+                      if (index >= _filteredEntries.length) {
+                        return SizedBox.shrink();
+                      }
+                      final entry = _filteredEntries[index];
+                      return _buildAnimatedItem(entry, animation);
+                    },
+                  ),
+                ),
     );
   }
 
-  //Animated Item
   Widget _buildAnimatedItem(Map<String, dynamic> entry, Animation<double> animation) {
     return SizeTransition(
       sizeFactor: animation,
@@ -267,6 +303,10 @@ class AllEntriesState extends State<AllEntries> {
 }
 
 String _formatDate(String isoString) {
-  final dateTime = DateTime.parse(isoString);
-  return "${dateTime.day}/${dateTime.month}/${dateTime.year}";
+  try {
+    final dateTime = DateTime.parse(isoString);
+    return "${dateTime.day}/${dateTime.month}/${dateTime.year}";
+  } catch (e) {
+    return isoString;
+  }
 }

@@ -138,6 +138,17 @@ class Vault {
     return db.query('entry');
   }
 
+  //Search Entry
+  Future<List<Map<String, dynamic>>> searchEntries(String query) async {
+    final db = await this.database;
+    final result = await db.query(
+      'entry',
+      where: 'title LIKE ? OR username LIKE ? OR notes LIKE ?',
+      whereArgs: ['%$query%', '%$query%', '%$query%'],
+    );
+    return result;
+  }
+
   Future<List<Map<String, dynamic>>> getEntriesPaginated(int limit, int offset) async {
     final db = await database;
     return db.query(

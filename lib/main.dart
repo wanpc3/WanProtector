@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wan_protector/vault.dart';
+import 'all_entries_controller.dart';
+import 'vault.dart';
 import 'all_entries.dart';
 import 'password_generator.dart';
 import 'deleted_entries.dart';
@@ -32,7 +33,6 @@ class _MainAppState extends State<MainApp> {
     _checkMasterPassword();
   }
 
-  //Check if user has created master password or not
   void _checkMasterPassword() async {
     final dbHelper = Vault();
     bool isSet = await dbHelper.isMasterPasswordSet();
@@ -64,22 +64,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   int _selectedIndex = 0;
   late final List<Widget> _pageOptions;
   late final GlobalKey<AllEntriesState> _allEntriesKey;
   late final GlobalKey<DeletedEntriesState> _deletedEntriesKey;
 
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  late final AllEntriesController _entriesController;
+
   @override
   void initState() {
     super.initState();
+    _entriesController = AllEntriesController();
     _allEntriesKey = GlobalKey<AllEntriesState>();
     _deletedEntriesKey = GlobalKey<DeletedEntriesState>();
     _pageOptions = [
       AllEntries(
         key: _allEntriesKey,
+        controller: _entriesController,
         onEntryDeleted: (id) async {
-            await Future.delayed(const Duration(milliseconds: 100), () {
+          await Future.delayed(const Duration(milliseconds: 100), () {
             if (_allEntriesKey.currentState?.mounted ?? false) {
               _allEntriesKey.currentState?.removeEntryWithAnimation(id);
             }
@@ -103,7 +108,22 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _entriesController.dispose();
+    super.dispose();
+  }
+
   void _onItemTapped(int index) {
+    if (_isSearching && index != 0) {
+      setState(() {
+        _isSearching = false;
+        _searchController.clear();
+        _entriesController.exitSearch?.call();
+      });
+    }
+    
     Navigator.pop(context);
     if (index != _selectedIndex) {
       setState(() {
@@ -119,10 +139,59 @@ class _HomeScreenState extends State<HomeScreen> {
     'Settings',
   ];
 
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      autofocus: true,
+      decoration: InputDecoration(
+        hintText: 'Search entries...',
+        border: InputBorder.none,
+        hintStyle: TextStyle(color: Colors.white70),
+      ),
+      style: TextStyle(color: Colors.white),
+      onChanged: _entriesController.handleSearch,
+    );
+  }
+
+  List<Widget> _buildAppBarActions() {
+    if (_selectedIndex != 0) return [];
+    
+    return _isSearching
+        ? [
+            IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                setState(() {
+                  _isSearching = false;
+                  _searchController.clear();
+                  _entriesController.exitSearch?.call();
+                });
+              },
+            )
+          ]
+        : [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isSearching = true;
+                });
+              },
+            )
+          ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex])),
+      appBar: AppBar(
+        title: _isSearching && _selectedIndex == 0 
+            ? _buildSearchField()
+            : Text(_titles[_selectedIndex]),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        actions: _buildAppBarActions(),
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -134,32 +203,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
-
-            //All Entries
             ListTile(
               leading: Icon(Icons.lock),
               title: Text('All Entries'),
               selected: _selectedIndex == 0,
               onTap: () => _onItemTapped(0),
             ),
-
-            //Password Generator
             ListTile(
               leading: Icon(Icons.password),
               title: Text('Password Generator'),
               selected: _selectedIndex == 1,
               onTap: () => _onItemTapped(1),
             ),
-
-            //Deleted Entries
             ListTile(
               leading: Icon(Icons.delete),
               title: Text('Deleted Entries'),
               selected: _selectedIndex == 2,
               onTap: () => _onItemTapped(2),
             ),
-
-            //Settings
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings'),
@@ -173,6 +234,14 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex,
         children: _pageOptions,
       ),
+      floatingActionButton: _isSearching || _selectedIndex != 0
+          ? null
+          : FloatingActionButton(
+              onPressed: _entriesController.navigateToAddEntry,
+              backgroundColor: const Color(0xFF085465),
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }
