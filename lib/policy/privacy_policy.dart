@@ -280,6 +280,7 @@ class PrivacyPolicy extends StatelessWidget {
               const SizedBox(height: 20),
 
               //8. California Consumer Privacy Act (CCPA) - Header
+              /*
               Text(
                 PolicyPage.ccpa_header,
                 style: TextStyle(
@@ -388,8 +389,9 @@ class PrivacyPolicy extends StatelessWidget {
               ),
 
               SizedBox(height: 20),
+              */
 
-              //11. Policy Updates - Header
+              //8. Policy Updates - Header
               Text(
                 PolicyPage.policy_update_header,
                 style: TextStyle(
@@ -406,7 +408,7 @@ class PrivacyPolicy extends StatelessWidget {
 
               SizedBox(height: 20),
 
-              //12. Contact - Header
+              //9. Contact - Header
               Text(
                 PolicyPage.contact_header,
                 style: TextStyle(
