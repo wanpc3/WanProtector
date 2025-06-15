@@ -62,9 +62,10 @@ class _AddEntryState extends State<AddEntry> {
 
       //Success Message
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Entry added"), 
-          backgroundColor: Colors.lightGreen,
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Text("Entry added"), 
+          backgroundColor: Colors.green[400],
+          duration: Duration(seconds: 2),
         )
       );
       Navigator.pop(context, true);
@@ -84,7 +85,11 @@ class _AddEntryState extends State<AddEntry> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Entry")),
+      appBar: AppBar(
+        title: Text("Add Entry"),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(

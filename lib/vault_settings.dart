@@ -130,6 +130,8 @@ class _VaultSettingsState extends State<VaultSettings> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(8),

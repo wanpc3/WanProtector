@@ -1,15 +1,18 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'all_entries_controller.dart';
+import 'deleted_entries_controller.dart';
 import 'vault.dart';
 import 'all_entries.dart';
 import 'add_entry.dart';
 import 'entries_state.dart';
+import 'deleted_entries_state_manager.dart';
 import 'password_generator.dart';
 import 'deleted_entries.dart';
 import 'settings.dart';
 import 'login_screen.dart';
 import 'create_vault.dart';
+import 'dart:async';
 
 void main() {
   runApp(MainApp());
@@ -51,6 +54,7 @@ class _MainAppState extends State<MainApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => EntriesState()),
+        ChangeNotifierProvider(create: (_) => DeletedEntriesStateManager()),
       ],
       child: MaterialApp(
         theme: ThemeData.light(),
@@ -77,14 +81,32 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   late final AllEntriesController _entriesController;
+  late final DeletedEntriesController _deletedEntriesController;
+  Timer? _searchDebounce;
+
+  //Track which screen is being searched
+  int? _searchingScreenIndex;
 
   @override
   void initState() {
     super.initState();
     _entriesController = AllEntriesController(
-      exitSearch: () => context.read<EntriesState>().exitSearch(),
-      handleSearch: (query) => context.read<EntriesState>().searchEntries(query),
+      exitSearch: _exitSearch,
+      handleSearch: (query) {
+        if (_selectedIndex == 0) {
+          context.read<EntriesState>().searchEntries(query);
+        }
+      },
       navigateToAddEntry: _navigateToAddEntry,
+    );
+
+    _deletedEntriesController = DeletedEntriesController(
+      exitSearch: _exitSearch,
+      handleSearch: (query) {
+        if (_selectedIndex == 2) {
+          context.read<DeletedEntriesStateManager>().searchDeletedEntries(query);
+        }
+      },
     );
     
     _pageOptions = [
@@ -92,15 +114,28 @@ class _HomeScreenState extends State<HomeScreen> {
         onEntryDeleted: (id) async {
           await Future.delayed(const Duration(milliseconds: 100));
           context.read<EntriesState>().removeEntry(id);
-          // If you need to notify DeletedEntries, you can add that here
         },
       ),
       PasswordGenerator(),
       DeletedEntries(
+        controller: _deletedEntriesController,
         onEntryUpdated: () => context.read<EntriesState>().loadEntries(),
       ),
       Settings(toggleTheme: widget.toggleTheme),
     ];
+  }
+
+  void _exitSearch() {
+    if (_searchingScreenIndex == 0) {
+      context.read<EntriesState>().exitSearch();
+    } else if (_searchingScreenIndex == 2) {
+      context.read<DeletedEntriesStateManager>().exitSearch();
+    }
+    setState(() {
+      _isSearching = false;
+      _searchingScreenIndex = null;
+      _searchController.clear();
+    });
   }
 
   void _navigateToAddEntry() async {
@@ -129,17 +164,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    _entriesController.dispose();
     super.dispose();
   }
 
   void _onItemTapped(int index) {
-    if (_isSearching && index != 0) {
-      setState(() {
-        _isSearching = false;
-        _searchController.clear();
-        _entriesController.exitSearch?.call();
-      });
+    if (_isSearching) {
+      _exitSearch();
     }
     
     Navigator.pop(context);
@@ -162,29 +192,35 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _searchController,
       autofocus: true,
       decoration: InputDecoration(
-        hintText: 'Search entries...',
+        hintText: _selectedIndex == 0 
+          ? 'Search entries...' 
+          : 'Search deleted entries...',
         border: InputBorder.none,
         hintStyle: TextStyle(color: Colors.white70),
       ),
       style: TextStyle(color: Colors.white),
-      onChanged: _entriesController.handleSearch,
+      onChanged: (query) {
+        // Debounce the search
+        _searchDebounce?.cancel();
+        _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+          if (_selectedIndex == 0) {
+            _entriesController.handleSearch?.call(query);
+          } else if (_selectedIndex == 2) {
+            _deletedEntriesController.handleSearch?.call(query);
+          }
+        });
+      },
     );
   }
 
   List<Widget> _buildAppBarActions() {
-    if (_selectedIndex != 0) return [];
+    if (_selectedIndex != 0 && _selectedIndex != 2) return [];
     
     return _isSearching
         ? [
             IconButton(
               icon: Icon(Icons.close),
-              onPressed: () {
-                setState(() {
-                  _isSearching = false;
-                  _searchController.clear();
-                  _entriesController.exitSearch?.call();
-                });
-              },
+              onPressed: _exitSearch,
             )
           ]
         : [
@@ -193,6 +229,12 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 setState(() {
                   _isSearching = true;
+                  _searchingScreenIndex = _selectedIndex;
+                  if (_selectedIndex == 0) {
+                    context.read<EntriesState>().exitSearch();
+                  } else {
+                    context.read<DeletedEntriesStateManager>().exitSearch();
+                  }
                 });
               },
             )
@@ -203,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching && _selectedIndex == 0 
+        title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
             ? _buildSearchField()
             : Text(_titles[_selectedIndex]),
         backgroundColor: Colors.black,

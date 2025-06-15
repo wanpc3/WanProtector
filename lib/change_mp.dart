@@ -87,6 +87,8 @@ class _ChangeMpScreen extends State<ChangeMp> {
 
       appBar: AppBar(
         title: Text("Change Master Password"),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
 
       body: SafeArea(

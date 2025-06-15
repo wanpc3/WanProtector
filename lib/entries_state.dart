@@ -4,7 +4,7 @@ import 'vault.dart';
 class EntriesState extends ChangeNotifier {
   final Vault _dbHelper = Vault();
   
-  // Private state
+  //Private state
   List<Map<String, dynamic>> _entries = [];
   List<Map<String, dynamic>> _filteredEntries = [];
   bool _isLoading = true;
@@ -13,7 +13,7 @@ class EntriesState extends ChangeNotifier {
   final int _itemsPerPage = 20;
   bool _isSearching = false;
   
-  // Public getters
+  //Public getters
   List<Map<String, dynamic>> get entries => _entries;
   List<Map<String, dynamic>> get filteredEntries => _filteredEntries;
   bool get isLoading => _isLoading;
@@ -27,8 +27,8 @@ class EntriesState extends ChangeNotifier {
     _currentPage = 0;
     final newEntries = await _dbHelper.getEntriesPaginated(_itemsPerPage, 0);
 
-    _entries = newEntries;
-    _filteredEntries = List.from(newEntries);
+    _entries = List<Map<String, dynamic>>.from(newEntries);
+    _filteredEntries = List<Map<String, dynamic>>.from(newEntries);
     _isLoading = false;
     _hasMore = newEntries.length == _itemsPerPage;
     notifyListeners();
@@ -70,7 +70,7 @@ class EntriesState extends ChangeNotifier {
     
     try {
       final results = await _dbHelper.searchEntries(query);
-      _filteredEntries = results;
+      _filteredEntries = List<Map<String, dynamic>>.from(results);
     } finally {
       _isLoading = false;
       notifyListeners();

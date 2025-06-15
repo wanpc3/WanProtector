@@ -14,6 +14,8 @@ class AppTheme extends StatelessWidget {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: ElevatedButton(

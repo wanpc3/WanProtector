@@ -74,7 +74,11 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     Navigator.of(context).pop();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("The entry has been restored"))
+      SnackBar(
+        content: Text("The entry has been restored"),
+        backgroundColor: Colors.green[400],
+        duration: Duration(seconds: 2),
+      )
     );
 
     widget.onRestored?.call();
@@ -99,10 +103,16 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     Navigator.of(context).pop();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('The entry has been permanently deleted')),
+      SnackBar(
+        content: Text('The entry has been permanently deleted'),
+        backgroundColor: Colors.red[400],
+          duration: Duration(seconds: 2),
+      ),
     );
 
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(
+      const Duration(milliseconds: 100)
+      );
     
     if (widget.onRestored != null) {
       widget.onRestored!();
@@ -131,7 +141,21 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Deleted Entry'),
+        title: FutureBuilder<Map<String, dynamic>?>(
+          future: _entryFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Text('Loading...');
+            }
+            if (snapshot.hasData && snapshot.data != null) {
+              final title = snapshot.data!['title'];
+              return Text('$title');
+            }
+            return Text('Entry #${widget.oldId}');
+          },
+        ),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         actions: [
 
           //Restore Icon

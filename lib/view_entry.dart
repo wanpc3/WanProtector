@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'deleted_entries_state_manager.dart';
+import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
 
@@ -65,27 +68,34 @@ class _ViewEntryState extends State<ViewEntry> {
 
   //Entry removal
   void _removeEntry(int id) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    await _dbHelper.softDeleteEntry(id);
-
-    Navigator.of(context).pop();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("The entry has been removed"))
-    );
-
-    if (widget.onEntryDeleted != null) {
-      widget.onEntryDeleted!(id);
+    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
+    
+    try {
+      // 1. Perform soft delete in database
+      await _dbHelper.softDeleteEntry(id);
+      
+      // 2. Update both states
+      final entriesState = context.read<EntriesState>();
+      final deletedEntriesState = context.read<DeletedEntriesStateManager>();
+      
+      entriesState.removeEntry(id);
+      await deletedEntriesState.refreshDeletedEntries();
+      
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Entry moved to deleted items"))
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}"))
+        );
+      }
     }
-
-    Navigator.pop(context, true);
   }
 
   void _navigateToEditEntry(Map<String, dynamic> entry) async {
@@ -142,6 +152,8 @@ class _ViewEntryState extends State<ViewEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
         title: FutureBuilder<Map<String, dynamic>?>(
         future: _entryFuture,
         builder: (context, snapshot) {

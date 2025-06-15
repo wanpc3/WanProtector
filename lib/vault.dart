@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -196,45 +197,57 @@ class Vault {
   }
 
   //Soft Delete
-  Future<void> softDeleteEntry(int id) async {
+  Future<bool> softDeleteEntry(int id) async {
     final db = await database;
+    try {
+      return await db.transaction((txn) async {
+        final entry = await txn.query(
+          'entry',
+          where: 'id = ?',
+          whereArgs: [id],
+          limit: 1,
+        );
 
-    //1) Get the entry to perform soft-delete
-    final entry = await db.query(
-      'entry',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
+        if (entry.isNotEmpty) {
+          await txn.insert('deleted_entry', {
+            'deleted_id': id,
+            'title': entry.first['title'],
+            'username': entry.first['username'],
+            'password': entry.first['password'],
+            'url': entry.first['url'],
+            'notes': entry.first['notes'],
+            'created_at': entry.first['created_at'],
+            'last_updated': DateTime.now().toIso8601String(),
+          });
 
-    //2) Insert into deleted_entry table
-    if (entry.isNotEmpty) {
-      await db.insert(
-        'deleted_entry',
-        {
-          'deleted_id': entry[0]['id'],
-          'title': entry[0]['title'],
-          'username': entry[0]['username'],
-          'password': entry[0]['password'],
-          'url': entry[0]['url'],
-          'notes': entry[0]['notes'],
-          'last_updated': DateTime.now().toIso8601String(),
+          await txn.delete('entry', where: 'id = ?', whereArgs: [id]);
+          return true;
         }
-      );
+        return false;
+      });
+    } catch (e) {
+      debugPrint("Soft delete error: $e");
+      return false;
     }
-
-    //3) Delete from main entry table
-    await db.delete(
-      'entry',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
   }
 
   //Read Deleted Entry
   Future<List<Map<String, dynamic>>> getDeletedEntries() async {
     final db = await database;
     return db.query('deleted_entry');
+  }
+
+  //Search Deleted Entries
+  Future<List<Map<String, dynamic>>> searchDeletedEntries(String query) async {
+    final db = await this.database;
+    if (query.isEmpty) return [];
+    
+    final searchQuery = query.toLowerCase();
+    return await db.query(
+      'deleted_entry',
+      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(notes) LIKE ?',
+      whereArgs: ['%$searchQuery%', '%$searchQuery%', '%$searchQuery%'],
+    );
   }
 
   Future<List<Map<String, dynamic>>> getDeletedEntriesPaginated(int limit, int offset) async {
@@ -259,38 +272,42 @@ class Vault {
   }
 
   //Restore Deleted Entry
-  Future<void> restoreEntry(int oldId) async {
+  Future<bool> restoreEntry(int deletedId) async {
     final db = await database;
-    
-    //1) Get the deleted entry
-    final deletedEntry = await db.query(
-      'deleted_entry',
-      where: 'deleted_id = ?',
-      whereArgs: [oldId],
-      limit: 1,
-    );
-    
-    if (deletedEntry.isNotEmpty) {
-      //2) Insert back into entry table
-      await db.insert(
-        'entry',
-        {
-          'id': deletedEntry[0]['deleted_id'],
-          'title': deletedEntry[0]['title'],
-          'username': deletedEntry[0]['username'],
-          'password': deletedEntry[0]['password'],
-          'url': deletedEntry[0]['url'],
-          'notes': deletedEntry[0]['notes'],
-          'last_updated': DateTime.now().toIso8601String(),
-        },
-      );
-      
-      //3) Remove from deleted_entry table
-      await db.delete(
-        'deleted_entry',
-        where: 'deleted_id = ?',
-        whereArgs: [oldId],
-      );
+    try {
+      return await db.transaction((txn) async {
+        // 1. Get the deleted entry
+        final deletedEntry = await txn.query(
+          'deleted_entry',
+          where: 'deleted_id = ?',
+          whereArgs: [deletedId],
+          limit: 1,
+        );
+
+        if (deletedEntry.isNotEmpty) {
+          // 2. Insert back into main table
+          await txn.insert('entry', {
+            'title': deletedEntry.first['title'],
+            'username': deletedEntry.first['username'],
+            'password': deletedEntry.first['password'],
+            'url': deletedEntry.first['url'],
+            'notes': deletedEntry.first['notes'],
+            'created_at': deletedEntry.first['created_at'],
+          });
+
+          // 3. Remove from deleted table
+          await txn.delete(
+            'deleted_entry',
+            where: 'deleted_id = ?',
+            whereArgs: [deletedId],
+          );
+          return true;
+        }
+        return false;
+      });
+    } catch (e) {
+      debugPrint("Restore error: $e");
+      return false;
     }
   }
 

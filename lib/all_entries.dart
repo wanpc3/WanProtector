@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wan_protector/all_entries_controller.dart';
 import 'entries_state.dart';
-//import 'add_entry.dart';
 import 'view_entry.dart';
 
 class AllEntries extends StatefulWidget {
   final Function(int)? onEntryDeleted;
+  final AllEntriesController? controller;
 
   const AllEntries({
     Key? key,
+    this.controller,
     this.onEntryDeleted,
   }) : super(key: key);
 
@@ -44,29 +46,6 @@ class AllEntriesState extends State<AllEntries> {
       }
     }
   }
-
-  // void _navigateToAddEntry() async {
-  //   final result = await Navigator.push(
-  //     context,
-  //     PageRouteBuilder(
-  //       pageBuilder: (context, animation, secondaryAnimation) => AddEntry(),
-  //       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-  //         const begin = Offset(1.0, 0.0);
-  //         const end = Offset.zero;
-  //         const curve = Curves.easeInOut;
-  //         var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-  //         return SlideTransition(
-  //           position: animation.drive(tween),
-  //           child: child,
-  //         );
-  //       }
-  //     ),
-  //   );
-
-  //   if (result == true) {
-  //     context.read<EntriesState>().loadEntries();
-  //   }
-  // }
 
   void _navigateToViewEntry(Map<String, dynamic> entry) async {
     final result = await Navigator.push(
