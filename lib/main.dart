@@ -1,7 +1,10 @@
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'all_entries_controller.dart';
 import 'vault.dart';
 import 'all_entries.dart';
+import 'add_entry.dart';
+import 'entries_state.dart';
 import 'password_generator.dart';
 import 'deleted_entries.dart';
 import 'settings.dart';
@@ -45,11 +48,16 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: _themeMode,
-      home: _initialScreen ?? Scaffold(body: Center(child: CircularProgressIndicator())),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EntriesState()),
+      ],
+      child: MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: _themeMode,
+        home: _initialScreen ?? Scaffold(body: Center(child: CircularProgressIndicator())),
+      ),
     );
   }
 }
@@ -66,9 +74,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late final List<Widget> _pageOptions;
-  late final GlobalKey<AllEntriesState> _allEntriesKey;
-  late final GlobalKey<DeletedEntriesState> _deletedEntriesKey;
-
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   late final AllEntriesController _entriesController;
@@ -76,36 +81,49 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _entriesController = AllEntriesController();
-    _allEntriesKey = GlobalKey<AllEntriesState>();
-    _deletedEntriesKey = GlobalKey<DeletedEntriesState>();
+    _entriesController = AllEntriesController(
+      exitSearch: () => context.read<EntriesState>().exitSearch(),
+      handleSearch: (query) => context.read<EntriesState>().searchEntries(query),
+      navigateToAddEntry: _navigateToAddEntry,
+    );
+    
     _pageOptions = [
       AllEntries(
-        key: _allEntriesKey,
-        controller: _entriesController,
         onEntryDeleted: (id) async {
-          await Future.delayed(const Duration(milliseconds: 100), () {
-            if (_allEntriesKey.currentState?.mounted ?? false) {
-              _allEntriesKey.currentState?.removeEntryWithAnimation(id);
-            }
-            
-            if (_deletedEntriesKey.currentState?.mounted ?? false) {
-              _deletedEntriesKey.currentState?.insertNewDeletedEntry(id);
-            }
-          });
+          await Future.delayed(const Duration(milliseconds: 100));
+          context.read<EntriesState>().removeEntry(id);
+          // If you need to notify DeletedEntries, you can add that here
         },
       ),
       PasswordGenerator(),
       DeletedEntries(
-        key: _deletedEntriesKey,
-        onEntryUpdated: () {
-          if (_allEntriesKey.currentState?.mounted ?? false) {
-            _allEntriesKey.currentState?.reload();
-          }
-        },
+        onEntryUpdated: () => context.read<EntriesState>().loadEntries(),
       ),
       Settings(toggleTheme: widget.toggleTheme),
     ];
+  }
+
+  void _navigateToAddEntry() async {
+    final result = await Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => AddEntry(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        }
+      ),
+    );
+
+    if (result == true) {
+      context.read<EntriesState>().loadEntries();
+    }
   }
 
   @override

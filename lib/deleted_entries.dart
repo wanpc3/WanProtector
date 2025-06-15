@@ -270,16 +270,22 @@ class DeletedEntriesState extends State<DeletedEntries> {
   Widget _buildAnimatedItem(Map<String, dynamic> deletedEntry, Animation<double> animation) {
     return SizeTransition(
       sizeFactor: animation,
-      child: ListTile(
-        key: ValueKey(deletedEntry['deleted_id']),
-        leading: Icon(Icons.close, color: Colors.red),
-        title: Text(deletedEntry['title']),
-        subtitle: Text(deletedEntry['username']),
-        trailing: Text(
-          _formatDate(deletedEntry['created_at']),
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-        onTap: () => _navigateToViewDeletedEntry(deletedEntry),
+      child: Column(
+        children: [
+          Divider(height: 1, thickness: 0.5),
+          ListTile(
+            key: ValueKey(deletedEntry['deleted_id']),
+            leading: Icon(Icons.close, color: Colors.red),
+            title: Text(deletedEntry['title']),
+            subtitle: Text(deletedEntry['username']),
+            trailing: Text(
+              _formatDate(deletedEntry['created_at']),
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            onTap: () => _navigateToViewDeletedEntry(deletedEntry),
+          ),
+          Divider(height: 1, thickness: 0.5),
+        ],
       ),
     );
   }

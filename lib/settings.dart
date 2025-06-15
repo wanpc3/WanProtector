@@ -20,6 +20,7 @@ class _SettingsState extends State<Settings> {
   //Setting contents
   final List<String> settings = <String>[
     'App Theme',
+    'Sort Entries',
     'Auto-Lock',
     'Vault Settings',
     'Change Master Password',
@@ -32,6 +33,7 @@ class _SettingsState extends State<Settings> {
   //leading icons
   final List<IconData> leadingIcons = <IconData>[
     Icons.palette,
+    Icons.sort,
     Icons.lock_clock,
     Icons.vpn_key,
     Icons.lock_reset,

@@ -143,11 +143,18 @@ class _ViewEntryState extends State<ViewEntry> {
     return Scaffold(
       appBar: AppBar(
         title: FutureBuilder<Map<String, dynamic>?>(
-          future: _entryFuture,
-          builder: (context, snapshot) {
-            return Text('View Entry');
-          },
-        ),
+        future: _entryFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Text('Loading...');
+          }
+          if (snapshot.hasData && snapshot.data != null) {
+            final title = snapshot.data!['title'];
+            return Text('$title');
+          }
+          return Text('Entry #${widget.entryId}');
+        },
+      ),
         actions: [
           FutureBuilder<Map<String, dynamic>?>(
             future: _entryFuture,
