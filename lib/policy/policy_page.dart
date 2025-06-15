@@ -17,9 +17,9 @@ class PolicyPage {
 
   //3. How We Use Your Information
   static const String use_info_header = "3. How We Use Your Information";
-  static const String use_info_text1 = "• We use the collected information for the following purposes:";
+  static const String use_info_text1 = "We use the collected information for the following purposes:";
   static const String use_info_text2 = "• To authenticate users and provide access to their secured data";
-  static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";
+  //static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";
   static const String use_info_text4 = "• To ensure proper functioning and user experience of the app";
   static const String use_info_text5 = "We do not send marketing emails, newsletters, or promotional communications.";
 
@@ -34,16 +34,11 @@ class PolicyPage {
 
   //6. Third-Party Services
   static const String third_party_header = "6. Third-Party Services";
-  static const String third_party_text = "WanProtector integrates with Google login to facilitate backup and restore functionality. By using this feature, you agree to Google’s privacy policy. No other third-party services or ad platforms are used.";
+  static const String third_party_text = "WanProtector stores all password data locally on your device. However, if you choose to enable backup functionality, you may opt to save your data to Google Drive or another cloud storage provider of your choice. This is entirely optional and user-initiated.";
 
   //7. User Rights
   static const String user_rights_header = "7. User Rights";
-  static const String user_rights_text1 = "Depending on your location, you may have the right to:";
-  static const String user_rights_text2 = "• Request access to or deletion of your personal data";
-  static const String user_rights_text3 = "• Correct inaccuracies in your data";
-  static const String user_rights_text4 = "• Export your data in a readable format";
-  static const String user_rights_text5 = "• Withdraw consent at any time (if applicable)";
-  static const String user_rights_text6 = "To exercise your rights, please contact us at idrissilhan@gmail.com.";
+  static const String user_rights_text1 = "All data stored by WanProtector remains entirely on your device, unless you choose to back it up. You have full control over your data, including the ability to export, delete, or manage backups. For assistance, you may contact idrissilhan@gmail.com.";
 
   //8. California Consumer Privacy Act (CCPA)
   /*
