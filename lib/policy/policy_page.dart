@@ -5,7 +5,7 @@ class PolicyPage {
 
   //1. Introduction
   static const String introduction_header = "1. Introduction";
-  static const String introduction_text = "This Privacy Policy explains how WanProtector (\"we\", \"our\", or \"us\") collects, uses, and safeguards your information when you use our mobile application (\"App\"). We are committed to protecting your privacy and ensuring your data is handled securely and in compliance with applicable privacy laws including GDPR, CCPA, and CalOPPA.";
+  static const String introduction_text = "This Privacy Policy explains how WanProtector (\"we\", \"our\", or \"us\") collects, uses, and safeguards your information when you use our mobile application (\"App\"). We are committed to protecting your privacy and ensuring your data is handled securely.";
 
   //2. Information We Collect
   static const String info_collect_header = "2. Information We Collect";
