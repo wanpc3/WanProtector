@@ -46,6 +46,7 @@ class PolicyPage {
   static const String user_rights_text6 = "To exercise your rights, please contact us at idrissilhan@gmail.com.";
 
   //8. California Consumer Privacy Act (CCPA)
+  /*
   static const String ccpa_header = "8. California Consumer Privacy Act (CCPA)";
   static const String ccpa_text1 = "If you are a California resident, you have the right to request:";
   static const String ccpa_text2 = "• What personal data we collect";
@@ -67,13 +68,14 @@ class PolicyPage {
   static const String caloppa_text2 = "• We provide a clear link to this privacy policy in the app";
   static const String caloppa_text3 = "• Users may review and update their information";
   static const String caloppa_text4 = "• We notify users of policy updates via the app or contact email (if available)";
+  */
 
   //11. Policy Updates
-  static const String policy_update_header = "11. Policy Updates";
+  static const String policy_update_header = "8. Policy Updates";
   static const String policy_update_text = "We may update this Privacy Policy to reflect changes in our practices or legal requirements. We encourage users to review this policy periodically. Updates will be posted within the app and, where appropriate, via user email.";
 
   //12. Contact
-  static const String contact_header = "12. Contact";
+  static const String contact_header = "9. Contact";
   static const String contact_text = "If you have any questions about this Privacy Policy or your personal data, you may contact us at:";
   static const String contact_email = "Email: idrissilhan@gmail.com";
 
