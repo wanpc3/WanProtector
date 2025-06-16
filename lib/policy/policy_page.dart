@@ -9,7 +9,8 @@ class PolicyPage {
 
   //2. Information We Collect
   static const String info_collect_header = "2. Information We Collect";
-  static const String info_collect_text1 = "WanProtector does not collect or transmit any personally identifiable information. All data, including usernames, passwords, and vault contents, is securely stored on your device and never shared with the developer or third parties.";
+  static const String info_collect_text1 = "WanProtector does not collect or transmit any personally identifiable information. All data, including usernames, passwords, and vault contents, is securely stored on your device and never shared with the developer or third parties.
+";
   // static const String info_collect_text2 = "• Name or Username";
   // static const String info_collect_text3 = "• Email Address";
   // static const String info_collect_text4 = "• Password (used for authentication)";
@@ -18,7 +19,9 @@ class PolicyPage {
   //3. How We Use Your Information
   static const String use_info_header = "3. How We Use Your Information";
   static const String use_info_text1 = "We use the collected information for the following purposes:";
+  static const String use_info_text1 = "We use the collected information for the following purposes:";
   static const String use_info_text2 = "• To authenticate users and provide access to their secured data";
+  //static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";
   //static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";
   static const String use_info_text4 = "• To ensure proper functioning and user experience of the app";
   static const String use_info_text5 = "We do not send marketing emails, newsletters, or promotional communications.";
@@ -35,12 +38,15 @@ class PolicyPage {
   //6. Third-Party Services
   static const String third_party_header = "6. Third-Party Services";
   static const String third_party_text = "WanProtector stores all password data locally on your device. However, if you choose to enable backup functionality, you may opt to save your data to Google Drive or another cloud storage provider of your choice. This is entirely optional and user-initiated.";
+  static const String third_party_text = "WanProtector stores all password data locally on your device. However, if you choose to enable backup functionality, you may opt to save your data to Google Drive or another cloud storage provider of your choice. This is entirely optional and user-initiated.";
 
   //7. User Rights
   static const String user_rights_header = "7. User Rights";
   static const String user_rights_text1 = "All data stored by WanProtector remains entirely on your device, unless you choose to back it up. You have full control over your data, including the ability to export, delete, or manage backups. For assistance, you may contact idrissilhan@gmail.com.";
+  static const String user_rights_text1 = "All data stored by WanProtector remains entirely on your device, unless you choose to back it up. You have full control over your data, including the ability to export, delete, or manage backups. For assistance, you may contact idrissilhan@gmail.com.";
 
   //8. California Consumer Privacy Act (CCPA)
+  /*
   /*
   static const String ccpa_header = "8. California Consumer Privacy Act (CCPA)";
   static const String ccpa_text1 = "If you are a California resident, you have the right to request:";
@@ -64,12 +70,15 @@ class PolicyPage {
   static const String caloppa_text3 = "• Users may review and update their information";
   static const String caloppa_text4 = "• We notify users of policy updates via the app or contact email (if available)";
   */
+  */
 
   //11. Policy Updates
+  static const String policy_update_header = "8. Policy Updates";
   static const String policy_update_header = "8. Policy Updates";
   static const String policy_update_text = "We may update this Privacy Policy to reflect changes in our practices or legal requirements. We encourage users to review this policy periodically. Updates will be posted within the app and, where appropriate, via user email.";
 
   //12. Contact
+  static const String contact_header = "9. Contact";
   static const String contact_header = "9. Contact";
   static const String contact_text = "If you have any questions about this Privacy Policy or your personal data, you may contact us at:";
   static const String contact_email = "Email: idrissilhan@gmail.com";
