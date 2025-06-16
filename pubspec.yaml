@@ -16,11 +16,16 @@ dependencies:
   provider: ^6.1.5
   path: ^1.9.1
   intl: ^0.20.2
-  flutter_secure_storage: ^9.2.4
   file_picker: ^10.1.9
   url_launcher: ^6.3.1
   permission_handler: ^12.0.0+1
   open_file: ^3.5.10
+
+  #Security
+  encrypt: ^5.0.3
+  pointycastle: ^3.6.2
+  sqflite_sqlcipher: ^3.1.0+1
+  flutter_secure_storage: ^9.2.4
 
   cupertino_icons: ^1.0.8
 
@@ -28,13 +33,22 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.14.4
 
   flutter_lints: ^5.0.0
 
+# flutter_launcher_icons:
+#   android: "launcher_icon"
+#   image_path: "assets/icon/wp_official_icon.png"
 
 flutter:
 
   uses-material-design: true
+
+  assets:
+    - assets/get_started_1.png
+    - assets/get_started_2.png
+    - assets/get_started_3.png
 
   fonts:
     - family: Ubuntu

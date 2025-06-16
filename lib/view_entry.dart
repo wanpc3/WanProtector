@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'deleted_entries_state_manager.dart';
-import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
 
@@ -71,15 +68,7 @@ class _ViewEntryState extends State<ViewEntry> {
     showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
     
     try {
-      // 1. Perform soft delete in database
       await _dbHelper.softDeleteEntry(id);
-      
-      // 2. Update both states
-      final entriesState = context.read<EntriesState>();
-      final deletedEntriesState = context.read<DeletedEntriesStateManager>();
-      
-      entriesState.removeEntry(id);
-      await deletedEntriesState.refreshDeletedEntries();
       
       if (mounted) {
         Navigator.of(context).pop();

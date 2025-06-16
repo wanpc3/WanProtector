@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
+
+class AllEntries extends StatefulWidget {
+
+  const AllEntries({
+    Key? key,
+  });
+
+  @override
+  AllEntriesState createState() => AllEntriesState();
+}
+
+class AllEntriesState extends State<AllEntries> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text("Hello World!"),
+      ),
+    );
+  }
+}
+
+/*
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wan_protector/all_entries_controller.dart';
+import 'all_entries_controller.dart';
 import 'entries_state.dart';
 import 'view_entry.dart';
 
@@ -151,3 +175,4 @@ class AllEntriesState extends State<AllEntries> {
     }
   }
 }
+*/

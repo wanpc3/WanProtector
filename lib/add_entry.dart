@@ -61,13 +61,13 @@ class _AddEntryState extends State<AddEntry> {
       }
 
       //Success Message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Entry added"), 
-          backgroundColor: Colors.green[400],
-          duration: Duration(seconds: 2),
-        )
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text("Entry added"), 
+      //     backgroundColor: Colors.green[400],
+      //     duration: Duration(seconds: 2),
+      //   )
+      // );
       Navigator.pop(context, true);
     }
   }
