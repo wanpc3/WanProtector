@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'models/entry.dart';
+import 'models/deleted_entry.dart';
 
 class Vault {
   static final Vault _instance = Vault._internal();
@@ -134,9 +136,10 @@ class Vault {
   }
 
   //Read Entry
-  Future<List<Map<String, dynamic>>> getEntries() async {
+  Future<List<Entry>> getEntries() async {
     final db = await database;
-    return db.query('entry');
+    final List<Map<String, dynamic>> maps = await db.query('entry');
+    return maps.map((e) => Entry.fromMap(e)).toList();
   }
 
   //Search Entry
@@ -232,9 +235,10 @@ class Vault {
   }
 
   //Read Deleted Entry
-  Future<List<Map<String, dynamic>>> getDeletedEntries() async {
+  Future<List<DeletedEntry>> getDeletedEntries() async {
     final db = await database;
-    return db.query('deleted_entry');
+    final List<Map<String, dynamic>> maps = await db.query('deleted_entry');
+    return maps.map((e) => DeletedEntry.fromMap(e)).toList();
   }
 
   //Search Deleted Entries

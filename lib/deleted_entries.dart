@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'entries_state.dart';
-import 'view_entry.dart';
+import 'deleted_state.dart';
+import 'view_deleted_entry.dart';
 
-class AllEntries extends StatefulWidget {
+class DeletedEntries extends StatefulWidget {
 
-  const AllEntries({
+  const DeletedEntries({
     Key? key,
   });
 
   @override
-  AllEntriesState createState() => AllEntriesState();
+  DeletedEntriesState createState() => DeletedEntriesState();
 }
 
-class AllEntriesState extends State<AllEntries> {
+class DeletedEntriesState extends State<DeletedEntries> {
 
   //To go View Entry
-  void _navigateToViewEntry(Map<String, dynamic> entry) async {
+  void _navigateToViewDeletedEntry(Map<String, dynamic> entry) async {
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => ViewEntry(
-          entryId: entry['id'],
+        pageBuilder: (_, __, ___) => ViewDeletedEntry(
+          oldId: entry['deleted_id'],
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
@@ -37,20 +37,20 @@ class AllEntriesState extends State<AllEntries> {
     );
 
     if (result == true) {
-      context.read<EntriesState>().fetchEntries();
+      context.read<DeletedState>().fetchDeletedEntries();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final entriesProvider = Provider.of<EntriesState>(context);
+    final deletedEntriesProvider = Provider.of<DeletedState>(context);
     return Scaffold(
-      body: entriesProvider.isLoading
+      body: deletedEntriesProvider.isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: entriesProvider.entries.length,
+              itemCount: deletedEntriesProvider.deletedEntries.length,
               itemBuilder: (context, index) {
-                final entry = entriesProvider.entries[index];
+                final entry = deletedEntriesProvider.deletedEntries[index];
                 return Column(
                   children: [
                     Divider(
@@ -66,9 +66,9 @@ class AllEntriesState extends State<AllEntries> {
                         _formatDate(entry.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      onTap: () => _navigateToViewEntry(entry.toMap()),
+                      onTap: () => _navigateToViewDeletedEntry(entry.toMap()),
                     ),
-                    if (index == entriesProvider.entries.length - 1)
+                    if (index == deletedEntriesProvider.deletedEntries.length - 1)
                       Divider(
                         height: 1,
                         thickness: 1,

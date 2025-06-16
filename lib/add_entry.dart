@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'models/entry.dart';
 import 'vault.dart';
 
 class AddEntry extends StatefulWidget {
 
-  final Map<String, dynamic>? entry;
+  final Entry? entry;
 
   AddEntry({this.entry});
 
@@ -27,47 +28,25 @@ class _AddEntryState extends State<AddEntry> {
   void initState() {
     super.initState();
     if (widget.entry != null) {
-      _titleController.text = widget.entry!['title'];
-      _usernameController.text = widget.entry!['username'];
-      _passwordController.text = widget.entry!['password'] ?? '';
-      _urlController.text = widget.entry!['url'] ?? '';
-      _notesController.text = widget.entry!['notes'] ?? '';
+      _titleController.text = widget.entry!.title;
+      _usernameController.text = widget.entry!.username;
+      _passwordController.text = widget.entry!.password;
+      _urlController.text = widget.entry!.url;
+      _notesController.text = widget.entry!.notes;
     }
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-
-      //Hides keyboard right away
-      FocusScope.of(context).unfocus();
-
-      if (widget.entry == null) {
-          await _dbHelper.insertEntry(
-          _titleController.text, 
-          _usernameController.text, 
-          _passwordController.text, 
-          _urlController.text, 
-          _notesController.text,
-        );
-      } else {
-        await _dbHelper.updateEntry(
-          widget.entry!['id'],
-          _titleController.text,
-          _usernameController.text,
-          _passwordController.text,
-          _urlController.text,
-          _notesController.text,
-        );
-      }
-
-      //Success Message
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text("Entry added"), 
-      //     backgroundColor: Colors.green[400],
-      //     duration: Duration(seconds: 2),
-      //   )
-      // );
+    //Hides keyboard right away
+    FocusScope.of(context).unfocus();
+      await _dbHelper.insertEntry(
+        _titleController.text, 
+        _usernameController.text, 
+        _passwordController.text, 
+        _urlController.text, 
+        _notesController.text,
+      );
       Navigator.pop(context, true);
     }
   }
@@ -90,14 +69,13 @@ class _AddEntryState extends State<AddEntry> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-
-              //Title
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(labelText: "Title"),
@@ -108,10 +86,7 @@ class _AddEntryState extends State<AddEntry> {
                   return null;
                 },
               ),
-
               SizedBox(height: 16),
-
-              //Username
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(labelText: "Username"),
@@ -122,10 +97,7 @@ class _AddEntryState extends State<AddEntry> {
                   return null;
                 },
               ),
-
               SizedBox(height: 16),
-
-              //Password
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -143,26 +115,17 @@ class _AddEntryState extends State<AddEntry> {
                   )
                 ),
               ),
-
               SizedBox(height: 16),
-
-              //Url
               TextFormField(
                 controller: _urlController,
                 decoration: InputDecoration(labelText: "Url"),
               ),
-
               SizedBox(height: 16),
-
-              //Notes
               TextFormField(
                 controller: _notesController,
                 decoration: InputDecoration(labelText: "Notes"),
               ),
-
-              SizedBox(height: 20),
-              
-              //Button
+              SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _submitForm, 
                 style: ElevatedButton.styleFrom(
@@ -174,6 +137,7 @@ class _AddEntryState extends State<AddEntry> {
                 ),
                 child: Text("OK"),
               ),
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
             ],
           ),
         ),

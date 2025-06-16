@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
-//import 'package:sqflite/sqflite.dart';
+import 'package:provider/provider.dart';
+import 'entries_state.dart';
+import 'deleted_state.dart';
 import 'vault.dart';
 import 'all_entries.dart';
-//import 'add_entry.dart';
+import 'add_entry.dart';
+import 'deleted_entries.dart';
 import 'password_generator.dart';
 import 'settings.dart';
 import 'login_screen.dart';
 import 'get_started.dart';
 
 void main() {
-  runApp(MainApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => EntriesState()..fetchEntries()),
+        ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
+      ],
+      child: MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatefulWidget {
@@ -79,13 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _pageOptions = [
       AllEntries(),
       PasswordGenerator(),
+      DeletedEntries(),
       Settings(toggleTheme: widget.toggleTheme),
     ];
   }
 
-  /*
   void _navigateToAddEntry() async {
-    await Navigator.push(
+    final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => AddEntry(),
@@ -101,8 +112,11 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       ),
     );
+
+    if (result == true) {
+      await Provider.of<EntriesState>(context, listen: false).fetchEntries();
+    }
   }
-  */
 
   @override
   void dispose() {
@@ -122,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> _titles = [
     'All Entries',
     'Password Generator',
+    'Deleted Entries',
     'Settings',
   ];
 
@@ -156,17 +171,17 @@ class _HomeScreenState extends State<HomeScreen> {
               selected: _selectedIndex == 1,
               onTap: () => _onItemTapped(1),
             ),
-            // ListTile(
-            //   leading: Icon(Icons.delete),
-            //   title: Text('Deleted Entries'),
-            //   selected: _selectedIndex == 2,
-            //   onTap: () => _onItemTapped(2),
-            // ),
+            ListTile(
+              leading: Icon(Icons.delete),
+              title: Text('Deleted Entries'),
+              selected: _selectedIndex == 2,
+              onTap: () => _onItemTapped(2),
+            ),
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings'),
-              selected: _selectedIndex == 2,
-              onTap: () => _onItemTapped(2),
+              selected: _selectedIndex == 3,
+              onTap: () => _onItemTapped(3),
             ),
           ],
         ),
@@ -178,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: _isSearching || _selectedIndex != 0
           ? null
           : FloatingActionButton(
-              onPressed: () {},
+              onPressed: _navigateToAddEntry,
               backgroundColor: const Color(0xFF085465),
               foregroundColor: Colors.white,
               child: const Icon(Icons.add),

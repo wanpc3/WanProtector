@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'deleted_state.dart';
+import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
 
 class ViewEntry extends StatefulWidget {
   final int entryId;
-  final VoidCallback? onEntryUpdated;
-  final Function(int)? onEntryDeleted;
 
   ViewEntry({
     Key? key,
     required this.entryId,
-    required this.onEntryUpdated,
-    this.onEntryDeleted,
   }): super(key: key);
 
   @override
@@ -65,20 +64,30 @@ class _ViewEntryState extends State<ViewEntry> {
 
   //Entry removal
   void _removeEntry(int id) async {
-    showDialog(context: context, builder: (_) => const Center(child: CircularProgressIndicator()));
+    showDialog(
+      context: context, 
+      builder: (_) => const Center(
+        child: CircularProgressIndicator()
+      )
+    );
     
     try {
       await _dbHelper.softDeleteEntry(id);
+
+      //Refresh the entry so it updates.
+      final stateManager = context.read<EntriesState>();
+      await stateManager.refreshEntries();
+
+      //Refresh deleted entry as well
+      final deletedStateManager = context.read<DeletedState>();
+      await deletedStateManager.refreshDeletedEntries();
       
-      if (mounted) {
+      if (context.mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Entry moved to deleted items"))
-        );
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${e.toString()}"))
@@ -124,7 +133,6 @@ class _ViewEntryState extends State<ViewEntry> {
     );
 
     if (result == true) {
-      widget.onEntryUpdated?.call();
       setState(() {
         _entryFuture = _loadDataAndSetControllers();
       });
@@ -147,7 +155,7 @@ class _ViewEntryState extends State<ViewEntry> {
         future: _entryFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text('Loading...');
+            return const Text('Loading...');
           }
           if (snapshot.hasData && snapshot.data != null) {
             final title = snapshot.data!['title'];
@@ -191,15 +199,15 @@ class _ViewEntryState extends State<ViewEntry> {
         future: _entryFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading entry'));
+            return const Center(child: Text('Error loading entry'));
           }
           
           if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('Entry not found'));
+            return const Center(child: Text('Entry not found'));
           }
 
           final entry = snapshot.data!;

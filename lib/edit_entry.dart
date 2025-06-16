@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:wan_protector/entries_state.dart';
 import 'vault.dart';
 
 class EditEntry extends StatefulWidget {
@@ -115,6 +117,10 @@ class _EditEntryState extends State<EditEntry> {
         newUrl, 
         newNotes
       );
+
+      //Refresh the entry so it updates.
+      final stateManager = context.read<EntriesState>();
+      await stateManager.refreshEntries();
 
       Navigator.pop(context, true);
     }
