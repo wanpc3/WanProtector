@@ -30,9 +30,9 @@ class _AddEntryState extends State<AddEntry> {
     if (widget.entry != null) {
       _titleController.text = widget.entry!.title;
       _usernameController.text = widget.entry!.username;
-      _passwordController.text = widget.entry!.password;
-      _urlController.text = widget.entry!.url;
-      _notesController.text = widget.entry!.notes;
+      _passwordController.text = widget.entry!.password ?? '';
+      _urlController.text = widget.entry!.url ?? '';
+      _notesController.text = widget.entry!.notes ?? '';
     }
   }
 

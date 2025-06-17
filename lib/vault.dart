@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'entry_cache.dart';
+import 'deleted_entry_cache.dart';
 import 'encryption_helper.dart';
 import 'models/master_password.dart';
 import 'models/entry.dart';
@@ -187,9 +188,15 @@ class Vault {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('entry');
 
-    return Future.wait(
+    final entries =  await Future.wait(
       maps.map((e) => Entry.fromMapAsync(e))
     );
+
+    for (var entry in entries) {
+      EntryCache().addEntry(entry);
+    }
+
+    return entries;
   }
 
   //Search Entry
@@ -317,9 +324,15 @@ class Vault {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('deleted_entry');
     
-    return Future.wait(
+    final deletedEntries = await Future.wait(
       maps.map((e) => DeletedEntry.fromMapAsync(e))
     );
+
+    for (var deletedEntry in deletedEntries) {
+      DeletedEntryCache().addDeletedEntry(deletedEntry);
+    }
+
+    return deletedEntries;
   }
 
   //Search Deleted Entries
@@ -350,16 +363,24 @@ class Vault {
     );
   }
 
-  Future<DeletedEntry> getDeletedEntryById(int deletedId) async {
+  Future<DeletedEntry?> getDeletedEntryById(int deletedId) async {
+
+    if (DeletedEntryCache().getDeletedEntry(deletedId) != null) {
+      return DeletedEntryCache().getDeletedEntry(deletedId);
+    }
+
     final db = await database;
     final maps = await db.query(
       'deleted_entry',
       where: 'deleted_id = ?',
       whereArgs: [deletedId],
     );
+
+    if (maps.isEmpty) return null;
     
-    if (maps.isEmpty) throw Exception('Deleted Entry not found');
-    return await DeletedEntry.fromMapAsync(maps.first);
+    final deletedEntry = await DeletedEntry.fromMapAsync(maps.first);
+    DeletedEntryCache().addDeletedEntry(deletedEntry);
+    return deletedEntry;
   }
 
   //Restore Deleted Entry

@@ -4,9 +4,9 @@ class Entry {
   final int? id;
   final String title;
   final String username;
-  final String password;
-  final String url;
-  final String notes;
+  final String? password;
+  final String? url;
+  final String? notes;
   final String createdAt;
   final String lastUpdated;
 
@@ -38,10 +38,10 @@ class Entry {
     return {
       'id': id,
       'title': title,
-      'username': await EncryptionHelper.encryptText(username),
-      'password': await EncryptionHelper.encryptText(password),
-      'url': url,
-      'notes': await EncryptionHelper.encryptText(notes),
+      'username': await EncryptionHelper.encryptText(username ?? ''),
+      'password': await EncryptionHelper.encryptText(password ?? ''),
+      'url': url ?? '',
+      'notes': await EncryptionHelper.encryptText(notes ?? ''),
       'created_at': createdAt,
       'last_updated': lastUpdated,
     };

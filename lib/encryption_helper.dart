@@ -42,16 +42,19 @@ class EncryptionHelper {
 
   //Encrypt with AES-256-CBC + HMAC-SHA256
   static Future<String> encryptText(String plainText) async {
+    if (plainText.trim().isEmpty) {
+      return '';
+    }
+
     final key = await _getEncryptionKey();
     final iv = _generateIV();
     final encrypter = encrypt.Encrypter(
       encrypt.AES(key, mode: encrypt.AESMode.cbc)
     );
 
-    //Encrypt
     final encrypted = encrypter.encrypt(plainText, iv: iv);
 
-    //Combine IV + cipherText + HMAC
+    //Compute HMAC
     final hmac = Hmac(sha256, key.bytes);
     final authCode = hmac.convert([...iv.bytes, ...encrypted.bytes]).bytes;
 
@@ -60,6 +63,10 @@ class EncryptionHelper {
 
   //Decrypt with verification
   static Future<String> decryptText(String encryptedText) async {
+    if (encryptedText.trim().isEmpty) {
+      return '';
+    }
+
     try {
       final key = await _getEncryptionKey();
       final data = base64.decode(encryptedText);
@@ -75,11 +82,14 @@ class EncryptionHelper {
         throw Exception('HMAC verification failed');
       }
 
-      //Decrypt
       final encrypter = encrypt.Encrypter(
         encrypt.AES(key, mode: encrypt.AESMode.cbc)
       );
-      final decrypted = encrypter.decryptBytes(encrypt.Encrypted(cipherText), iv: iv);
+      final decrypted = encrypter.decryptBytes(
+        encrypt.Encrypted(cipherText),
+        iv: iv,
+      );
+
       return utf8.decode(decrypted);
     } catch (e) {
       return '';

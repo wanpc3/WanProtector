@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
+import 'deleted_entry_cache.dart';
 import 'view_deleted_entry.dart';
 
 class DeletedEntries extends StatefulWidget {
@@ -43,23 +45,24 @@ class DeletedEntriesState extends State<DeletedEntries> {
   }
 
   //To go View Entry
-  void _navigateToViewDeletedEntry(Map<String, dynamic> deletedEntry) async {
+  void _navigateToViewDeletedEntry(DeletedEntry deletedEntry) async {
+    DeletedEntryCache().addDeletedEntry(deletedEntry);
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => ViewDeletedEntry(
-          deletedId: deletedEntry['deleted_id'],
+          deletedId: deletedEntry.deletedId!,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
+          return ScaleTransition(
+            scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
           );
-        }
+        },
+        transitionDuration: Duration(milliseconds: 400),
       ),
     );
 
@@ -93,10 +96,7 @@ class DeletedEntriesState extends State<DeletedEntries> {
                         _formatDate(deletedEntry.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      onTap: () async {
-                        final mappedDeletedEntry = await deletedEntry.toMapAsync();
-                        _navigateToViewDeletedEntry(mappedDeletedEntry);
-                      },
+                      onTap: () => _navigateToViewDeletedEntry(deletedEntry),
                     ),
                     if (index == deletedEntriesProvider.deletedEntries.length - 1)
                       Divider(

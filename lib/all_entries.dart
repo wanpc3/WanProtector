@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'models/entry.dart';
+import 'entry_cache.dart';
 import 'entries_state.dart';
 import 'view_entry.dart';
 
@@ -43,12 +45,13 @@ class AllEntriesState extends State<AllEntries> {
   }
 
   //To go View Entry
-  void _navigateToViewEntry(Map<String, dynamic> entry) async {
+  void _navigateToViewEntry(Entry entry) async {
+    EntryCache().addEntry(entry);
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => ViewEntry(
-          entryId: entry['id'],
+          entryId: entry.id!,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return ScaleTransition(
@@ -59,7 +62,7 @@ class AllEntriesState extends State<AllEntries> {
             ),
           );
         },
-        transitionDuration: Duration(milliseconds: 460),
+        transitionDuration: Duration(milliseconds: 400),
       ),
     );
 
@@ -94,10 +97,7 @@ class AllEntriesState extends State<AllEntries> {
                         _formatDate(entry.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      onTap: () async {
-                        final mappedEntry = await entry.toMapAsync();
-                        _navigateToViewEntry(mappedEntry);
-                      },
+                      onTap: () => _navigateToViewEntry(entry),
                     ),
                     if (index == entriesProvider.entries.length - 1)
                       Divider(

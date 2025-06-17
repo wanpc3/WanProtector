@@ -11,8 +11,9 @@ class ViewDeletedEntry extends StatefulWidget {
   final int deletedId;
 
   ViewDeletedEntry({
+    Key? key,
     required this.deletedId,
-  });
+  }): super(key: key);
 
   @override
   _ViewDeletedEntryState createState() => _ViewDeletedEntryState();
@@ -160,7 +161,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text('Loading...');
             }
-            if (snapshot.hasData && snapshot.data != null) {
+            if (snapshot.hasError && !snapshot.hasData) {
               return const Text('View Deleted Entry');
             }
             return Text(snapshot.data!.title);

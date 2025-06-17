@@ -49,9 +49,9 @@ class _ViewEntryState extends State<ViewEntry> {
   void _updateControllers(Entry entry) {
     _titleController.text = entry.title;
     _usernameController.text = entry.username;
-    _passwordController.text = entry.password;
-    _urlController.text = entry.url;
-    _notesController.text = entry.notes;
+    _passwordController.text = entry.password!;
+    _urlController.text = entry.url!;
+    _notesController.text = entry.notes!;
   }
 
   @override
