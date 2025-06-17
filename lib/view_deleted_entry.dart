@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'models/deleted_entry.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'vault.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
-  final int oldId;
+  final int deletedId;
 
   ViewDeletedEntry({
-    required this.oldId,
+    required this.deletedId,
   });
 
   @override
@@ -27,32 +28,29 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
   bool _obscurePassword = true;
   final Vault _dbHelper = Vault();
-  late Future<Map<String, dynamic>?> _entryFuture;
+  late Future<DeletedEntry?> _deletedEntryFuture;
 
   @override
   void initState() {
     super.initState();
-    _entryFuture = _loadDeletedEntry();
+    _deletedEntryFuture = _loadDataAndSetControllers();
   }
 
-  Future<Map<String, dynamic>?> _loadDeletedEntry() async {
-    final db = await _dbHelper.database;
-    final result = await db.query(
-      'deleted_entry',
-      where: 'deleted_id = ?',
-      whereArgs: [widget.oldId],
-      limit: 1,
-    );
-    if (result.isNotEmpty) {
-      final entry = result[0];
-      _titleController.text = entry['title'] as String? ?? '';
-      _usernameController.text = entry['username'] as String? ?? '';
-      _passwordController.text = entry['password'] as String? ?? '';
-      _urlController.text = entry['url'] as String? ?? '';
-      _notesController.text = entry['notes'] as String? ?? '';
-      return entry;
+  Future<DeletedEntry?> _loadDataAndSetControllers() async {
+    final deletedEntry = await _dbHelper.getDeletedEntryById(widget.deletedId);
+    if (deletedEntry != null) {
+      _updateControllers(deletedEntry);
+      return deletedEntry;
     }
     return null;
+  }
+
+  void _updateControllers(DeletedEntry deletedEntry) {
+    _titleController.text = deletedEntry.title;
+    _usernameController.text = deletedEntry.username;
+    _passwordController.text = deletedEntry.password;
+    _urlController.text = deletedEntry.url;
+    _notesController.text = deletedEntry.notes;
   }
 
   //To restore deleted entry
@@ -66,7 +64,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     );
 
     try {
-      await _dbHelper.restoreEntry(widget.oldId);
+      await _dbHelper.restoreEntry(widget.deletedId);
 
       //Refresh the deleted entry so it updates.
       final stateDeletedManager = context.read<DeletedState>();
@@ -108,7 +106,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     );
 
     try {
-      await _dbHelper.deleteEntryPermanently(widget.oldId);
+      await _dbHelper.deleteEntryPermanently(widget.deletedId);
 
       final stateDeletedManager = context.read<DeletedState>();
       await stateDeletedManager.refreshDeletedEntries();
@@ -154,21 +152,20 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: FutureBuilder<Map<String, dynamic>?>(
-          future: _entryFuture,
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: FutureBuilder<DeletedEntry?>(
+          future: _deletedEntryFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Text('Loading...');
             }
             if (snapshot.hasData && snapshot.data != null) {
-              final title = snapshot.data!['title'];
-              return Text('$title');
+              return const Text('View Deleted Entry');
             }
-            return Text('Entry #${widget.oldId}');
+            return Text(snapshot.data!.title);
           },
         ),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
         actions: [
 
           //Restore Icon
@@ -178,8 +175,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
           ),
 
           //Delete Permanently option
-          FutureBuilder<Map<String, dynamic>?>(
-            future: _entryFuture,
+          FutureBuilder<DeletedEntry?>(
+            future: _deletedEntryFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Container();
@@ -222,8 +219,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
           ),
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>?>(
-        future: _entryFuture,
+      body: FutureBuilder<DeletedEntry?>(
+        future: _deletedEntryFuture,
         builder: (context, snapshot) {
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -235,8 +232,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
           }
 
           final deletedEntry = snapshot.data!;
-          final createdAt = formatDateTime(deletedEntry['created_at']);
-          final lastUpdated = formatDateTime(deletedEntry['last_updated']);
+          final createdAt = formatDateTime(deletedEntry.createdAt);
+          final lastUpdated = formatDateTime(deletedEntry.lastUpdated);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),

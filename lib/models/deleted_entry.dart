@@ -1,3 +1,5 @@
+import '../encryption_helper.dart';
+
 class DeletedEntry {
   final int? deletedId;
   final String title;
@@ -19,27 +21,27 @@ class DeletedEntry {
     required this.lastUpdated,
   });
 
-  factory DeletedEntry.fromMap(Map<String, dynamic> map) {
+  static Future<DeletedEntry> fromMapAsync(Map<String, dynamic> map) async {
     return DeletedEntry(
       deletedId: map['deleted_id'],
       title: map['title'],
-      username: map['username'],
-      password: map['password'],
+      username: await EncryptionHelper.decryptText(map['username']),
+      password: await EncryptionHelper.decryptText(map['password']),
       url: map['url'],
-      notes: map['notes'],
+      notes: await EncryptionHelper.decryptText(map['notes']),
       createdAt: map['created_at'],
       lastUpdated: map['last_updated'],
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Future<Map<String, dynamic>> toMapAsync() async {
     return {
       'deleted_id': deletedId,
       'title': title,
-      'username': username,
-      'password': password,
+      'username': await EncryptionHelper.encryptText(username),
+      'password': await EncryptionHelper.encryptText(password),
       'url': url,
-      'notes': notes,
+      'notes': await EncryptionHelper.encryptText(notes),
       'created_at': createdAt,
       'last_updated': lastUpdated,
     };

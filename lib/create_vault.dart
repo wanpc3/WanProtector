@@ -1,7 +1,7 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:wan_protector/encryption_helper.dart';
+import 'models/master_password.dart';
 import 'vault.dart';
 import 'login_screen.dart';
 import 'policy/terms_of_service.dart';
@@ -41,21 +41,30 @@ class _CreateVaultScreen extends State<CreateVault> {
       return;
     }
 
-    //Save securely in Flutter Secure Storage
+    final now = DateTime.now().toIso8601String();
+
+    //1) Encrypt and save using model
+    final masterPassword = MasterPassword(
+      id: 1,
+      password: password,
+      createdAt: now,
+      lastUpdated: now,
+    );
+
+    await Vault().insertMasterPassword(
+      password,
+      masterPassword.createdAt,
+      masterPassword.lastUpdated,
+    );
+
+    //2) Also store it in secure storage for auto login
     await _secureStorage.write(key: 'auth_token', value: password);
 
-    //Encryption
-    //final encryptedPassword = EncryptionHelper.encryptText(password);
-
-    //Save to SQLite storage
-    final now = DateTime.now().toIso8601String();
-    await Vault().insertMasterPassword(password, now, now);
-
-    //Navigate to login
+    //3) Go to login screen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme)
+        builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
       ),
     );
   }

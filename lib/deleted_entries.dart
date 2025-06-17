@@ -43,12 +43,12 @@ class DeletedEntriesState extends State<DeletedEntries> {
   }
 
   //To go View Entry
-  void _navigateToViewDeletedEntry(Map<String, dynamic> entry) async {
+  void _navigateToViewDeletedEntry(Map<String, dynamic> deletedEntry) async {
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => ViewDeletedEntry(
-          oldId: entry['deleted_id'],
+          deletedId: deletedEntry['deleted_id'],
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
@@ -77,7 +77,7 @@ class DeletedEntriesState extends State<DeletedEntries> {
           : ListView.builder(
               itemCount: deletedEntriesProvider.deletedEntries.length,
               itemBuilder: (context, index) {
-                final entry = deletedEntriesProvider.deletedEntries[index];
+                final deletedEntry = deletedEntriesProvider.deletedEntries[index];
                 return Column(
                   children: [
                     Divider(
@@ -87,13 +87,16 @@ class DeletedEntriesState extends State<DeletedEntries> {
                     ),
                     ListTile(
                       leading: Icon(Icons.close, color: Colors.red),
-                      title: Text(entry.title),
-                      subtitle: Text(entry.username),
+                      title: Text(deletedEntry.title),
+                      subtitle: Text(deletedEntry.username),
                       trailing: Text(
-                        _formatDate(entry.createdAt),
+                        _formatDate(deletedEntry.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      onTap: () => _navigateToViewDeletedEntry(entry.toMap()),
+                      onTap: () async {
+                        final mappedDeletedEntry = await deletedEntry.toMapAsync();
+                        _navigateToViewDeletedEntry(mappedDeletedEntry);
+                      },
                     ),
                     if (index == deletedEntriesProvider.deletedEntries.length - 1)
                       Divider(

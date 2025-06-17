@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:wan_protector/entries_state.dart';
+import 'entries_state.dart';
+import 'models/entry.dart';
 import 'vault.dart';
 
 class EditEntry extends StatefulWidget {
-  final Map<String, dynamic>? entry;
+  final Entry? entry;
 
   EditEntry({this.entry});
 
@@ -29,11 +30,11 @@ class _EditEntryState extends State<EditEntry> {
   void initState() {
     super.initState();
     if (widget.entry != null) {
-      _titleController.text = widget.entry!['title'];
-      _usernameController.text = widget.entry!['username'];
-      _passwordController.text = widget.entry!['password'] ?? '';
-      _urlController.text = widget.entry!['url'] ?? '';
-      _notesController.text = widget.entry!['notes'] ?? '';
+      _titleController.text = widget.entry!.title;
+      _usernameController.text = widget.entry!.username;
+      _passwordController.text = widget.entry!.password;
+      _urlController.text = widget.entry!.url;
+      _notesController.text = widget.entry!.notes;
     }
 
     _titleController.addListener(_checkForChanges);
@@ -44,11 +45,11 @@ class _EditEntryState extends State<EditEntry> {
   }
 
   void _checkForChanges() {
-    final newState = _titleController.text != widget.entry!['title'] ||
-        _usernameController.text != widget.entry!['username'] ||
-        _passwordController.text != (widget.entry!['password'] ?? '') ||
-        _urlController.text != (widget.entry!['url'] ?? '') ||
-        _notesController.text != (widget.entry!['notes'] ?? '');
+    final newState = _titleController.text != widget.entry!.title ||
+        _usernameController.text != widget.entry!.username ||
+        _passwordController.text != (widget.entry!.password) ||
+        _urlController.text != (widget.entry!.url) ||
+        _notesController.text != (widget.entry!.notes);
 
     if (newState != _hasChanges) {
       setState(() {
@@ -102,7 +103,7 @@ class _EditEntryState extends State<EditEntry> {
 
       await Future.delayed(Duration(microseconds: 300));
 
-      final id = widget.entry!['id'];
+      final id = widget.entry!.id;
       final newTitle = _titleController.text.trim();
       final newUsername = _usernameController.text.trim();
       final newPassword = _passwordController.text.trim();
@@ -110,7 +111,7 @@ class _EditEntryState extends State<EditEntry> {
       final newNotes = _notesController.text.trim();
 
       await _dbHelper.updateEntry(
-        id, 
+        id!, 
         newTitle, 
         newUsername, 
         newPassword, 
@@ -162,7 +163,7 @@ class _EditEntryState extends State<EditEntry> {
                   children: [
                     // Title (with Hero)
                     Hero(
-                      tag: 'title-${widget.entry!['id']}',
+                      tag: 'title-${widget.entry!.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(
@@ -182,7 +183,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     // Username (with Hero)
                     Hero(
-                      tag: 'username-${widget.entry!['id']}',
+                      tag: 'username-${widget.entry!.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: Row(
@@ -210,7 +211,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     // Password (with Hero)
                     Hero(
-                      tag: 'password-${widget.entry!['id']}',
+                      tag: 'password-${widget.entry!.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: Row(
@@ -249,7 +250,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     // Url (with Hero)
                     Hero(
-                      tag: 'url-${widget.entry!['id']}',
+                      tag: 'url-${widget.entry!.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(
@@ -263,7 +264,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     // Notes (with Hero)
                     Hero(
-                      tag: 'notes-${widget.entry!['id']}',
+                      tag: 'notes-${widget.entry!.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(

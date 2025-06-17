@@ -98,12 +98,12 @@ class _ViewEntryState extends State<ViewEntry> {
     }
   }
 
-  void _navigateToEditEntry(Map<String, dynamic> entry) async {
+  void _navigateToEditEntry(Entry entry) async {
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => EditEntry(
-          entry: Map.from(entry),
+          entry: entry,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
@@ -177,11 +177,11 @@ class _ViewEntryState extends State<ViewEntry> {
 
               return PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
+                onSelected: (value) async {
                   if (value == 'Delete') {
                     _removeEntry(entry.id!);
                   } else if (value == 'Edit') {
-                    _navigateToEditEntry(entry.toMap());
+                    _navigateToEditEntry(entry);
                   }
                 },
                 itemBuilder: (_) => [
@@ -217,7 +217,7 @@ class _ViewEntryState extends State<ViewEntry> {
           final entry = snapshot.data!;
           final createdAt = formatDateTime(entry.createdAt);
           final lastUpdated = formatDateTime(entry.lastUpdated);
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(

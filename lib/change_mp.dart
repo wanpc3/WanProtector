@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'encryption_helper.dart';
 import 'vault.dart';
 import 'login_screen.dart';
 
@@ -47,10 +46,13 @@ class _ChangeMpScreen extends State<ChangeMp> {
       return;
     }
 
+    //1) Update password via Vault with encryption
     await Vault().updateMasterPassword(newPassword);
 
+    //2) Overwrite secure token
     await _secureStorage.write(key: 'auth_token', value: newPassword);
 
+    //3) Force logout for security reasons
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -171,6 +173,57 @@ class _ChangeMpScreen extends State<ChangeMp> {
                     }
                     return null;
                   },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Warning to change master password
+                Center(
+                  child: SizedBox(
+                    width: 350.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF9C4),
+                        border: Border.all(color: Colors.orange.shade700, width: 2.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          //Warning 1
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: const Text(
+                                  "You are about to change your master password.",
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16.0),
+
+                          //Warning 2
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: const Text(
+                                  "Always remember your master password. Never share it with anyone else.",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 32),

@@ -51,15 +51,15 @@ class AllEntriesState extends State<AllEntries> {
           entryId: entry['id'],
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
+          return ScaleTransition(
+            scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
           );
-        }
+        },
+        transitionDuration: Duration(milliseconds: 460),
       ),
     );
 
@@ -94,7 +94,10 @@ class AllEntriesState extends State<AllEntries> {
                         _formatDate(entry.createdAt),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      onTap: () => _navigateToViewEntry(entry.toMap()),
+                      onTap: () async {
+                        final mappedEntry = await entry.toMapAsync();
+                        _navigateToViewEntry(mappedEntry);
+                      },
                     ),
                     if (index == entriesProvider.entries.length - 1)
                       Divider(
