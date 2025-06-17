@@ -1,3 +1,5 @@
+import '../encryption_helper.dart';
+
 class Entry {
   final int? id;
   final String title;
@@ -24,7 +26,7 @@ class Entry {
       id: map['id'],
       title: map['title'],
       username: map['username'],
-      password: map['password'],
+      password: EncryptionHelper.decryptText(map['password']),
       url: map['url'],
       notes: map['notes'],
       createdAt: map['created_at'],
@@ -37,7 +39,7 @@ class Entry {
       'id': id,
       'title': title,
       'username': username,
-      'password': password,
+      'password': EncryptionHelper.encryptText(password),
       'url': url,
       'notes': notes,
       'created_at': createdAt,

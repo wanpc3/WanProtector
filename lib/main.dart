@@ -88,11 +88,32 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _pageOptions = [
-      AllEntries(),
+      AllEntries(
+        isSearching: _isSearching,
+        searchController: _searchController,
+      ),
       PasswordGenerator(),
-      DeletedEntries(),
+      DeletedEntries(
+        isSearching: _isSearching,
+        searchController: _searchController,
+      ),
       Settings(toggleTheme: widget.toggleTheme),
     ];
+  }
+
+  //Search Entry
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        if (_selectedIndex == 0) {
+          Provider.of<EntriesState>(context, listen: false).fetchEntries();
+        } else if (_selectedIndex == 2) {
+          Provider.of<DeletedState>(context, listen: false).fetchDeletedEntries();
+        }
+      }
+    });
   }
 
   void _navigateToAddEntry() async {
@@ -129,6 +150,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index != _selectedIndex) {
       setState(() {
         _selectedIndex = index;
+        _isSearching = false;
+        _searchController.clear();
+        
+        if (index == 0) {
+          _pageOptions[0] = AllEntries(
+            isSearching: _isSearching, 
+            searchController: _searchController,
+          );
+        } else if (index == 2) {
+          _pageOptions[2] = DeletedEntries(
+            isSearching: _isSearching, 
+            searchController: _searchController,
+          );
+        }
       });
     }
   }
@@ -144,9 +179,34 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_selectedIndex]),
+        title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
+            ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                hintStyle: TextStyle(color: Colors.white70),
+                border: InputBorder.none,
+              ),
+            )
+          : Text(_titles[_selectedIndex]),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        actions: (_selectedIndex == 0 || _selectedIndex == 2)
+            ? [
+              if (_isSearching)
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: _toggleSearch,
+                )
+              else
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _toggleSearch,
+                )
+            ]
+          : [],
       ),
       drawer: Drawer(
         child: ListView(

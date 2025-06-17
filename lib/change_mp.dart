@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'encryption_helper.dart';
 import 'vault.dart';
 import 'login_screen.dart';
 
@@ -38,31 +39,25 @@ class _ChangeMpScreen extends State<ChangeMp> {
       return;
     }
 
-    //Fetch stored password
-    String? storedPassword = await _secureStorage.read(key: 'auth_token');
-
-    //Verify current password
-    if (storedPassword != currentPasswordInput) {
+    final isVerified = await Vault().verifyMasterPassword(currentPasswordInput);
+    if (!isVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Current Master Password is incorrect')),
       );
       return;
     }
 
-    //Save securely in Flutter Secure Storage
-    await _secureStorage.write(key: 'auth_token', value: newPassword);
-
-    //Save to SQLite storage
     await Vault().updateMasterPassword(newPassword);
 
-    //Alert user so they know they will be logged out
+    await _secureStorage.write(key: 'auth_token', value: newPassword);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Success'),
-          content: const Text('Master Password changed. Logging out...'),
+          content: const Text('Your master password has been changed. For security reasons, you will now be logged out.'),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
@@ -156,7 +151,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                 //Confirm Master Password
                 TextFormField(
                   controller: _confirmPasswordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword_3,
                   decoration: InputDecoration(
                     hintText: 'Confirm Master Password',
                     suffixIcon: IconButton(

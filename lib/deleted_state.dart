@@ -5,14 +5,32 @@ import 'vault.dart';
 class DeletedState with ChangeNotifier {
   List<DeletedEntry> _deletedEntries = [];
   bool _isLoading = true;
+  final String _searchText = "";
 
-  List<DeletedEntry> get deletedEntries => _deletedEntries;
+  List<DeletedEntry> get deletedEntries {
+    if (_searchText.isEmpty) return _deletedEntries;
+
+    final lowerQuery = _searchText.toLowerCase();
+    return _deletedEntries.where((deletedEntry) {
+      return deletedEntry.title.toLowerCase().contains(lowerQuery) ||
+             deletedEntry.username.toLowerCase().contains(lowerQuery);
+    }).toList();
+  }
+
   bool get isLoading => _isLoading;
 
   Future<void> fetchDeletedEntries() async {
     _isLoading = true;
     notifyListeners();
     _deletedEntries = await Vault().getDeletedEntries();
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> searchDeletedEntries(String query) async {
+    _isLoading = true;
+    notifyListeners();
+    _deletedEntries = await Vault().searchDeletedEntries(query);
     _isLoading = false;
     notifyListeners();
   }

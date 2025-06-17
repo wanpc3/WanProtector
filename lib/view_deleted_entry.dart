@@ -107,24 +107,31 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       ),
     );
 
-    await _dbHelper.deleteEntryPermanently(widget.oldId);
+    try {
+      await _dbHelper.deleteEntryPermanently(widget.oldId);
 
-    if (!mounted) return;
-    Navigator.of(context).pop();
+      final stateDeletedManager = context.read<DeletedState>();
+      await stateDeletedManager.refreshDeletedEntries();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('The entry has been permanently deleted'),
-        backgroundColor: Colors.red[400],
-          duration: Duration(seconds: 2),
-      ),
-    );
-
-    await Future.delayed(
-      const Duration(milliseconds: 100)
-    );
-    
-    Navigator.pop(context, true);
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('The entry has been permanently deleted'),
+            backgroundColor: Colors.red[400],
+              duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch(e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}"))
+        );
+      }
+    }
   }
 
   @override

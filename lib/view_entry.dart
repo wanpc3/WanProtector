@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'models/entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
 import 'vault.dart';
@@ -28,7 +29,7 @@ class _ViewEntryState extends State<ViewEntry> {
 
   bool _obscurePassword = true;
   final Vault _dbHelper = Vault();
-  late Future<Map<String, dynamic>?> _entryFuture;
+  late Future<Entry?> _entryFuture;
 
   @override
   void initState() {
@@ -36,20 +37,21 @@ class _ViewEntryState extends State<ViewEntry> {
     _entryFuture = _loadDataAndSetControllers();
   }
 
-  Future<Map<String, dynamic>?> _loadDataAndSetControllers() async {
+  Future<Entry?> _loadDataAndSetControllers() async {
     final entry = await _dbHelper.getEntryById(widget.entryId);
     if (entry != null) {
       _updateControllers(entry);
+      return entry;
     }
-    return entry;
+    return null;
   }
 
-  void _updateControllers(Map<String, dynamic> entry) {
-    _titleController.text = entry['title'];
-    _usernameController.text = entry['username'];
-    _passwordController.text = entry['password'] ?? '';
-    _urlController.text = entry['url'] ?? '';
-    _notesController.text = entry['notes'] ?? '';
+  void _updateControllers(Entry entry) {
+    _titleController.text = entry.title;
+    _usernameController.text = entry.username;
+    _passwordController.text = entry.password;
+    _urlController.text = entry.url;
+    _notesController.text = entry.notes;
   }
 
   @override
@@ -151,33 +153,35 @@ class _ViewEntryState extends State<ViewEntry> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: FutureBuilder<Map<String, dynamic>?>(
-        future: _entryFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text('Loading...');
-          }
-          if (snapshot.hasData && snapshot.data != null) {
-            final title = snapshot.data!['title'];
-            return Text('$title');
-          }
-          return Text('Entry #${widget.entryId}');
-        },
-      ),
+        title: FutureBuilder<Entry?>(
+          future: _entryFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Loading...');
+            }
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Text('View Entry');
+            }
+            return Text(snapshot.data!.title);
+          },
+        ),
         actions: [
-          FutureBuilder<Map<String, dynamic>?>(
+          FutureBuilder<Entry?>(
             future: _entryFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Container();
               }
+
+              final entry = snapshot.data!;
+
               return PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
                   if (value == 'Delete') {
-                    _removeEntry(snapshot.data!['id']);
+                    _removeEntry(entry.id!);
                   } else if (value == 'Edit') {
-                    _navigateToEditEntry(snapshot.data!);
+                    _navigateToEditEntry(entry.toMap());
                   }
                 },
                 itemBuilder: (_) => [
@@ -195,7 +199,7 @@ class _ViewEntryState extends State<ViewEntry> {
           )
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>?>(
+      body: FutureBuilder<Entry?>(
         future: _entryFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -211,8 +215,8 @@ class _ViewEntryState extends State<ViewEntry> {
           }
 
           final entry = snapshot.data!;
-          final createdAt = formatDateTime(entry['created_at']);
-          final lastUpdated = formatDateTime(entry['last_updated']);
+          final createdAt = formatDateTime(entry.createdAt);
+          final lastUpdated = formatDateTime(entry.lastUpdated);
           
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:wan_protector/encryption_helper.dart';
 import 'vault.dart';
 import 'login_screen.dart';
 import 'policy/terms_of_service.dart';
@@ -42,6 +43,9 @@ class _CreateVaultScreen extends State<CreateVault> {
 
     //Save securely in Flutter Secure Storage
     await _secureStorage.write(key: 'auth_token', value: password);
+
+    //Encryption
+    //final encryptedPassword = EncryptionHelper.encryptText(password);
 
     //Save to SQLite storage
     final now = DateTime.now().toIso8601String();

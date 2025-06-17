@@ -4,16 +4,43 @@ import 'deleted_state.dart';
 import 'view_deleted_entry.dart';
 
 class DeletedEntries extends StatefulWidget {
+  final bool isSearching;
+  final TextEditingController searchController;
+  final VoidCallback? onSearchToggled;
 
   const DeletedEntries({
     Key? key,
-  });
+    required this.isSearching,
+    required this.searchController,
+    this.onSearchToggled,
+  }) : super(key: key);
 
   @override
   DeletedEntriesState createState() => DeletedEntriesState();
 }
 
 class DeletedEntriesState extends State<DeletedEntries> {
+
+  @override
+  void initState() {
+    super.initState();
+    widget.searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = widget.searchController.text;
+    if (query.isNotEmpty) {
+      context.read<DeletedState>().searchDeletedEntries(query);
+    } else {
+      context.read<DeletedState>().fetchDeletedEntries();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.searchController.removeListener(_onSearchChanged);
+    super.dispose();
+  }
 
   //To go View Entry
   void _navigateToViewDeletedEntry(Map<String, dynamic> entry) async {
@@ -59,7 +86,7 @@ class DeletedEntriesState extends State<DeletedEntries> {
                       color: Colors.grey[300],
                     ),
                     ListTile(
-                      leading: Icon(Icons.key, color: Colors.amber),
+                      leading: Icon(Icons.close, color: Colors.red),
                       title: Text(entry.title),
                       subtitle: Text(entry.username),
                       trailing: Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'encryption_helper.dart';
 import 'models/entry.dart';
 import 'models/deleted_entry.dart';
 
@@ -33,7 +34,7 @@ class Vault {
         //Master Password
         db.execute('''
           CREATE TABLE master_password(
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY CHECK (id = 1),
             password TEXT NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
             last_updated TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
@@ -85,10 +86,11 @@ class Vault {
     String lastUpdated,
   ) async {
     final db = await database;
+    final encryptedPassword = EncryptionHelper.encryptText(password);
     return await db.insert(
       'master_password',
       {
-        'password': password,
+        'password': encryptedPassword,
         'created_at': createdAt,
         'last_updated': lastUpdated,
       },
@@ -96,18 +98,42 @@ class Vault {
     );
   }
 
+  //Verify master password
+  Future<bool> verifyMasterPassword(String inputPassword) async {
+    final db = await database;
+    final result = await db.query('master_password');
+
+    if (result.isEmpty) return false;
+
+    final encrypted = result.first['password'] as String;
+    final decrypted = EncryptionHelper.decryptText(encrypted);
+
+    return decrypted == inputPassword;
+  }
+
+  //Get Master Password
+  Future<String?> getEncryptedMasterPassword() async {
+    final db = await database;
+    final result = await db.query('master_password', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['password'] as String;
+    }
+    return null;
+  }
+
   //Update Master Password
   Future<int> updateMasterPassword(
-    String newPassword,
+    String newPassword
   ) async {
     final db = await database;
+    final encryptedPassword = EncryptionHelper.encryptText(newPassword);
     return await db.update(
       'master_password',
       {
-        'password': newPassword,
+        'password': encryptedPassword,
         'last_updated': DateTime.now().toIso8601String(),
       },
-      conflictAlgorithm: ConflictAlgorithm.replace
+      where: 'id = 1',
     );
   }
 
@@ -120,12 +146,13 @@ class Vault {
     String notes,
   ) async {
     final db = await database;
+    final encryptedPassword = EncryptionHelper.encryptText(password);
     return await db.insert(
       'entry', 
       {
         'title': title,
         'username': username,
-        'password': password,
+        'password': encryptedPassword,
         'url': url,
         'notes': notes,
         'created_at': DateTime.now().toIso8601String(),
@@ -143,14 +170,18 @@ class Vault {
   }
 
   //Search Entry
-  Future<List<Map<String, dynamic>>> searchEntries(String query) async {
+  Future<List<Entry>> searchEntries(String query) async {
     final db = await this.database;
     final result = await db.query(
       'entry',
-      where: 'title LIKE ? OR username LIKE ? OR notes LIKE ?',
-      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(notes) LIKE ?',
+      whereArgs: [
+        '%${query.toLowerCase()}%',
+        '%${query.toLowerCase()}%',
+        '%${query.toLowerCase()}%'
+      ],
     );
-    return result;
+    return result.map((map) => Entry.fromMap(map)).toList();
   }
 
   Future<List<Map<String, dynamic>>> getEntriesPaginated(int limit, int offset) async {
@@ -173,12 +204,13 @@ class Vault {
     String newNotes,
   ) async {
     final db = await database;
+    final encryptedPassword = EncryptionHelper.encryptText(newPassword);
     return await db.update(
       'entry',
       {
         'title': newTitle,
         'username': newUsername,
-        'password': newPassword,
+        'password': encryptedPassword,
         'url': newUrl,
         'notes': newNotes,
         'last_updated': DateTime.now().toIso8601String(),
@@ -189,14 +221,14 @@ class Vault {
   }
 
   //Get single entry by ID
-  Future<Map<String, dynamic>?> getEntryById(int id) async {
+  Future<Entry?> getEntryById(int id) async {
     final db = await database;
     final result = await db.query(
       'entry',
       where: 'id = ?',
       whereArgs: [id],
     );
-    return result.isNotEmpty ? result.first : null;
+    return result.isNotEmpty ? Entry.fromMap(result.first) : null;
   }
 
   //Soft Delete
@@ -242,16 +274,18 @@ class Vault {
   }
 
   //Search Deleted Entries
-  Future<List<Map<String, dynamic>>> searchDeletedEntries(String query) async {
+  Future<List<DeletedEntry>> searchDeletedEntries(String query) async {
     final db = await this.database;
-    if (query.isEmpty) return [];
-    
-    final searchQuery = query.toLowerCase();
-    return await db.query(
+    final result = await db.query(
       'deleted_entry',
       where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(notes) LIKE ?',
-      whereArgs: ['%$searchQuery%', '%$searchQuery%', '%$searchQuery%'],
+      whereArgs: [
+        '%${query.toLowerCase()}%',
+        '%${query.toLowerCase()}%',
+        '%${query.toLowerCase()}%'
+      ],
     );
+    return result.map((map) => DeletedEntry.fromMap(map)).toList();
   }
 
   Future<List<Map<String, dynamic>>> getDeletedEntriesPaginated(int limit, int offset) async {
