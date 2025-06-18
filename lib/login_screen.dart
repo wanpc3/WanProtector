@@ -59,13 +59,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Dismiss keyboard
       FocusScope.of(context).unfocus();
 
-      // Short delay to show loading spinner
       await Future.delayed(const Duration(seconds: 1));
 
-      if (!mounted) return; // To avoid calling Navigator after dispose
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
@@ -82,9 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Incorrect master password")),
-      );
+      setState(() {
+        _errorText = "Incorrect master password";
+      });
     }
   }
 

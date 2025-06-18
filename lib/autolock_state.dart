@@ -3,7 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AutoLockState extends ChangeNotifier {
   bool _isAutoLockEnabled = false;
+  bool _isLoaded = false;
+
   bool get isAutoLockEnabled => _isAutoLockEnabled;
+  bool get isLoaded => _isLoaded;
 
   AutoLockState() {
     _loadAutoLockPreference();
@@ -11,7 +14,6 @@ class AutoLockState extends ChangeNotifier {
   
   Future<void> _loadAutoLockPreference() async {
     final prefs = await SharedPreferences.getInstance();
-
     final isFirstRun = prefs.getBool('is_first_run') ?? true;
 
     if (isFirstRun) {
@@ -22,6 +24,7 @@ class AutoLockState extends ChangeNotifier {
       _isAutoLockEnabled = prefs.getBool('auto_lock_enabled') ?? false;
     }
 
+    _isLoaded = true;
     notifyListeners();
   }
 
