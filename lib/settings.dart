@@ -5,11 +5,14 @@ import 'policy/privacy_policy.dart';
 import 'app_theme.dart';
 import 'vault_settings.dart';
 import 'change_mp.dart';
+import 'auto_lock.dart';
 
 class Settings extends StatefulWidget {
   final VoidCallback toggleTheme;
 
-  Settings({required this.toggleTheme});
+  Settings({
+    required this.toggleTheme
+  });
   
   @override
   _SettingsState createState() => _SettingsState();
@@ -61,6 +64,24 @@ class _SettingsState extends State<Settings> {
                     pageBuilder: (context, animation, secondaryAnimation) => AppTheme(
                       toggleTheme: widget.toggleTheme
                     ),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              } else if (settings[index] == 'Auto-Lock') {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => AutoLock(),
                     transitionsBuilder:(context, animation, secondaryAnimation, child) {
                       const begin = Offset(1.0, 0.0);
                       const end = Offset.zero;

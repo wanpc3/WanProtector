@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'lifecycle_watcher.dart';
+import 'autolock_state.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'vault.dart';
@@ -12,16 +14,33 @@ import 'login_screen.dart';
 import 'get_started.dart';
 
 void main() {
+  
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => EntriesState()..fetchEntries()),
         ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
+        ChangeNotifierProvider(create: (_) => AutoLockState()),
       ],
-      child: MainApp(),
+      child: LifecycleWatcher(
+        onAutoLock: () => handleAutoLock(navigatorKey.currentContext!),
+        child: MaterialApp(
+          navigatorKey: navigatorKey,
+          home: MainApp(),
+        ),
+      ),
     ),
   );
 }
+
+  void handleAutoLock(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => LoginScreen(toggleTheme: () {})),
+      (route) => false,
+    );
+  }
 
 class MainApp extends StatefulWidget {
   @override
@@ -173,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Password Generator',
     'Deleted Entries',
     'Settings',
+    'Exit',
   ];
 
   @override
@@ -242,6 +262,26 @@ class _HomeScreenState extends State<HomeScreen> {
               title: Text('Settings'),
               selected: _selectedIndex == 3,
               onTap: () => _onItemTapped(3),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Exit'),
+              onTap: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  PageRouteBuilder(
+                    transitionDuration: Duration(milliseconds: 300),
+                    pageBuilder: (_, __, ___) => LoginScreen(toggleTheme: () {}),
+                    transitionsBuilder: (_, animation, __, child) {
+                      final offset = Tween<Offset>(
+                        begin: Offset(0, -1), // Slide from top
+                        end: Offset.zero,
+                      ).animate(animation);
+                      return SlideTransition(position: offset, child: child);
+                    },
+                  ),
+                  (route) => false,
+                );
+              },
             ),
           ],
         ),

@@ -10,10 +10,6 @@ class AppTheme extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('App Theme'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
