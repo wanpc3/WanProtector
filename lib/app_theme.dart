@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'theme_provider.dart';
 
 class AppTheme extends StatelessWidget {
-  final VoidCallback toggleTheme;
-
-  AppTheme({required this.toggleTheme});
-
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('App Theme'),
+        title: const Text('App Theme'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: toggleTheme, 
-          child: Text('Switch Theme'),
-        ),
+      body: ListView(
+        children: [
+          ListTile(
+            leading: Icon(
+              isDarkMode ? Icons.nightlight_round : Icons.wb_sunny,
+              color: isDarkMode ? Colors.amber : Colors.orange,
+            ),
+            title: Text('Switch to ${isDarkMode ? "Light" : "Dark"} Mode'),
+            trailing: Switch(
+              value: isDarkMode, 
+              onChanged: (value) => themeProvider.toggleTheme(),
+              activeColor: Colors.tealAccent,
+            ),
+          )
+        ],
       ),
     );
   }

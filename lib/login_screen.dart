@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
           pageBuilder: (_, __, ___) => HomeScreen(toggleTheme: widget.toggleTheme),
           transitionsBuilder: (_, animation, __, child) {
             final offsetAnimation = Tween<Offset>(
-              begin: Offset(0.0, 1.0), // from bottom
+              begin: Offset(0.0, 1.0),
               end: Offset.zero,
             ).animate(animation);
             return SlideTransition(position: offsetAnimation, child: child);
@@ -98,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
         foregroundColor: Colors.white,
       ),
 
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: _isLoading
             ? Center(child: CircularProgressIndicator())

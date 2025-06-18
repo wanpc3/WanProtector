@@ -86,8 +86,8 @@ class AllEntriesState extends State<AllEntries> {
                   children: [
                     Divider(
                       height: 1,
-                      thickness: 1,
-                      color: Colors.grey[300],
+                      thickness: 0.5,
+                      color: Colors.grey,
                     ),
                     ListTile(
                       leading: Icon(Icons.key, color: Colors.amber),
@@ -102,8 +102,8 @@ class AllEntriesState extends State<AllEntries> {
                     if (index == entriesProvider.entries.length - 1)
                       Divider(
                         height: 1,
-                        thickness: 1,
-                        color: Colors.grey[300],
+                        thickness: 0.5,
+                        color: Colors.grey,
                       ),
                   ],
                 );

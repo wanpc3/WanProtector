@@ -183,7 +183,6 @@ class _ChangeMpScreen extends State<ChangeMp> {
                     width: 350.0,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF9C4),
                         border: Border.all(color: Colors.orange.shade700, width: 2.0),
                         borderRadius: BorderRadius.circular(8.0),
                       ),

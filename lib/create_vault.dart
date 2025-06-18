@@ -75,6 +75,8 @@ class _CreateVaultScreen extends State<CreateVault> {
 
       appBar: AppBar(
         title: Text("Create Vault"),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
 
       body: SafeArea(

@@ -21,7 +21,7 @@ class AutoLock extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Enable auto-lock after 1 minute of inactivity in the background and after 1 minute of inactivity when screen turns off',
+              "Enable auto-lock after 1 minute when you're not using the app or when your screen is off.",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -29,11 +29,13 @@ class AutoLock extends StatelessWidget {
             ),
           ),
           SwitchListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             title: const Text("Enable Auto-Lock"),
             value: isEnabled,
             onChanged: (bool value) {
               autoLockState.setAutoLockEnabled(value);
             },
+            secondary: const Icon(Icons.lock_clock),
           ),
         ],
       ),

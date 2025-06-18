@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'lifecycle_watcher.dart';
 import 'autolock_state.dart';
+import 'theme_provider.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'vault.dart';
@@ -23,12 +24,20 @@ void main() {
         ChangeNotifierProvider(create: (_) => EntriesState()..fetchEntries()),
         ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
         ChangeNotifierProvider(create: (_) => AutoLockState()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: LifecycleWatcher(
         onAutoLock: () => handleAutoLock(navigatorKey.currentContext!),
-        child: MaterialApp(
-          navigatorKey: navigatorKey,
-          home: MainApp(),
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              themeMode: themeProvider.themeMode,
+              theme: ThemeData.light(),
+              darkTheme: ThemeData.dark(),
+              home: MainApp(),
+            );
+          },
         ),
       ),
     ),
@@ -43,19 +52,17 @@ void main() {
   }
 
 class MainApp extends StatefulWidget {
+  const MainApp({
+    super.key
+  });
+
   @override
   _MainAppState createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> {
-  ThemeMode _themeMode = ThemeMode.light;
-  Widget? _initialScreen;
 
-  void toggleTheme() {
-    setState(() {
-      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
+  Widget? _initialScreen;
 
   @override
   void initState() {
@@ -68,22 +75,22 @@ class _MainAppState extends State<MainApp> {
     bool isSet = await dbHelper.isMasterPasswordSet();
     setState(() {
       _initialScreen = isSet
-        ? LoginScreen(toggleTheme: toggleTheme)
-        : GetStarted(toggleTheme: toggleTheme);
+          ? LoginScreen(toggleTheme: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            })
+          : GetStarted(toggleTheme: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: _themeMode,
-      home: _initialScreen ?? Scaffold(
-        body: Center(
-          child: CircularProgressIndicator()
-        )
-      ),
+    return _initialScreen ??
+        const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator()
+          ),
     );
   }
 }

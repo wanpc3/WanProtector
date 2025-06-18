@@ -23,7 +23,7 @@ class _SettingsState extends State<Settings> {
   //Setting contents
   final List<String> settings = <String>[
     'App Theme',
-    'Sort Entries',
+    //'Sort Entries', //Reserve for the next version
     'Auto-Lock',
     'Vault Settings',
     'Change Master Password',
@@ -36,7 +36,7 @@ class _SettingsState extends State<Settings> {
   //leading icons
   final List<IconData> leadingIcons = <IconData>[
     Icons.palette,
-    Icons.sort,
+    //Icons.sort,
     Icons.lock_clock,
     Icons.vpn_key,
     Icons.lock_reset,
@@ -61,9 +61,7 @@ class _SettingsState extends State<Settings> {
                 Navigator.push(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => AppTheme(
-                      toggleTheme: widget.toggleTheme
-                    ),
+                    pageBuilder: (context, animation, secondaryAnimation) => AppTheme(),
                     transitionsBuilder:(context, animation, secondaryAnimation, child) {
                       const begin = Offset(1.0, 0.0);
                       const end = Offset.zero;

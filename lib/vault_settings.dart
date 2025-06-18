@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
@@ -20,66 +19,85 @@ class _VaultSettingsState extends State<VaultSettings> {
   ];
 
   final Vault dbHelper = Vault();
-  File? _file;
-
-  // Backup Vault
+  bool _isProcessing = false;
+  
   Future<void> _backupVault() async {
+    setState(() => _isProcessing = true);
+    
     try {
-      // Request storage permission
-      if (await Permission.storage.request().isGranted) {
-        // Get the database path
-        String dbPath = await getDatabasesPath();
-        String sourcePath = p.join(dbPath, 'wan_protector.db');
-        
-        // Create backup directory if it doesn't exist
-        Directory? backupDir = await getExternalStorageDirectory();
-        String backupPath = p.join(backupDir!.path, 'WANProtectorBackups');
-        await Directory(backupPath).create(recursive: true);
-        
-        // Create backup file with timestamp
-        String timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-        String destPath = p.join(backupPath, 'wan_protector_backup_$timestamp.db');
-        
-        // Copy the database file
-        await File(sourcePath).copy(destPath);
-        
-        // Show success message
+      // 1. Get source file
+      final dbPath = await getDatabasesPath();
+      final sourceFile = File(p.join(dbPath, 'wan_protector.db'));
+      if (!await sourceFile.exists()) {
+        throw Exception('Database file not found');
+      }
+
+      // 2. Let user choose save location using system picker
+      final String? savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Backup As',
+        fileName: 'wan_protector_backup_${DateTime.now().toIso8601String().replaceAll(RegExp(r'[:\.]'), '-')}.db',
+        type: FileType.any,
+        lockParentWindow: true,
+      );
+
+      if (savePath == null) return; // User cancelled
+
+      // 3. Copy using FilePicker's result (works with scoped storage)
+      final bytes = await sourceFile.readAsBytes();
+      final backupFile = File(savePath);
+      await backupFile.writeAsBytes(bytes);
+
+      // 4. Verify
+      if (!await backupFile.exists()) {
+        throw Exception('Backup file was not created');
+      }
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Backup created successfully at: $destPath')),
-        );
-        
-        // Optionally open the file location
-        OpenFile.open(destPath);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Storage permission denied')),
+          SnackBar(
+            content: Text('Backup saved successfully'),
+            duration: Duration(seconds: 3),
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Backup failed: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup failed: ${e.toString()}'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
-  // Restore Vault
   Future<void> _restoreVault() async {
+    setState(() => _isProcessing = true);
+    
     try {
-      // Pick the backup file
+      // 1. Let user select backup file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['db'],
+        type: FileType.any,
+        allowMultiple: false,
       );
 
-      if (result != null) {
+      if (result != null && result.files.isNotEmpty) {
         File backupFile = File(result.files.single.path!);
-        
-        // Show confirmation dialog
+
+        // 2. Verify the file exists
+        if (!await backupFile.exists()) {
+          throw Exception('Selected file not found');
+        }
+
+        // 3. Show confirmation dialog
         bool confirm = await showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: Text('Confirm Restore'),
-            content: Text('This will overwrite your current entries. Are you sure?'),
+            content: Text('This will overwrite ALL current data. Continue?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -94,21 +112,30 @@ class _VaultSettingsState extends State<VaultSettings> {
         ) ?? false;
 
         if (confirm) {
-          // Get current database path
+          // 4. Get current database path
           String dbPath = await getDatabasesPath();
           String destPath = p.join(dbPath, 'wan_protector.db');
           
-          // Close the database before restoring
+          // 5. Close database before restoring
           await dbHelper.close();
           
-          // Copy the backup file to the database location
+          // 6. Copy the backup file
           await backupFile.copy(destPath);
           
-          // Reopen the database
+          // 7. Verify the restored database
+          try {
+            final db = await openDatabase(destPath);
+            await db.close();
+          } catch (e) {
+            await File(destPath).delete();
+            throw Exception('Invalid database file');
+          }
+          
+          // 8. Reinitialize database
           await dbHelper.database;
           
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Vault restored successfully')),
+            SnackBar(content: Text('Vault restored successfully')),
           );
         }
       }
@@ -118,6 +145,8 @@ class _VaultSettingsState extends State<VaultSettings> {
       );
       // Reopen database if restore failed
       await dbHelper.database;
+    } finally {
+      setState(() => _isProcessing = false);
     }
   }
 
@@ -126,30 +155,28 @@ class _VaultSettingsState extends State<VaultSettings> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Vault Settings'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: contents.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text(contents[index]),
-            onTap: () {
-              if (contents[index] == 'Backup Vault') {
-                _backupVault();
-              } else if (contents[index] == 'Restore Vault') {
-                _restoreVault();
-              }
-            },
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-      ),
+      body: _isProcessing
+          ? Center(child: CircularProgressIndicator())
+          : ListView.separated(
+              padding: const EdgeInsets.all(8),
+              itemCount: contents.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(contents[index]),
+                  onTap: () {
+                    if (contents[index] == 'Backup Vault') {
+                      _backupVault();
+                    } else if (contents[index] == 'Restore Vault') {
+                      _restoreVault();
+                    }
+                  },
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => Divider(),
+            ),
     );
   }
 }

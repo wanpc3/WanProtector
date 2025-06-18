@@ -85,8 +85,8 @@ class DeletedEntriesState extends State<DeletedEntries> {
                   children: [
                     Divider(
                       height: 1,
-                      thickness: 1,
-                      color: Colors.grey[300],
+                      thickness: 0.5,
+                      color: Colors.grey,
                     ),
                     ListTile(
                       leading: Icon(Icons.close, color: Colors.red),
@@ -101,8 +101,8 @@ class DeletedEntriesState extends State<DeletedEntries> {
                     if (index == deletedEntriesProvider.deletedEntries.length - 1)
                       Divider(
                         height: 1,
-                        thickness: 1,
-                        color: Colors.grey[300],
+                        thickness: 0.5,
+                        color: Colors.grey,
                       ),
                   ],
                 );
