@@ -186,7 +186,10 @@ class Vault {
   //Read Entry
   Future<List<Entry>> getEntries() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('entry');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'entry',
+      orderBy: 'datetime(created_at) DESC',
+    );
 
     final entries =  await Future.wait(
       maps.map((e) => Entry.fromMapAsync(e))
@@ -322,7 +325,10 @@ class Vault {
   //Read Deleted Entry
   Future<List<DeletedEntry>> getDeletedEntries() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('deleted_entry');
+    final List<Map<String, dynamic>> maps = await db.query(
+      'deleted_entry',
+      orderBy: 'datetime(created_at) DESC',
+    );
     
     final deletedEntries = await Future.wait(
       maps.map((e) => DeletedEntry.fromMapAsync(e))

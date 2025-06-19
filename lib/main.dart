@@ -240,10 +240,19 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text(
-                "Menu",
-                style: TextStyle(color: Colors.white, fontSize: 24),
+              decoration: BoxDecoration(color: Colors.black),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                  "WanProtector",
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontSize: 30,
+                      fontFamily: 'Ubuntu',
+                    ),
+                  ),
+                ),
               ),
             ),
             ListTile(
