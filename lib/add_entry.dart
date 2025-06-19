@@ -22,6 +22,7 @@ class _AddEntryState extends State<AddEntry> {
   final TextEditingController _notesController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _hasChanges = false;
   final Vault _dbHelper = Vault();
 
   @override
@@ -33,6 +34,29 @@ class _AddEntryState extends State<AddEntry> {
       _passwordController.text = widget.entry!.password ?? '';
       _urlController.text = widget.entry!.url ?? '';
       _notesController.text = widget.entry!.notes ?? '';
+    }
+
+    //To track changes
+    _titleController.addListener(_checkForChanges);
+    _usernameController.addListener(_checkForChanges);
+    _passwordController.addListener(_checkForChanges);
+    _urlController.addListener(_checkForChanges);
+    _notesController.addListener(_checkForChanges);
+  }
+
+  void _checkForChanges() {
+    final entry = widget.entry;
+    final newState =
+        _titleController.text != (entry?.title ?? '') ||
+        _usernameController.text != (entry?.username ?? '') ||
+        _passwordController.text != (entry?.password ?? '') ||
+        _urlController.text != (entry?.url ?? '') ||
+        _notesController.text != (entry?.notes ?? '');
+
+    if (newState != _hasChanges) {
+      setState(() {
+        _hasChanges = newState;
+      });
     }
   }
 
@@ -53,6 +77,12 @@ class _AddEntryState extends State<AddEntry> {
 
   @override
   void dispose() {
+    _titleController.removeListener(_checkForChanges);
+    _usernameController.removeListener(_checkForChanges);
+    _passwordController.removeListener(_checkForChanges);
+    _urlController.removeListener(_checkForChanges);
+    _notesController.removeListener(_checkForChanges);
+
     _titleController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
@@ -61,90 +91,129 @@ class _AddEntryState extends State<AddEntry> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges) return true;
+
+    final shouldPop = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Discard new entry?'),
+        content: const Text('You have unsaved entry. Are you sure you want to discard it?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+
+    return shouldPop ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Add Entry"),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: "Title"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter title";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: "Username"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter username";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  )
+    return WillPopScope(
+      onWillPop: _onWillPop,
+        child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Add Entry"),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(labelText: "Title"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter title";
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _urlController,
-                decoration: InputDecoration(labelText: "Url"),
-              ),
-              SizedBox(height: 16),
-              Container(
-                height: 150,
-                child: TextFormField(
-                  controller: _notesController,
-                  decoration: InputDecoration(labelText: "Notes"),
-                  minLines: 4,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(labelText: "Username"),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter username";
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _submitForm, 
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF085465),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: const StadiumBorder(),
+
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    )
+                  ),
                 ),
-                child: Text("OK"),
-              ),
-              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-            ],
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _urlController,
+                  decoration: InputDecoration(labelText: "Url"),
+                ),
+
+                const SizedBox(height: 16),
+
+                Container(
+                  height: 150,
+                  child: TextFormField(
+                    controller: _notesController,
+                    decoration: InputDecoration(labelText: "Notes"),
+                    minLines: 4,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                ElevatedButton(
+                  onPressed: _submitForm, 
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF085465),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: const StadiumBorder(),
+                  ),
+                  child: const Text("OK"),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).viewInsets.bottom
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -19,12 +19,24 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
   final tips = [
     '"I recommend using passwords of twenty-five characters or more." - Kevin Mitnick, *The Art of Invisibility*',
     '"The more characters in your password, the longer it will take password-guessing programs to run through all the possible variations." - Kevin Mitnick, *The Art of Invisibility*',
-    'Passwords should be long, unpredictable, and unique for every account." - Troy Hunt, *Have I Been Pwned*',
-    "Avoid using your birthdate or names in passwords",
-    "Use a password manager to avoid reusing passwords",
-    "Update important passwords regularly",
-    "A passphrase (e.g., 'PurpleTurtleJumps@9PM') is easier to remember and harder to crack.",
-    "Never reuse passwords - data breaches often expose credentials used elsewhere."
+    '"Passwords should be long, unpredictable, and unique for every account." - Troy Hunt, *Have I Been Pwned*',
+    "Avoid using your birthdate, pet names, or common words in passwords.",
+    "Update your passwords for financial or email accounts every 6–12 months.",
+    "Reusing the same password? That's how hackers gain access to multiple accounts.",
+    "A passphrase like 'CoffeeTableRains@7am' is easier to remember and harder to crack.",
+    "The longer your password, the harder it is to brute-force. Aim for 16+ characters.",
+    "Don’t rely on browser-saved passwords. Use a real password manager.",
+    "Use 2FA (Two-Factor Authentication) wherever possible for added security.",
+    "A mix of letters, numbers, and symbols boosts password strength.",
+    "Avoid patterns like 'abcd', '1234', or keyboard walks like 'qwerty'.",
+    "Hackers love simple passwords. Make yours complex and unpredictable.",
+    "Got hacked? Change your password *immediately* on all reused accounts.",
+    "Avoid storing passwords in notes apps or text files.",
+    "Security questions are weak points—treat them like passwords too.",
+    "Don't copy others. Your password should be unique, like your fingerprint.",
+    "Even strong passwords become weak if reused. Generate a fresh one.",
+    "A password manager remembers complex passwords, so you don’t have to.",
+    "Never share your password—even with people you trust.",
   ];
 
   int currentTipIndex = 0;

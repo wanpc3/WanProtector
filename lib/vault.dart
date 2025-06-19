@@ -28,7 +28,7 @@ class Vault {
   }
 
   Future<Database> _initDB() async {
-    String path = join(await getDatabasesPath(), "wan_protector.db");
+    String path = join(await getDatabasesPath(), "wp_vault.db");
     return await openDatabase(
       path,
       version: 1,

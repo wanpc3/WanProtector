@@ -1,5 +1,5 @@
-name: wan_protector
-description: "A new Flutter project."
+name: WanProtector
+description: "A standalone password manager app available on Google Play"
 publish_to: 'none'
 version: 1.0.0+1
 

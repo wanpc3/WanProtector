@@ -80,16 +80,16 @@ class _EditEntryState extends State<EditEntry> {
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Discard changes?'),
-        content: Text('You have unsaved changes. Are you sure you want to discard them?'),
+        title: const Text('Discard changes?'),
+        content: const Text('You have unsaved changes. Are you sure you want to discard them?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Discard'),
+            child: const Text('Discard'),
           ),
         ],
       ),
@@ -134,7 +134,7 @@ class _EditEntryState extends State<EditEntry> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Edit Entry"),
+          title: const Text("Edit Entry"),
           leading: IconButton(
             icon: Icon(Icons.close),
             onPressed: () async {
@@ -179,7 +179,7 @@ class _EditEntryState extends State<EditEntry> {
                       ),
                     ),
 
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     //Username
                     Hero(
@@ -207,7 +207,7 @@ class _EditEntryState extends State<EditEntry> {
                       ),
                     ),
                     
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     //Password
                     Hero(
@@ -246,7 +246,7 @@ class _EditEntryState extends State<EditEntry> {
                       ),
                     ),
 
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     //Url
                     Hero(
@@ -260,7 +260,7 @@ class _EditEntryState extends State<EditEntry> {
                       ),
                     ),
                     
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     //Notes
                     Hero(

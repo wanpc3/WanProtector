@@ -1,11 +1,12 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:WanProtector/vault.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:open_file/open_file.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-import 'package:sqflite/sqflite.dart';
-import 'dart:io';
-import 'vault.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class VaultSettings extends StatefulWidget {
   @override
@@ -18,135 +19,204 @@ class _VaultSettingsState extends State<VaultSettings> {
     'Restore Vault',
   ];
 
-  final Vault dbHelper = Vault();
-  bool _isProcessing = false;
-  
+  //Upload Vault to Files
   Future<void> _backupVault() async {
-    setState(() => _isProcessing = true);
-    
     try {
-      // 1. Get source file
-      final dbPath = await getDatabasesPath();
-      final sourceFile = File(p.join(dbPath, 'wan_protector.db'));
-      if (!await sourceFile.exists()) {
-        throw Exception('Database file not found');
-      }
-
-      // 2. Let user choose save location using system picker
-      final String? savePath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Backup As',
-        fileName: 'wan_protector_backup_${DateTime.now().toIso8601String().replaceAll(RegExp(r'[:\.]'), '-')}.db',
-        type: FileType.any,
-        lockParentWindow: true,
-      );
-
-      if (savePath == null) return; // User cancelled
-
-      // 3. Copy using FilePicker's result (works with scoped storage)
-      final bytes = await sourceFile.readAsBytes();
-      final backupFile = File(savePath);
-      await backupFile.writeAsBytes(bytes);
-
-      // 4. Verify
-      if (!await backupFile.exists()) {
-        throw Exception('Backup file was not created');
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Backup saved successfully'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Backup failed: ${e.toString()}'),
-            duration: Duration(seconds: 5),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
-  }
-
-  Future<void> _restoreVault() async {
-    setState(() => _isProcessing = true);
-    
-    try {
-      // 1. Let user select backup file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        File backupFile = File(result.files.single.path!);
-
-        // 2. Verify the file exists
-        if (!await backupFile.exists()) {
-          throw Exception('Selected file not found');
-        }
-
-        // 3. Show confirmation dialog
-        bool confirm = await showDialog(
+      //1) Permission check
+      var status = await Permission.storage.status;
+      if (status.isPermanentlyDenied) {
+        await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Confirm Restore'),
-            content: Text('This will overwrite ALL current data. Continue?'),
+          builder: (ctx) => AlertDialog(
+            title: const Text("Permission denied"),
+            content: const Text("Enable storage permission in settings"),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text('Restore'),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text("OK"),
               ),
             ],
           ),
-        ) ?? false;
+        );
+        return;
+      }
 
-        if (confirm) {
-          // 4. Get current database path
-          String dbPath = await getDatabasesPath();
-          String destPath = p.join(dbPath, 'wan_protector.db');
-          
-          // 5. Close database before restoring
-          await dbHelper.close();
-          
-          // 6. Copy the backup file
-          await backupFile.copy(destPath);
-          
-          // 7. Verify the restored database
-          try {
-            final db = await openDatabase(destPath);
-            await db.close();
-          } catch (e) {
-            await File(destPath).delete();
-            throw Exception('Invalid database file');
-          }
-          
-          // 8. Reinitialize database
-          await dbHelper.database;
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Vault restored successfully')),
-          );
-        }
+      //2) Close database
+      await Vault().close();
+
+      //3) Get file and check existence
+      final vaultPath = path.join(await getDatabasesPath(), "wp_vault.db");
+      final vaultFile = File(vaultPath);
+
+      if (!await vaultFile.exists()) {
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Error"),
+            content: const Text("Database file not found."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      //4) Read bytes
+      final bytes = await vaultFile.readAsBytes();
+
+      //5) Save with FilePicker
+      final String? savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Backup Vault',
+        fileName: 'wp_vault_backup.db',
+        allowedExtensions: ['db'],
+        type: FileType.custom,
+        bytes: bytes,
+      );
+
+      //6) Reopen database
+      await Vault().database;
+
+      //7) Enhanced success feedback
+      if (savePath != null && mounted) {
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Backup Complete"),
+            content: const Text("Vault backed up successfully."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Restore failed: ${e.toString()}')),
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Backup Failed"),
+          content: Text("Error: ${e.toString()}"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
       );
-      // Reopen database if restore failed
-      await dbHelper.database;
-    } finally {
-      setState(() => _isProcessing = false);
+    }
+  }
+
+  //Restore Vault
+  Future<void> _restoreVault() async {
+    try {
+      // 1. Pick backup file
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.any,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      // 2. Get bytes from file (with fallback)
+      Uint8List? bytes = result.files.first.bytes;
+      if (bytes == null || bytes.isEmpty) {
+        final filePath = result.files.first.path;
+        if (filePath != null) {
+          bytes = await File(filePath).readAsBytes();
+        } else {
+          throw Exception("Could not read file contents");
+        }
+      }
+
+      // 3. Create temp file
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/restore_temp.db');
+      await tempFile.writeAsBytes(bytes);
+
+      // 4. Open backup database
+      final backupDb = await openDatabase(tempFile.path);
+
+      // 5. Verify backup structure
+      final tables = await backupDb.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table'");
+      final requiredTables = ['entry', 'deleted_entry'];
+      if (!requiredTables.every((t) => tables.any((row) => row['name'] == t))) {
+        throw Exception("Invalid backup file structure");
+      }
+
+      // 6. Get current database
+      final currentDb = await Vault().database;
+      
+      // 7. Get current master password to preserve it
+      final currentMasterPassword = await currentDb.query('master_password');
+
+      // 8. Perform restore transaction
+      await currentDb.transaction((txn) async {
+        // Clear existing data (except master_password)
+        await txn.delete('entry');
+        await txn.delete('deleted_entry');
+
+        // Restore entries
+        final entries = await backupDb.rawQuery('SELECT * FROM entry');
+        for (final entry in entries) {
+          await txn.insert('entry', entry);
+        }
+
+        // Restore deleted entries
+        final deletedEntries = await backupDb.rawQuery('SELECT * FROM deleted_entry');
+        for (final entry in deletedEntries) {
+          await txn.insert('deleted_entry', entry);
+        }
+
+        // Restore original master password if it was cleared
+        if (currentMasterPassword.isNotEmpty) {
+          await txn.insert('master_password', currentMasterPassword.first,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+      });
+
+      // 9. Clean up
+      await backupDb.close();
+      await tempFile.delete();
+
+      // 10. Show success
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Restore Complete"),
+            content: const Text("Vault data restored successfully\nMaster password preserved"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("OK"))
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Restore Failed"),
+            content: Text("Error: ${e.toString()}"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("OK"))
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -158,9 +228,7 @@ class _VaultSettingsState extends State<VaultSettings> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: _isProcessing
-          ? Center(child: CircularProgressIndicator())
-          : ListView.separated(
+      body: ListView.separated(
               padding: const EdgeInsets.all(8),
               itemCount: contents.length,
               itemBuilder: (BuildContext context, int index) {
