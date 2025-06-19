@@ -121,9 +121,15 @@ class _AddEntryState extends State<AddEntry> {
                 decoration: InputDecoration(labelText: "Url"),
               ),
               SizedBox(height: 16),
-              TextFormField(
-                controller: _notesController,
-                decoration: InputDecoration(labelText: "Notes"),
+              Container(
+                height: 150,
+                child: TextFormField(
+                  controller: _notesController,
+                  decoration: InputDecoration(labelText: "Notes"),
+                  minLines: 4,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                ),
               ),
               SizedBox(height: 32),
               ElevatedButton(

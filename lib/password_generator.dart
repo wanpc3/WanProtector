@@ -17,11 +17,14 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
   bool includeSpecial = true;
 
   final tips = [
-    '"I recommend using passwords of twenty-five characters or more." – Kevin Mitnick, *The Art of Invisibility*',
-    '"The more characters in your password, the longer it will take password-guessing programs to run through all the possible variations." – Kevin Mitnick, *The Art of Invisibility*',
+    '"I recommend using passwords of twenty-five characters or more." - Kevin Mitnick, *The Art of Invisibility*',
+    '"The more characters in your password, the longer it will take password-guessing programs to run through all the possible variations." - Kevin Mitnick, *The Art of Invisibility*',
+    'Passwords should be long, unpredictable, and unique for every account." - Troy Hunt, *Have I Been Pwned*',
     "Avoid using your birthdate or names in passwords",
     "Use a password manager to avoid reusing passwords",
-    "Update important passwords regularly"
+    "Update important passwords regularly",
+    "A passphrase (e.g., 'PurpleTurtleJumps@9PM') is easier to remember and harder to crack.",
+    "Never reuse passwords - data breaches often expose credentials used elsewhere."
   ];
 
   int currentTipIndex = 0;
@@ -79,7 +82,6 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
               readOnly: true,
               enableInteractiveSelection: false,
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.copy),
                   onPressed: () {

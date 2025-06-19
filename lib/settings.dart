@@ -182,7 +182,7 @@ class _SettingsState extends State<Settings> {
 
   //Rate on Google Play
   Future<void> _rateOnGooglePlay() async {
-    const url = 'https://play.google.com/store/apps/details?id=com.example.wan_protector';
+    const url = 'https://play.google.com/store/apps/details?id=com.ilhanidriss.wan_protector';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
@@ -192,55 +192,19 @@ class _SettingsState extends State<Settings> {
 
   //Report a Bug
   Future<void> _reportBug() async {
-    try {
-      final Uri uri = Uri(
-        scheme: 'mailto',
-        path: 'idrissilhan@gmail.com',
-        queryParameters: {
-          'subject': 'Report a Bug - WanProtector',
-          'body': 'Hello WanProtector team,\n\n',
-        },
-      );
+    final String subject = Uri.encodeComponent('Report a Bug - WanProtector');
+    final String body = Uri.encodeComponent('Hello WanProtector team,\n\n');
 
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No email app found. Please contact us at idrissilhan@gmail.com')),
-          );
-        }
-      }
+    final String emailUri = 'mailto:idrissilhan@gmail.com?subject=$subject&body=$body';
+
+    try {
+      await launchUrl(Uri.parse(emailUri), mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error occurred: ${e.toString()}')),
+          SnackBar(content: Text('Could not open email app. Please email idrissilhan@gmail.com manually.')),
         );
       }
     }
   }
-
-  //Email formatter
-  String buildMailtoUri({
-    required String email,
-    String? subject,
-    String? body,
-  }) {
-    String uri = 'mailto:$email';
-    List<String> queryParams = [];
-
-    if (subject != null && subject.isNotEmpty) {
-      queryParams.add('subject=${Uri.encodeComponent(subject)}');
-    }
-    if (body != null && body.isNotEmpty) {
-      queryParams.add('body=${Uri.encodeComponent(body)}');
-    }
-
-    if (queryParams.isNotEmpty) {
-      uri += '?${queryParams.join('&')}';
-    }
-
-    return uri;
-  }
-
 }

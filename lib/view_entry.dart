@@ -333,10 +333,16 @@ class _ViewEntryState extends State<ViewEntry> {
                   tag: 'notes-${widget.entryId}',
                   child: Material(
                     type: MaterialType.transparency,
-                    child: TextFormField(
-                      controller: _notesController,
-                      decoration: InputDecoration(labelText: "Notes"),
-                      enabled: false,
+                    child: Container(
+                      height: 150,
+                      child: TextFormField(
+                        controller: _notesController,
+                        decoration: InputDecoration(labelText: "Notes"),
+                        minLines: 4,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        enabled: false,
+                      ),
                     ),
                   ),
                 ),

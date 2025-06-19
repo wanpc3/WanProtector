@@ -161,7 +161,7 @@ class _EditEntryState extends State<EditEntry> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Title (with Hero)
+                    //Title
                     Hero(
                       tag: 'title-${widget.entry!.id}',
                       child: Material(
@@ -181,7 +181,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     SizedBox(height: 16),
 
-                    // Username (with Hero)
+                    //Username
                     Hero(
                       tag: 'username-${widget.entry!.id}',
                       child: Material(
@@ -209,7 +209,7 @@ class _EditEntryState extends State<EditEntry> {
                     
                     SizedBox(height: 16),
 
-                    // Password (with Hero)
+                    //Password
                     Hero(
                       tag: 'password-${widget.entry!.id}',
                       child: Material(
@@ -248,7 +248,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     SizedBox(height: 16),
 
-                    // Url (with Hero)
+                    //Url
                     Hero(
                       tag: 'url-${widget.entry!.id}',
                       child: Material(
@@ -262,7 +262,7 @@ class _EditEntryState extends State<EditEntry> {
                     
                     SizedBox(height: 16),
 
-                    // Notes (with Hero)
+                    //Notes
                     Hero(
                       tag: 'notes-${widget.entry!.id}',
                       child: Material(
@@ -270,6 +270,9 @@ class _EditEntryState extends State<EditEntry> {
                         child: TextFormField(
                           controller: _notesController,
                           decoration: InputDecoration(labelText: "Notes"),
+                          minLines: 4,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
                         ),
                       ),
                     ),

@@ -323,10 +323,16 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                 const SizedBox(height: 16),
 
                 //Notes
-                TextFormField(
-                  controller: _notesController,
-                  decoration: InputDecoration(labelText: "Notes"),
-                  enabled: false,
+                Container(
+                  height: 150,
+                    child: TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(labelText: "Notes"),
+                      minLines: 4,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      enabled: false,
+                  ),
                 ),
 
                 //Time created and last updated
