@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:WanProtector/vault.dart';
+import 'vault.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'entries_state.dart';
+import 'deleted_state.dart';
 
 class VaultSettings extends StatefulWidget {
   @override
@@ -115,110 +117,104 @@ class _VaultSettingsState extends State<VaultSettings> {
 
   //Restore Vault
   Future<void> _restoreVault() async {
-    try {
-      // 1. Pick backup file
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
-        type: FileType.any,
-        withData: true,
+  try {
+    // 1. Pick backup file
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Select Vault Backup',
+      type: FileType.any,
+    );
+
+    if (result == null || result.files.isEmpty) {
+      // User canceled
+      return;
+    }
+
+    // Handle both web and mobile platforms
+    String? pickedFilePath = result.files.single.path;
+    Uint8List? fileBytes = result.files.single.bytes;
+
+    if (pickedFilePath == null && fileBytes == null) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Error"),
+          content: const Text("Could not access the selected file."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
       );
+      return;
+    }
 
-      if (result == null || result.files.isEmpty) return;
+    // 2. Close current DB connection
+    await Vault().close();
 
-      // 2. Get bytes from file (with fallback)
-      Uint8List? bytes = result.files.first.bytes;
-      if (bytes == null || bytes.isEmpty) {
-        final filePath = result.files.first.path;
-        if (filePath != null) {
-          bytes = await File(filePath).readAsBytes();
-        } else {
-          throw Exception("Could not read file contents");
-        }
-      }
+    // 3. Replace the current DB file with the selected backup
+    final vaultPath = path.join(await getDatabasesPath(), "wp_vault.db");
+    final File vaultFile = File(vaultPath);
 
-      // 3. Create temp file
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File('${tempDir.path}/restore_temp.db');
-      await tempFile.writeAsBytes(bytes);
+    if (fileBytes != null) {
+      // For web or when bytes are available
+      await vaultFile.writeAsBytes(fileBytes);
+    } else if (pickedFilePath != null) {
+      // For mobile when path is available
+      await File(pickedFilePath).copy(vaultFile.path);
+    }
 
-      // 4. Open backup database
-      final backupDb = await openDatabase(tempFile.path);
+    // 4. Reopen DB connection
+    await Vault().database;
 
-      // 5. Verify backup structure
-      final tables = await backupDb.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type='table'");
-      final requiredTables = ['entry', 'deleted_entry'];
-      if (!requiredTables.every((t) => tables.any((row) => row['name'] == t))) {
-        throw Exception("Invalid backup file structure");
-      }
+    // 5. Refresh UI state from Providers
+    if (mounted) {
+      final entriesState = context.read<EntriesState>();
+      final deletedState = context.read<DeletedState>();
 
-      // 6. Get current database
-      final currentDb = await Vault().database;
-      
-      // 7. Get current master password to preserve it
-      final currentMasterPassword = await currentDb.query('master_password');
+      await entriesState.refreshEntries();
+      await deletedState.refreshDeletedEntries();
+    }
 
-      // 8. Perform restore transaction
-      await currentDb.transaction((txn) async {
-        // Clear existing data (except master_password)
-        await txn.delete('entry');
-        await txn.delete('deleted_entry');
+    // 6. Inform user
+    if (mounted) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Restore Complete"),
+          content: const Text("Vault restored successfully."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
+  } catch (e) {
+    // Reopen database even if restore failed
+    await Vault().database;
 
-        // Restore entries
-        final entries = await backupDb.rawQuery('SELECT * FROM entry');
-        for (final entry in entries) {
-          await txn.insert('entry', entry);
-        }
-
-        // Restore deleted entries
-        final deletedEntries = await backupDb.rawQuery('SELECT * FROM deleted_entry');
-        for (final entry in deletedEntries) {
-          await txn.insert('deleted_entry', entry);
-        }
-
-        // Restore original master password if it was cleared
-        if (currentMasterPassword.isNotEmpty) {
-          await txn.insert('master_password', currentMasterPassword.first,
-            conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      });
-
-      // 9. Clean up
-      await backupDb.close();
-      await tempFile.delete();
-
-      // 10. Show success
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text("Restore Complete"),
-            content: const Text("Vault data restored successfully\nMaster password preserved"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("OK"))
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text("Restore Failed"),
-            content: Text("Error: ${e.toString()}"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("OK"))
-            ],
-          ),
-        );
-      }
+    if (mounted) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Restore Failed"),
+          content: Text("Error: ${e.toString()}"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
