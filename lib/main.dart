@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : Text(_titles[_selectedIndex]),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0A708A),
         foregroundColor: Colors.white,
         actions: (_selectedIndex == 0 || _selectedIndex == 2)
             ? [
@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.black),
+              decoration: BoxDecoration(color: const Color(0xFF0A708A)),
               child: Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ? null
           : FloatingActionButton(
               onPressed: _navigateToAddEntry,
-              backgroundColor: const Color(0xFF085465),
+              backgroundColor: Color(0xFF0A708A),
               foregroundColor: Colors.white,
               child: const Icon(Icons.add),
             ),

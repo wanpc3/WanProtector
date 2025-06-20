@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -101,12 +100,12 @@ class Vault {
   
   Future<String?> backupVault(BuildContext context) async {
     try {
-      // 1. Request permissions
+      //1) Request permissions
       if (!await _requestStoragePermissions()) {
         return "Storage permission denied";
       }
 
-      // 2. Get database file and encryption key
+      //2) Get database file and encryption key
       final dbPath = await getDatabasesPath();
       final sourceFile = File(join(dbPath, 'wp_vault.db'));
       final key = await EncryptionHelper.backupKey();
@@ -114,11 +113,11 @@ class Vault {
       if (key == null) return "No encryption key found";
       if (!await sourceFile.exists()) return "No vault database found to backup";
 
-      //3. Read original database and encode key
+      //3) Read original database and encode key
       final originalBytes = await sourceFile.readAsBytes();
       final keyBytes = utf8.encode(key);
 
-      //4. Create backup bytes in separate steps
+      //4) Create backup bytes in separate steps
       final backupBytes = Uint8List(8 + keyBytes.length + originalBytes.length);
       
       //Set magic number "WPVK"
@@ -133,7 +132,7 @@ class Vault {
       //Set original database content
       backupBytes.setRange(8 + keyBytes.length, backupBytes.length, originalBytes);
 
-      //5. Save as single file
+      //5) Save as single file
       final String? savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Vault Backup',
         fileName: 'wp_vault_backup.db',
@@ -170,14 +169,13 @@ class Vault {
   
   Future<String?> restoreVault(BuildContext context) async {
     try {
-      // 1. Request permissions
+      //1) Request permissions
       if (!await _requestStoragePermissions()) {
         return "Storage permission denied";
       }
 
       FilePickerResult? result;
       
-      // Try different file picking methods with fallbacks
       try {
         // First attempt: Use any file type but suggest .db files
         result = await FilePicker.platform.pickFiles(
@@ -203,7 +201,7 @@ class Vault {
         return "Invalid file selected";
       }
 
-      //3) Ask for user confirmation
+      //2) Ask for user confirmation
        bool proceed = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) {
@@ -231,11 +229,11 @@ class Vault {
         return "Restore cancelled by user";
       }
 
-      // 2. Read and validate backup file
+      //3) Read and validate backup file
       final backupFile = File(platformFile.path!);
       final backupBytes = await backupFile.readAsBytes();
 
-      // Verify minimum file size and magic number
+      //Verify minimum file size and magic number
       if (backupBytes.length < 8 || 
           backupBytes[0] != 0x57 || // W
           backupBytes[1] != 0x50 || // P
@@ -244,37 +242,37 @@ class Vault {
         return "Invalid backup file format";
       }
 
-      // 3. Extract key length (big-endian)
+      //4) Extract key length (big-endian)
       final keyLength = (backupBytes[4] << 24) | 
                       (backupBytes[5] << 16) | 
                       (backupBytes[6] << 8) | 
                       backupBytes[7];
 
-      // Validate key length
+      //Validate key length
       if (8 + keyLength > backupBytes.length) {
         return "Corrupted backup file (invalid key length)";
       }
 
-      // 4. Extract and restore encryption key
+      //5) Extract and restore encryption key
       final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
       if (!await EncryptionHelper.restoreKey(key)) {
         return "Failed to restore encryption key";
       }
 
-      // 5. Extract and restore database
+      //6) Extract and restore database
       final dbBytes = backupBytes.sublist(8 + keyLength);
       final dbPath = await getDatabasesPath();
       final destFile = File(join(dbPath, 'wp_vault.db'));
       await destFile.writeAsBytes(dbBytes);
 
-      // 6. Refresh application state
+      //7) Refresh application state
       await clearCacheAndReopen();
       final stateDeletedManager = context.read<DeletedState>();
       final stateManager = context.read<EntriesState>();
       await stateDeletedManager.refreshDeletedEntries();
       await stateManager.refreshEntries();
 
-      //6) Show success message
+      //8) Show success message
       await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -301,22 +299,21 @@ class Vault {
   Future<bool> _requestStoragePermissions() async {
     try {
       if (Platform.isAndroid) {
-        // For Android 10 and below
+        //For Android 10 and below
         var storageStatus = await Permission.storage.status;
         if (storageStatus.isDenied) {
           storageStatus = await Permission.storage.request();
         }
 
-        // For Android 11 and above
+        //For Android 11 and above
         var manageStatus = await Permission.manageExternalStorage.status;
         if (manageStatus.isDenied) {
           manageStatus = await Permission.manageExternalStorage.request();
         }
 
-        // Check if either permission is granted
         return storageStatus.isGranted || manageStatus.isGranted;
       }
-      return true; // On iOS, permissions are handled differently
+      return true;
     } catch (e) {
       debugPrint("Permission error: $e");
       return false;

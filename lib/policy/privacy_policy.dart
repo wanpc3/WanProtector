@@ -20,7 +20,7 @@ class PrivacyPolicy extends StatelessWidget {
         title: const Text(
           "Privacy Policy",
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0A708A),
         foregroundColor: Colors.white,
       ),
 

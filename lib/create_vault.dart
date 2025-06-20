@@ -75,7 +75,7 @@ class _CreateVaultScreen extends State<CreateVault> {
 
       appBar: AppBar(
         title: Text("Create Vault"),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0A708A),
         foregroundColor: Colors.white,
       ),
 
@@ -183,7 +183,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        "3. This password manager stores all your passwords locally on your device. We recommend backing up your passwords to prevent data loss."
+                        "3. This password manager stores all your passwords locally on your device. We recommend backing up your vault to prevent data loss."
                       ),
                     ],
                   ),
@@ -262,7 +262,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF085465),
+                    backgroundColor: const Color(0xFF0A708A),
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

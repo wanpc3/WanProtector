@@ -7,26 +7,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class EncryptionHelper {
-  // Version prefix for future compatibility
+  //Version prefix for future compatibility
   static const _versionPrefix = 'v2:';
   static const _keyIdentifier = 'encryption_key_v2';
   static const _storage = FlutterSecureStorage();
 
-  // Cache the key to avoid repeated secure storage access
+  //Cache the key to avoid repeated secure storage access
   static encrypt.Key? _cachedKey;
 
-  /// Initialize with a key from secure storage or generate a new one
+  ///Initialize with a key from secure storage or generate a new one
   static Future<void> initialize() async {
     if (_cachedKey != null) return;
 
-    // Try to load existing key
+    //Try to load existing key
     final existingKey = await _storage.read(key: _keyIdentifier);
     if (existingKey != null && existingKey.length >= 32) {
       _cachedKey = encrypt.Key.fromBase64(existingKey);
       return;
     }
 
-    // Generate new secure key
+    //Generate new secure key
     final random = Random.secure();
     final keyBytes = Uint8List(32);
     for (var i = 0; i < keyBytes.length; i++) {
@@ -34,14 +34,14 @@ class EncryptionHelper {
     }
     _cachedKey = encrypt.Key(keyBytes);
     
-    // Store securely
+    //Store securely
     await _storage.write(
       key: _keyIdentifier,
       value: _cachedKey!.base64,
     );
   }
 
-  /// Clear cached key (for testing or logout scenarios)
+  //Clear cached key (for testing or logout scenarios)
   static Future<void> clearKey() async {
     _cachedKey = null;
     await _storage.delete(key: _keyIdentifier);
@@ -56,7 +56,7 @@ class EncryptionHelper {
     return encrypt.IV(ivBytes);
   }
 
-  /// Encrypts text with AES-256-CBC + HMAC-SHA256 authentication
+  //Encrypts text with AES-256-CBC + HMAC-SHA256 authentication
   static Future<String> encryptText(String plainText) async {
     if (plainText.isEmpty) return '';
     await initialize();
@@ -69,7 +69,7 @@ class EncryptionHelper {
 
       final encrypted = encrypter.encrypt(plainText, iv: iv);
 
-      // Add HMAC for authentication
+      //Add HMAC for authentication
       final hmac = Hmac(sha256, _cachedKey!.bytes);
       final authCode = hmac.convert([...iv.bytes, ...encrypted.bytes]).bytes;
 
@@ -80,7 +80,7 @@ class EncryptionHelper {
     }
   }
 
-  /// Decrypts text with HMAC verification
+  //Decrypts text with HMAC verification
   static Future<String> decryptText(String encryptedText) async {
     if (encryptedText.isEmpty || !encryptedText.startsWith(_versionPrefix)) {
       return '';
@@ -95,7 +95,7 @@ class EncryptionHelper {
       final cipherText = data.sublist(16, data.length - 32);
       final receivedHmac = data.sublist(data.length - 32);
 
-      // Verify HMAC
+      //Verify HMAC
       final hmac = Hmac(sha256, _cachedKey!.bytes);
       final computedHmac = hmac.convert([...iv.bytes, ...cipherText]).bytes;
 
@@ -120,7 +120,7 @@ class EncryptionHelper {
     }
   }
 
-  /// Constant-time comparison to prevent timing attacks
+  //Constant-time comparison to prevent timing attacks
   static bool _constantTimeCompare(List<int> a, List<int> b) {
     if (a.length != b.length) return false;
     var result = 0;
@@ -130,13 +130,13 @@ class EncryptionHelper {
     return result == 0;
   }
 
-  /// Backup the encryption key to a secure location
+  //Backup the encryption key to a secure location
   static Future<String?> backupKey() async {
     await initialize();
     return _cachedKey?.base64;
   }
 
-  /// Restore the encryption key from backup
+  //Restore the encryption key from backup
   static Future<bool> restoreKey(String base64Key) async {
     try {
       final key = encrypt.Key.fromBase64(base64Key);

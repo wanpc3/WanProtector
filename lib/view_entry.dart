@@ -96,7 +96,7 @@ class _ViewEntryState extends State<ViewEntry> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => EditEntry(
-          entry: entry,
+          entry: _currentEntry,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
@@ -148,7 +148,7 @@ class _ViewEntryState extends State<ViewEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0A708A),
         foregroundColor: Colors.white,
         title: Text(_currentEntry.title),
         actions: [
@@ -158,7 +158,7 @@ class _ViewEntryState extends State<ViewEntry> {
               if (value == 'Delete') {
                 _removeEntry(widget.entry.id!);
               } else if (value == 'Edit') {
-                _navigateToEditEntry(widget.entry);
+                _navigateToEditEntry(_currentEntry);
               }
             },
             itemBuilder: (_) => const [

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
-import 'deleted_entry_cache.dart';
 import 'view_deleted_entry.dart';
 
 class DeletedEntries extends StatefulWidget {

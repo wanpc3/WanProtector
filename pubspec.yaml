@@ -40,7 +40,7 @@ dev_dependencies:
 
 # flutter_launcher_icons:
 #   android: "launcher_icon"
-#   image_path: "assets/icon/wp_official_icon.png"
+#   image_path: "assets/icon/ic_launcher.png"
 
 flutter:
 

@@ -23,7 +23,7 @@ class _VaultSettingsState extends State<VaultSettings> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Vault Settings'),
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF0A708A),
         foregroundColor: Colors.white,
       ),
       body: ListView.separated(

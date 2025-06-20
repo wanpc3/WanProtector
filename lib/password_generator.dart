@@ -144,7 +144,7 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF085465),
+                backgroundColor: const Color(0xFF0A708A),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Generate Password'),

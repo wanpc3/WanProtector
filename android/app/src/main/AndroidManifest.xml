@@ -8,7 +8,7 @@
     <application
         android:label="wan_protector"
         android:name="${applicationName}"
-        android:icon="@mipmap/wp_official_icon"
+        android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
         <activity
             android:name=".MainActivity"
