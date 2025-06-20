@@ -1,14 +1,5 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'vault.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart' as path;
-import 'package:provider/provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
-import 'entries_state.dart';
-import 'deleted_state.dart';
 
 class VaultSettings extends StatefulWidget {
   @override
@@ -20,16 +11,6 @@ class _VaultSettingsState extends State<VaultSettings> {
     'Backup Vault',
     'Restore Vault',
   ];
-
-  //Upload Vault to Files
-  Future<void> _backupVault() async {
-
-  }
-
-  //Restore Vault
-  Future<void> _restoreVault() async {
-
-  }
 
   @override
   Widget build(BuildContext context) {

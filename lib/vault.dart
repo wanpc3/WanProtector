@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,6 +16,15 @@ import 'models/entry.dart';
 import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
+
+extension IntToBytes on int {
+  List<int> get bigEndianBytes => [
+    (this >> 24) & 0xFF,
+    (this >> 16) & 0xFF,
+    (this >> 8) & 0xFF,
+    this & 0xFF,
+  ];
+}
 
 class Vault {
   static final Vault _instance = Vault._internal();
@@ -100,66 +111,163 @@ class Vault {
   I/flutter (18649): Path to Vault: /data/user/0/com.ilhanidriss.wan_protector/databases/wp_vault.db
   I/flutter (18649): Path to external storage: Directory: '/storage/emulated/0/Android/data/com.ilhanidriss.wan_protector/files'
   */
-
-  backupVault() async {
-    var status = await Permission.manageExternalStorage.status;
-    if (!status.isGranted) {
-      await Permission.manageExternalStorage.request();
-    }
-
-    var status1 = await Permission.storage.status;
-    if (!status1.isGranted) {
-      await Permission.storage.request();
-    }
-
+  
+  Future<String?> backupVault() async {
     try {
-      File ourVaultFile = File(
-        '/data/user/0/com.ilhanidriss.wan_protector/databases/wp_vault.db'
-      );
-      Directory? folderPathForVaultFile = Directory(
-        '/storage/emulated/0/EntryVault/'
-      );
-      await folderPathForVaultFile.create();
-      await ourVaultFile.copy('/storage/emulated/0/EntryVault/wp_vault.db');
-    } catch (e) {
-      print("Error: ${e.toString()}");
-    }
-  }
-
-  Future<void> restoreVault(BuildContext context) async {
-    // Request permissions
-    final manageStatus = await Permission.manageExternalStorage.request();
-    final storageStatus = await Permission.storage.request();
-
-    if (!manageStatus.isGranted && !storageStatus.isGranted) {
-      print("Storage permission denied.");
-      return;
-    }
-
-    try {
-      final savedVaultFile = File('/storage/emulated/0/EntryVault/wp_vault.db');
-      final appVaultPath = join(await getDatabasesPath(), 'wp_vault.db');
-
-      if (!(await savedVaultFile.exists())) {
-        print("Backup file not found.");
-        return;
+      // 1. Request permissions
+      if (!await _requestStoragePermissions()) {
+        return "Storage permission denied";
       }
 
-      // Overwrite the database file
-      await savedVaultFile.copy(appVaultPath);
+      // 2. Get database file and encryption key
+      final dbPath = await getDatabasesPath();
+      final sourceFile = File(join(dbPath, 'wp_vault.db'));
+      final key = await EncryptionHelper.backupKey();
+      
+      if (key == null) return "No encryption key found";
+      if (!await sourceFile.exists()) return "No vault database found to backup";
 
-      // Reopen DB to refresh in-memory instance
-      await Vault().clearCacheAndReopen();
+      // 3. Read original database and encode key
+      final originalBytes = await sourceFile.readAsBytes();
+      final keyBytes = utf8.encode(key);
 
-      // Refresh app state
-      final stateDeletedManager = context.read<DeletedState>();
-      final stateManager = context.read<EntriesState>();
-      await stateDeletedManager.refreshDeletedEntries();
-      await stateManager.refreshEntries();
+      // 4. Create backup bytes in separate steps
+      final backupBytes = Uint8List(8 + keyBytes.length + originalBytes.length);
+      
+      // Set magic number "WPVK"
+      backupBytes.setRange(0, 4, [0x57, 0x50, 0x56, 0x4B]);
+      
+      // Set key length (big-endian)
+      backupBytes.setRange(4, 8, keyBytes.length.bigEndianBytes);
+      
+      // Set key bytes
+      backupBytes.setRange(8, 8 + keyBytes.length, keyBytes);
+      
+      // Set original database content
+      backupBytes.setRange(8 + keyBytes.length, backupBytes.length, originalBytes);
 
-      print("Vault restored successfully.");
+      // 5. Save as single file
+      final String? savePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Vault Backup',
+        fileName: 'wp_vault_backup.db',
+        allowedExtensions: ['db'],
+        type: FileType.custom,
+        bytes: backupBytes,
+      );
+
+      return savePath == null ? "Backup cancelled" : null;
     } catch (e) {
-      print("Restore Error: ${e.toString()}");
+      return "Backup failed: ${e.toString()}";
+    }
+  }
+  
+  Future<String?> restoreVault(BuildContext context) async {
+  try {
+    // 1. Request permissions
+    if (!await _requestStoragePermissions()) {
+      return "Storage permission denied";
+    }
+
+    FilePickerResult? result;
+    
+    // Try different file picking methods with fallbacks
+    try {
+      // First attempt: Use any file type but suggest .db files
+      result = await FilePicker.platform.pickFiles(
+        dialogTitle: 'Select Vault Backup File',
+        type: FileType.any,
+        allowMultiple: false,
+      );
+    } catch (e) {
+      debugPrint("FilePicker error: $e");
+      // Fallback to basic file picker if the first attempt fails
+      result = await FilePicker.platform.pickFiles(
+        dialogTitle: 'Select Vault Backup File',
+        allowMultiple: false,
+      );
+    }
+
+    if (result == null || result.files.isEmpty) {
+      return "Restore cancelled";
+    }
+
+    final platformFile = result.files.single;
+    if (platformFile.path == null) {
+      return "Invalid file selected";
+    }
+
+    // 2. Read and validate backup file
+    final backupFile = File(platformFile.path!);
+    final backupBytes = await backupFile.readAsBytes();
+
+    // Verify minimum file size and magic number
+    if (backupBytes.length < 8 || 
+        backupBytes[0] != 0x57 || // W
+        backupBytes[1] != 0x50 || // P
+        backupBytes[2] != 0x56 || // V
+        backupBytes[3] != 0x4B) { // K
+      return "Invalid backup file format";
+    }
+
+    // 3. Extract key length (big-endian)
+    final keyLength = (backupBytes[4] << 24) | 
+                     (backupBytes[5] << 16) | 
+                     (backupBytes[6] << 8) | 
+                     backupBytes[7];
+
+    // Validate key length
+    if (8 + keyLength > backupBytes.length) {
+      return "Corrupted backup file (invalid key length)";
+    }
+
+    // 4. Extract and restore encryption key
+    final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
+    if (!await EncryptionHelper.restoreKey(key)) {
+      return "Failed to restore encryption key";
+    }
+
+    // 5. Extract and restore database
+    final dbBytes = backupBytes.sublist(8 + keyLength);
+    final dbPath = await getDatabasesPath();
+    final destFile = File(join(dbPath, 'wp_vault.db'));
+    await destFile.writeAsBytes(dbBytes);
+
+    // 6. Refresh application state
+    await clearCacheAndReopen();
+    final stateDeletedManager = context.read<DeletedState>();
+    final stateManager = context.read<EntriesState>();
+    await stateDeletedManager.refreshDeletedEntries();
+    await stateManager.refreshEntries();
+
+    return null;
+  } catch (e, stackTrace) {
+    debugPrint("Restore error: $e\n$stackTrace");
+    return "Restore failed: ${e.toString()}";
+  }
+}
+  
+  Future<bool> _requestStoragePermissions() async {
+    try {
+      if (Platform.isAndroid) {
+        // For Android 10 and below
+        var storageStatus = await Permission.storage.status;
+        if (storageStatus.isDenied) {
+          storageStatus = await Permission.storage.request();
+        }
+
+        // For Android 11 and above
+        var manageStatus = await Permission.manageExternalStorage.status;
+        if (manageStatus.isDenied) {
+          manageStatus = await Permission.manageExternalStorage.request();
+        }
+
+        // Check if either permission is granted
+        return storageStatus.isGranted || manageStatus.isGranted;
+      }
+      return true; // On iOS, permissions are handled differently
+    } catch (e) {
+      debugPrint("Permission error: $e");
+      return false;
     }
   }
 
