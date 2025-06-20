@@ -90,7 +90,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
 
       appBar: AppBar(
         title: Text("Change Master Password"),
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
 
@@ -242,7 +242,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF0A708A),
+                    backgroundColor: const Color(0xFF2ECC71),
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

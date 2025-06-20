@@ -11,7 +11,7 @@ class AppTheme extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('App Theme'),
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
       body: ListView(

@@ -144,7 +144,7 @@ class _EditEntryState extends State<EditEntry> {
               }
             },
           ),
-          backgroundColor: const Color(0xFF0A708A),
+          backgroundColor: const Color(0xFF2ECC71),
           foregroundColor: Colors.white,
           actions: [
             IconButton(

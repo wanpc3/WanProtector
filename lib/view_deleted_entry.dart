@@ -146,7 +146,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
         title: Text(_currentDeletedEntry.title),
         actions: [

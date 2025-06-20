@@ -75,7 +75,7 @@ class _CreateVaultScreen extends State<CreateVault> {
 
       appBar: AppBar(
         title: Text("Create Vault"),
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
 
@@ -251,18 +251,37 @@ class _CreateVaultScreen extends State<CreateVault> {
                   ],
                 ),
 
+                if (!isCheckboxValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 12),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "You must agree to the terms of service and privacy policy.",
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                  ),
 
                 const SizedBox(height: 32),
 
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    final isFormValid = _formKey.currentState!.validate();
+
+                    if (!isChecked) {
+                      setState(() {
+                        isCheckboxValid = false;
+                      });
+                    }
+
+                    if (isFormValid && isChecked) {
                       _savePassword();
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF0A708A),
+                    backgroundColor: const Color(0xFF2ECC71),
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

@@ -13,7 +13,7 @@ class AutoLock extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Auto-Lock"),
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
       body: Column(

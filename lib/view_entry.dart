@@ -148,7 +148,7 @@ class _ViewEntryState extends State<ViewEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
         title: Text(_currentEntry.title),
         actions: [

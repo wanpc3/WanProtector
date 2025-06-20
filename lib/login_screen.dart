@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       appBar: AppBar(
         title: Text("Login Vault"),
-        backgroundColor: const Color(0xFF0A708A),
+        backgroundColor: const Color(0xFF2ECC71),
         foregroundColor: Colors.white,
       ),
 
@@ -154,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      backgroundColor: const Color(0xFF0A708A),
+                      backgroundColor: const Color(0xFF2ECC71),
                       foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 48),
                       shape: const StadiumBorder(),
