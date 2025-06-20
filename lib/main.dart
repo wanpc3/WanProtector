@@ -1,3 +1,4 @@
+import 'encryption_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'lifecycle_watcher.dart';
@@ -14,8 +15,10 @@ import 'settings.dart';
 import 'login_screen.dart';
 import 'get_started.dart';
 
-void main() {
+void main() async {
   
+  WidgetsFlutterBinding.ensureInitialized();
+  await EncryptionHelper.initialize();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   runApp(
@@ -280,8 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => _onItemTapped(3),
             ),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Exit'),
+              leading: Icon(Icons.exit_to_app),
+              title: Text('Lock'),
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
@@ -289,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     pageBuilder: (_, __, ___) => LoginScreen(toggleTheme: () {}),
                     transitionsBuilder: (_, animation, __, child) {
                       final offset = Tween<Offset>(
-                        begin: Offset(0, -1), // Slide from top
+                        begin: Offset(0, -1),
                         end: Offset.zero,
                       ).animate(animation);
                       return SlideTransition(position: offset, child: child);

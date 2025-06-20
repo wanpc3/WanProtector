@@ -4,9 +4,9 @@ class DeletedEntry {
   final int? deletedId;
   final String title;
   final String username;
-  final String password;
-  final String url;
-  final String notes;
+  final String? password;
+  final String? url;
+  final String? notes;
   final String createdAt;
   final String lastUpdated;
 
@@ -21,6 +21,7 @@ class DeletedEntry {
     required this.lastUpdated,
   });
 
+  //To display in View Deleted Entry
   static Future<DeletedEntry> fromMapAsync(Map<String, dynamic> map) async {
     return DeletedEntry(
       deletedId: map['deleted_id'],
@@ -39,9 +40,9 @@ class DeletedEntry {
       'deleted_id': deletedId,
       'title': title,
       'username': await EncryptionHelper.encryptText(username),
-      'password': await EncryptionHelper.encryptText(password),
+      'password': await EncryptionHelper.encryptText(password ?? ''),
       'url': url,
-      'notes': await EncryptionHelper.encryptText(notes),
+      'notes': await EncryptionHelper.encryptText(notes ?? ''),
       'created_at': createdAt,
       'last_updated': lastUpdated,
     };

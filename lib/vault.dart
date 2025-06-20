@@ -98,21 +98,8 @@ class Vault {
       },
     );
   }
-
-  //Get Vault path
-  getVaultPath() async {
-    String vaultPath = await getDatabasesPath();
-    print("Path to Vault: $vaultPath");
-    Directory? externalStoragePath = await getExternalStorageDirectory();
-    print("Path to external storage: $externalStoragePath");
-  }
-
-  /*
-  I/flutter (18649): Path to Vault: /data/user/0/com.ilhanidriss.wan_protector/databases/wp_vault.db
-  I/flutter (18649): Path to external storage: Directory: '/storage/emulated/0/Android/data/com.ilhanidriss.wan_protector/files'
-  */
   
-  Future<String?> backupVault() async {
+  Future<String?> backupVault(BuildContext context) async {
     try {
       // 1. Request permissions
       if (!await _requestStoragePermissions()) {
@@ -127,26 +114,26 @@ class Vault {
       if (key == null) return "No encryption key found";
       if (!await sourceFile.exists()) return "No vault database found to backup";
 
-      // 3. Read original database and encode key
+      //3. Read original database and encode key
       final originalBytes = await sourceFile.readAsBytes();
       final keyBytes = utf8.encode(key);
 
-      // 4. Create backup bytes in separate steps
+      //4. Create backup bytes in separate steps
       final backupBytes = Uint8List(8 + keyBytes.length + originalBytes.length);
       
-      // Set magic number "WPVK"
+      //Set magic number "WPVK"
       backupBytes.setRange(0, 4, [0x57, 0x50, 0x56, 0x4B]);
       
-      // Set key length (big-endian)
+      //Set key length (big-endian)
       backupBytes.setRange(4, 8, keyBytes.length.bigEndianBytes);
       
-      // Set key bytes
+      //Set key bytes
       backupBytes.setRange(8, 8 + keyBytes.length, keyBytes);
       
-      // Set original database content
+      //Set original database content
       backupBytes.setRange(8 + keyBytes.length, backupBytes.length, originalBytes);
 
-      // 5. Save as single file
+      //5. Save as single file
       final String? savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Vault Backup',
         fileName: 'wp_vault_backup.db',
@@ -155,96 +142,161 @@ class Vault {
         bytes: backupBytes,
       );
 
-      return savePath == null ? "Backup cancelled" : null;
+      if(savePath == null) return "Backup cancelled";
+
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Backup Succeed"),
+            content: const Text("Backup vault has been saved in your files"),
+            actions: [
+              TextButton(
+                child: const Text("OK"), 
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      return null;
     } catch (e) {
       return "Backup failed: ${e.toString()}";
     }
   }
   
   Future<String?> restoreVault(BuildContext context) async {
-  try {
-    // 1. Request permissions
-    if (!await _requestStoragePermissions()) {
-      return "Storage permission denied";
-    }
-
-    FilePickerResult? result;
-    
-    // Try different file picking methods with fallbacks
     try {
-      // First attempt: Use any file type but suggest .db files
-      result = await FilePicker.platform.pickFiles(
-        dialogTitle: 'Select Vault Backup File',
-        type: FileType.any,
-        allowMultiple: false,
+      // 1. Request permissions
+      if (!await _requestStoragePermissions()) {
+        return "Storage permission denied";
+      }
+
+      FilePickerResult? result;
+      
+      // Try different file picking methods with fallbacks
+      try {
+        // First attempt: Use any file type but suggest .db files
+        result = await FilePicker.platform.pickFiles(
+          dialogTitle: 'Select Vault Backup File',
+          type: FileType.any,
+          allowMultiple: false,
+        );
+      } catch (e) {
+        debugPrint("FilePicker error: $e");
+        // Fallback to basic file picker if the first attempt fails
+        result = await FilePicker.platform.pickFiles(
+          dialogTitle: 'Select Vault Backup File',
+          allowMultiple: false,
+        );
+      }
+
+      if (result == null || result.files.isEmpty) {
+        return "Restore cancelled";
+      }
+
+      final platformFile = result.files.single;
+      if (platformFile.path == null) {
+        return "Invalid file selected";
+      }
+
+      //3) Ask for user confirmation
+       bool proceed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Confirm Restore"),
+              content: const Text(
+                "All current entries will be replaced with the data from this backup. Do you want to proceed?",
+              ),
+              actions: [
+                TextButton(
+                  child: const Text("Cancel"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: const Text("Proceed"),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+      if (!proceed) {
+        return "Restore cancelled by user";
+      }
+
+      // 2. Read and validate backup file
+      final backupFile = File(platformFile.path!);
+      final backupBytes = await backupFile.readAsBytes();
+
+      // Verify minimum file size and magic number
+      if (backupBytes.length < 8 || 
+          backupBytes[0] != 0x57 || // W
+          backupBytes[1] != 0x50 || // P
+          backupBytes[2] != 0x56 || // V
+          backupBytes[3] != 0x4B) { // K
+        return "Invalid backup file format";
+      }
+
+      // 3. Extract key length (big-endian)
+      final keyLength = (backupBytes[4] << 24) | 
+                      (backupBytes[5] << 16) | 
+                      (backupBytes[6] << 8) | 
+                      backupBytes[7];
+
+      // Validate key length
+      if (8 + keyLength > backupBytes.length) {
+        return "Corrupted backup file (invalid key length)";
+      }
+
+      // 4. Extract and restore encryption key
+      final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
+      if (!await EncryptionHelper.restoreKey(key)) {
+        return "Failed to restore encryption key";
+      }
+
+      // 5. Extract and restore database
+      final dbBytes = backupBytes.sublist(8 + keyLength);
+      final dbPath = await getDatabasesPath();
+      final destFile = File(join(dbPath, 'wp_vault.db'));
+      await destFile.writeAsBytes(dbBytes);
+
+      // 6. Refresh application state
+      await clearCacheAndReopen();
+      final stateDeletedManager = context.read<DeletedState>();
+      final stateManager = context.read<EntriesState>();
+      await stateDeletedManager.refreshDeletedEntries();
+      await stateManager.refreshEntries();
+
+      //6) Show success message
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Restore Complete"),
+            content: const Text("Your vault has been successfully restored."),
+            actions: [
+              TextButton(
+                child: const Text("OK"),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
       );
-    } catch (e) {
-      debugPrint("FilePicker error: $e");
-      // Fallback to basic file picker if the first attempt fails
-      result = await FilePicker.platform.pickFiles(
-        dialogTitle: 'Select Vault Backup File',
-        allowMultiple: false,
-      );
+
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint("Restore error: $e\n$stackTrace");
+      return "Restore failed: ${e.toString()}";
     }
-
-    if (result == null || result.files.isEmpty) {
-      return "Restore cancelled";
-    }
-
-    final platformFile = result.files.single;
-    if (platformFile.path == null) {
-      return "Invalid file selected";
-    }
-
-    // 2. Read and validate backup file
-    final backupFile = File(platformFile.path!);
-    final backupBytes = await backupFile.readAsBytes();
-
-    // Verify minimum file size and magic number
-    if (backupBytes.length < 8 || 
-        backupBytes[0] != 0x57 || // W
-        backupBytes[1] != 0x50 || // P
-        backupBytes[2] != 0x56 || // V
-        backupBytes[3] != 0x4B) { // K
-      return "Invalid backup file format";
-    }
-
-    // 3. Extract key length (big-endian)
-    final keyLength = (backupBytes[4] << 24) | 
-                     (backupBytes[5] << 16) | 
-                     (backupBytes[6] << 8) | 
-                     backupBytes[7];
-
-    // Validate key length
-    if (8 + keyLength > backupBytes.length) {
-      return "Corrupted backup file (invalid key length)";
-    }
-
-    // 4. Extract and restore encryption key
-    final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
-    if (!await EncryptionHelper.restoreKey(key)) {
-      return "Failed to restore encryption key";
-    }
-
-    // 5. Extract and restore database
-    final dbBytes = backupBytes.sublist(8 + keyLength);
-    final dbPath = await getDatabasesPath();
-    final destFile = File(join(dbPath, 'wp_vault.db'));
-    await destFile.writeAsBytes(dbBytes);
-
-    // 6. Refresh application state
-    await clearCacheAndReopen();
-    final stateDeletedManager = context.read<DeletedState>();
-    final stateManager = context.read<EntriesState>();
-    await stateDeletedManager.refreshDeletedEntries();
-    await stateManager.refreshEntries();
-
-    return null;
-  } catch (e, stackTrace) {
-    debugPrint("Restore error: $e\n$stackTrace");
-    return "Restore failed: ${e.toString()}";
   }
-}
   
   Future<bool> _requestStoragePermissions() async {
     try {

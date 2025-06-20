@@ -22,7 +22,10 @@ class DeletedState with ChangeNotifier {
   Future<void> fetchDeletedEntries() async {
     _isLoading = true;
     notifyListeners();
-    _deletedEntries = await Vault().getDeletedEntries();
+
+    final newDeletedEntries = _deletedEntries = await Vault().getDeletedEntries();
+
+    _deletedEntries = newDeletedEntries;
     _isLoading = false;
     notifyListeners();
   }

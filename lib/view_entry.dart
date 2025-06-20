@@ -9,11 +9,11 @@ import 'vault.dart';
 import 'edit_entry.dart';
 
 class ViewEntry extends StatefulWidget {
-  final int entryId;
+  final Entry entry;
 
   ViewEntry({
     Key? key,
-    required this.entryId,
+    required this.entry,
   }): super(key: key);
 
   @override
@@ -29,21 +29,14 @@ class _ViewEntryState extends State<ViewEntry> {
 
   bool _obscurePassword = true;
   final Vault _dbHelper = Vault();
-  late Future<Entry?> _entryFuture;
+
+  late Entry _currentEntry;
 
   @override
   void initState() {
     super.initState();
-    _entryFuture = _loadDataAndSetControllers();
-  }
-
-  Future<Entry?> _loadDataAndSetControllers() async {
-    final entry = await _dbHelper.getEntryById(widget.entryId);
-    if (entry != null) {
-      _updateControllers(entry);
-      return entry;
-    }
-    return null;
+    _currentEntry = widget.entry;
+    _updateControllers(widget.entry);
   }
 
   void _updateControllers(Entry entry) {
@@ -135,9 +128,13 @@ class _ViewEntryState extends State<ViewEntry> {
     );
 
     if (result == true) {
-      setState(() {
-        _entryFuture = _loadDataAndSetControllers();
-      });
+      final updated = await _dbHelper.getEntryById(_currentEntry.id!);
+      if (updated != null) {
+        setState(() {
+          _currentEntry = updated;
+          _updateControllers(_currentEntry);
+        });
+      }
     }
   }
 
@@ -153,215 +150,165 @@ class _ViewEntryState extends State<ViewEntry> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: FutureBuilder<Entry?>(
-          future: _entryFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
-            }
-            if (snapshot.hasError || !snapshot.hasData) {
-              return const Text('View Entry');
-            }
-            return Text(snapshot.data!.title);
-          },
-        ),
+        title: Text(_currentEntry.title),
         actions: [
-          FutureBuilder<Entry?>(
-            future: _entryFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Container();
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) async {
+              if (value == 'Delete') {
+                _removeEntry(widget.entry.id!);
+              } else if (value == 'Edit') {
+                _navigateToEditEntry(widget.entry);
               }
-
-              final entry = snapshot.data!;
-
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) async {
-                  if (value == 'Delete') {
-                    _removeEntry(entry.id!);
-                  } else if (value == 'Edit') {
-                    _navigateToEditEntry(entry);
-                  }
-                },
-                itemBuilder: (_) => [
-                  const PopupMenuItem(
-                    value: 'Delete',
-                    child: Text("Delete Entry"),
-                  ),
-                  const PopupMenuItem(
-                    value: 'Edit',
-                    child: Text("Edit Entry"),
-                  ),
-                ],
-              );
             },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
+              PopupMenuItem(value: 'Edit', child: Text("Edit Entry")),
+            ],
           )
         ],
       ),
-      body: FutureBuilder<Entry?>(
-        future: _entryFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error loading entry'));
-          }
-          
-          if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('Entry not found'));
-          }
-
-          final entry = snapshot.data!;
-          final createdAt = formatDateTime(entry.createdAt);
-          final lastUpdated = formatDateTime(entry.lastUpdated);
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-
-                // Title (with Hero)
-                Hero(
-                  tag: 'title-${widget.entryId}',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: TextFormField(
-                      controller: _titleController,
-                      decoration: InputDecoration(labelText: "Title"),
-                      enabled: false,
-                    ),
-                  ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          children: [
+            //Title
+            Hero(
+              tag: 'title-${_currentEntry.title}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(labelText: "Title"),
+                  enabled: false,
                 ),
+              ),
+            ),
 
-                const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-                // Username (with Hero)
-                Hero(
-                  tag: 'username-${widget.entryId}',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _usernameController,
-                            enabled: false,
-                            decoration: InputDecoration(labelText: "Username"),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.copy),
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: _usernameController.text),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Username copied to clipboard')),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Password (with Hero)
-                Hero(
-                  tag: 'password-${widget.entryId}',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _passwordController,
-                            enabled: false,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(labelText: "Password"),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.copy),
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: _passwordController.text),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Password copied to clipboard')),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Url (with Hero)
-                Hero(
-                  tag: 'url-${widget.entryId}',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: TextFormField(
-                      controller: _urlController,
-                      decoration: InputDecoration(labelText: "Url"),
-                      enabled: false,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Notes (with Hero)
-                Hero(
-                  tag: 'notes-${widget.entryId}',
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Container(
-                      height: 150,
+            //Username
+            Hero(
+              tag: 'username-${_currentEntry.username}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Row(
+                  children: [
+                    Expanded(
                       child: TextFormField(
-                        controller: _notesController,
-                        decoration: InputDecoration(labelText: "Notes"),
-                        minLines: 4,
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
+                        controller: _usernameController,
                         enabled: false,
+                        decoration: InputDecoration(labelText: "Username"),
                       ),
                     ),
+                    IconButton(
+                      icon: Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: _usernameController.text),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Username copied to clipboard')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            //Password
+            Hero(
+              tag: 'password-${_currentEntry.password}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _passwordController,
+                        enabled: false,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(labelText: "Password"),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: _passwordController.text),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Password copied to clipboard')),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            //Url
+            Hero(
+              tag: 'url-${_currentEntry.url}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: TextFormField(
+                  controller: _urlController,
+                  decoration: InputDecoration(labelText: "Url"),
+                  enabled: false,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            //Notes
+            Hero(
+              tag: 'notes-${_currentEntry.notes}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  height: 150,
+                  child: TextFormField(
+                    controller: _notesController,
+                    decoration: InputDecoration(labelText: "Notes"),
+                    minLines: 4,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    enabled: false,
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Created and Updated 
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text("Created at: $createdAt"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text("Last updated at: $lastUpdated"),
-                ),
-              ],
+              ),
             ),
-          );
-        },
+
+            const SizedBox(height: 16),
+
+            //Created and Updated
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text("Created at: ${formatDateTime(_currentEntry.createdAt)}"),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text("Last updated at: ${formatDateTime(_currentEntry.lastUpdated)}"),
+            ),
+          ],
+        ),
       ),
     );
   }

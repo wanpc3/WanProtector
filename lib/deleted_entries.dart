@@ -1,3 +1,4 @@
+import 'package:WanProtector/vault.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/deleted_entry.dart';
@@ -46,23 +47,22 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
   //To go View Entry
   void _navigateToViewDeletedEntry(DeletedEntry deletedEntry) async {
-    DeletedEntryCache().addDeletedEntry(deletedEntry);
+    final fullDeletedEntry = await Vault().getDeletedEntryById(deletedEntry.deletedId!);
+    if (fullDeletedEntry == null) return;
+
     final result = await Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => ViewDeletedEntry(
-          deletedId: deletedEntry.deletedId!,
+          deletedEntry: fullDeletedEntry,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return ScaleTransition(
             scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
+            child: FadeTransition(opacity: animation, child: child),
           );
         },
-        transitionDuration: Duration(milliseconds: 400),
+        transitionDuration: Duration(milliseconds: 300),
       ),
     );
 
@@ -74,37 +74,24 @@ class DeletedEntriesState extends State<DeletedEntries> {
   @override
   Widget build(BuildContext context) {
     final deletedEntriesProvider = Provider.of<DeletedState>(context);
+
     return Scaffold(
       body: deletedEntriesProvider.isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
+          : ListView.separated(
               itemCount: deletedEntriesProvider.deletedEntries.length,
+              separatorBuilder: (_, __) => Divider(height: 1, thickness: 0.5, color: Colors.grey),
               itemBuilder: (context, index) {
                 final deletedEntry = deletedEntriesProvider.deletedEntries[index];
-                return Column(
-                  children: [
-                    Divider(
-                      height: 1,
-                      thickness: 0.5,
-                      color: Colors.grey,
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.close, color: Colors.red),
-                      title: Text(deletedEntry.title),
-                      subtitle: Text(deletedEntry.username),
-                      trailing: Text(
-                        _formatDate(deletedEntry.createdAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      onTap: () => _navigateToViewDeletedEntry(deletedEntry),
-                    ),
-                    if (index == deletedEntriesProvider.deletedEntries.length - 1)
-                      Divider(
-                        height: 1,
-                        thickness: 0.5,
-                        color: Colors.grey,
-                      ),
-                  ],
+                return ListTile(
+                  leading: Icon(Icons.close, color: Colors.red),
+                  title: Text(deletedEntry.title),
+                  subtitle: Text(deletedEntry.username),
+                  trailing: Text(
+                    _formatDate(deletedEntry.createdAt),
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  onTap: () => _navigateToViewDeletedEntry(deletedEntry),
                 );
               },
             )

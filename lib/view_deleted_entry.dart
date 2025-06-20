@@ -8,11 +8,11 @@ import 'deleted_state.dart';
 import 'vault.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
-  final int deletedId;
+  final DeletedEntry deletedEntry;
 
   ViewDeletedEntry({
     Key? key,
-    required this.deletedId,
+    required this.deletedEntry,
   }): super(key: key);
 
   @override
@@ -29,29 +29,22 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
   bool _obscurePassword = true;
   final Vault _dbHelper = Vault();
-  late Future<DeletedEntry?> _deletedEntryFuture;
+  
+  late DeletedEntry _currentDeletedEntry;
 
   @override
   void initState() {
     super.initState();
-    _deletedEntryFuture = _loadDataAndSetControllers();
-  }
-
-  Future<DeletedEntry?> _loadDataAndSetControllers() async {
-    final deletedEntry = await _dbHelper.getDeletedEntryById(widget.deletedId);
-    if (deletedEntry != null) {
-      _updateControllers(deletedEntry);
-      return deletedEntry;
-    }
-    return null;
+    _currentDeletedEntry = widget.deletedEntry;
+    _updateControllers(widget.deletedEntry);
   }
 
   void _updateControllers(DeletedEntry deletedEntry) {
     _titleController.text = deletedEntry.title;
     _usernameController.text = deletedEntry.username;
-    _passwordController.text = deletedEntry.password;
-    _urlController.text = deletedEntry.url;
-    _notesController.text = deletedEntry.notes;
+    _passwordController.text = deletedEntry.password!;
+    _urlController.text = deletedEntry.url!;
+    _notesController.text = deletedEntry.notes!;
   }
 
   //To restore deleted entry
@@ -65,7 +58,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     );
 
     try {
-      await _dbHelper.restoreEntry(widget.deletedId);
+      await _dbHelper.restoreEntry(_currentDeletedEntry.deletedId!);
 
       //Refresh the deleted entry so it updates.
       final stateDeletedManager = context.read<DeletedState>();
@@ -107,7 +100,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
     );
 
     try {
-      await _dbHelper.deleteEntryPermanently(widget.deletedId);
+      await _dbHelper.deleteEntryPermanently(_currentDeletedEntry.deletedId!);
 
       final stateDeletedManager = context.read<DeletedState>();
       await stateDeletedManager.refreshDeletedEntries();
@@ -155,18 +148,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: FutureBuilder<DeletedEntry?>(
-          future: _deletedEntryFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text('Loading...');
-            }
-            if (snapshot.hasError && !snapshot.hasData) {
-              return const Text('View Deleted Entry');
-            }
-            return Text(snapshot.data!.title);
-          },
-        ),
+        title: Text(_currentDeletedEntry.title),
         actions: [
 
           //Restore Icon
@@ -174,84 +156,68 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             icon: Icon(Icons.restore_from_trash),
             onPressed: _restoreEntry,
           ),
-
-          //Delete Permanently option
-          FutureBuilder<DeletedEntry?>(
-            future: _deletedEntryFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Container();
-              }
-              return PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) async {
-                  if (value == 'Delete Permanently') {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text("Permanently Delete?"),
-                        content: Text('This action cannot be undone. Are you sure?'),
-                        actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false), 
-                              child: Text('Cancel')
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true), 
-                              child: Text('Delete')
-                            ),
-                          ],
-                        ),
-                      );
-
-                    if (confirm == true) {
-                      _deleteEntryPermanently();
-                    }
-                  }
-                },
-                itemBuilder: (_) => [
-                  const PopupMenuItem(
-                    value: 'Delete Permanently',
-                    child: Text("Delete Permanently"),
+          
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) async {
+              if (value == 'Delete Permanently') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text("Permanently Delete?"),
+                    content: Text('This action cannot be undone. Are you sure?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false), 
+                        child: Text('Cancel')
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true), 
+                        child: Text('Delete')
+                      ),
+                    ],
                   ),
-                ],
-              );
+                );
+
+                if (confirm == true) {
+                  _deleteEntryPermanently();
+                }
+              }
             },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'Delete Permanently',
+                child: Text("Delete Permanently"),
+              ),
+            ],
           ),
         ],
       ),
-      body: FutureBuilder<DeletedEntry?>(
-        future: _deletedEntryFuture,
-        builder: (context, snapshot) {
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text("No entry found"));
-          }
-
-          final deletedEntry = snapshot.data!;
-          final createdAt = formatDateTime(deletedEntry.createdAt);
-          final lastUpdated = formatDateTime(deletedEntry.lastUpdated);
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-
-                //Title
-                TextFormField(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          children: [
+            //Title
+            Hero(
+              tag: 'title-${_currentDeletedEntry.title}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(labelText: "Title"),
                   enabled: false,
                 ),
-                
-                const SizedBox(height: 16),
+              ),
+            ),
 
-                //Username
-                Row(
+            const SizedBox(height: 16),
+
+            //Username
+            Hero(
+              tag: 'username-${_currentDeletedEntry.username}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Row(
                   children: [
                     Expanded(
                       child: TextFormField(
@@ -273,11 +239,17 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     ),
                   ],
                 ),
+              ),
+            ),
 
-                const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-                //Password
-                Row(
+            //Password
+            Hero(
+              tag: 'password-${_currentDeletedEntry.password}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Row(
                   children: [
                     Expanded(
                       child: TextFormField(
@@ -310,44 +282,58 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     ),
                   ],
                 ),
+              ),
+            ),
 
-                const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-                //Url
-                TextFormField(
+            //Url
+            Hero(
+              tag: 'url-${_currentDeletedEntry.url}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: TextFormField(
                   controller: _urlController,
                   decoration: InputDecoration(labelText: "Url"),
                   enabled: false,
                 ),
+              ),
+            ),
 
-                const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-                //Notes
-                Container(
+            //Notes
+            Hero(
+              tag: 'notes-${_currentDeletedEntry.notes}',
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
                   height: 150,
-                    child: TextFormField(
-                      controller: _notesController,
-                      decoration: InputDecoration(labelText: "Notes"),
-                      minLines: 4,
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      enabled: false,
+                  child: TextFormField(
+                    controller: _notesController,
+                    decoration: InputDecoration(labelText: "Notes"),
+                    minLines: 4,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    enabled: false,
                   ),
                 ),
-
-                //Time created and last updated
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text("Created at: $createdAt"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text("Last updated at: $lastUpdated"),
-                ),
-              ],
+              ),
             ),
-          );
-        },
+
+            const SizedBox(height: 16),
+
+            //Created and Updated
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Text("Created at: ${formatDateTime(_currentDeletedEntry.createdAt)}"),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text("Last updated at: ${formatDateTime(_currentDeletedEntry.lastUpdated)}"),
+            ),
+          ],
+        ),
       ),
     );
   }

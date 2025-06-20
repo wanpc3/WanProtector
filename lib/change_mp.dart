@@ -26,6 +26,8 @@ class _ChangeMpScreen extends State<ChangeMp> {
   bool _obscurePassword_2 = true;
   bool _obscurePassword_3 = true;
 
+  String? _currentPasswordError;
+
   void _savePassword() async {
     final currentPasswordInput = _currentPasswordController.text;
     final newPassword = _passwordController.text;
@@ -40,10 +42,14 @@ class _ChangeMpScreen extends State<ChangeMp> {
 
     final isVerified = await Vault().verifyMasterPassword(currentPasswordInput);
     if (!isVerified) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Current Master Password is incorrect')),
-      );
+      setState(() {
+        _currentPasswordError = 'Current Master Password is incorrect';
+      });
       return;
+    } else {
+      setState(() {
+        _currentPasswordError = null;
+      });
     }
 
     //1) Update password via Vault with encryption
@@ -102,6 +108,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   obscureText: _obscurePassword_1,
                   decoration: InputDecoration(
                     hintText: 'Current Master Password',
+                    errorText: _currentPasswordError,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword_1 ? Icons.visibility_off : Icons.visibility,

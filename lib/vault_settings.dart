@@ -7,9 +7,15 @@ class VaultSettings extends StatefulWidget {
 }
 
 class _VaultSettingsState extends State<VaultSettings> {
+
   final List<String> contents = <String>[
     'Backup Vault',
     'Restore Vault',
+  ];
+
+  final List<IconData> leadingIcons = <IconData>[
+    Icons.save,
+    Icons.restore,
   ];
 
   @override
@@ -25,13 +31,12 @@ class _VaultSettingsState extends State<VaultSettings> {
               itemCount: contents.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
+                  leading: Icon(leadingIcons[index]),
                   title: Text(contents[index]),
                   onTap: () async {
                     if (contents[index] == 'Backup Vault') {
-                      //_backupVault();
-                      await Vault().backupVault();
+                      await Vault().backupVault(context);
                     } else if (contents[index] == 'Restore Vault') {
-                      //_restoreVault();
                       await Vault().restoreVault(context);
                     }
                   },

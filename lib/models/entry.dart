@@ -21,6 +21,7 @@ class Entry {
     required this.lastUpdated,
   });
 
+  //To display in View Entry
   static Future<Entry> fromMapAsync(Map<String, dynamic> map) async {
     return Entry(
       id: map['id'],

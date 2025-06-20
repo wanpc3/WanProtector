@@ -22,7 +22,10 @@ class EntriesState with ChangeNotifier {
   Future<void> fetchEntries() async {
     _isLoading = true;
     notifyListeners();
-    _entries = await Vault().getEntries();
+
+    final newEntries = _entries = await Vault().getEntries();
+
+    _entries = newEntries;
     _isLoading = false;
     notifyListeners();
   }
