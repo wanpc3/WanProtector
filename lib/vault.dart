@@ -1,4 +1,9 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
 import 'entry_cache.dart';
@@ -7,6 +12,8 @@ import 'encryption_helper.dart';
 import 'models/master_password.dart';
 import 'models/entry.dart';
 import 'models/deleted_entry.dart';
+import 'deleted_state.dart';
+import 'entries_state.dart';
 
 class Vault {
   static final Vault _instance = Vault._internal();
@@ -79,6 +86,81 @@ class Vault {
         ''');
       },
     );
+  }
+
+  //Get Vault path
+  getVaultPath() async {
+    String vaultPath = await getDatabasesPath();
+    print("Path to Vault: $vaultPath");
+    Directory? externalStoragePath = await getExternalStorageDirectory();
+    print("Path to external storage: $externalStoragePath");
+  }
+
+  /*
+  I/flutter (18649): Path to Vault: /data/user/0/com.ilhanidriss.wan_protector/databases/wp_vault.db
+  I/flutter (18649): Path to external storage: Directory: '/storage/emulated/0/Android/data/com.ilhanidriss.wan_protector/files'
+  */
+
+  backupVault() async {
+    var status = await Permission.manageExternalStorage.status;
+    if (!status.isGranted) {
+      await Permission.manageExternalStorage.request();
+    }
+
+    var status1 = await Permission.storage.status;
+    if (!status1.isGranted) {
+      await Permission.storage.request();
+    }
+
+    try {
+      File ourVaultFile = File(
+        '/data/user/0/com.ilhanidriss.wan_protector/databases/wp_vault.db'
+      );
+      Directory? folderPathForVaultFile = Directory(
+        '/storage/emulated/0/EntryVault/'
+      );
+      await folderPathForVaultFile.create();
+      await ourVaultFile.copy('/storage/emulated/0/EntryVault/wp_vault.db');
+    } catch (e) {
+      print("Error: ${e.toString()}");
+    }
+  }
+
+  Future<void> restoreVault(BuildContext context) async {
+    // Request permissions
+    final manageStatus = await Permission.manageExternalStorage.request();
+    final storageStatus = await Permission.storage.request();
+
+    if (!manageStatus.isGranted && !storageStatus.isGranted) {
+      print("Storage permission denied.");
+      return;
+    }
+
+    try {
+      final savedVaultFile = File('/storage/emulated/0/EntryVault/wp_vault.db');
+      final appVaultPath = join(await getDatabasesPath(), 'wp_vault.db');
+
+      if (!(await savedVaultFile.exists())) {
+        print("Backup file not found.");
+        return;
+      }
+
+      // Overwrite the database file
+      await savedVaultFile.copy(appVaultPath);
+
+      // Reopen DB to refresh in-memory instance
+      await Vault().clearCacheAndReopen();
+
+      // Refresh app state
+      final stateDeletedManager = context.read<DeletedState>();
+      final stateManager = context.read<EntriesState>();
+      await stateDeletedManager.refreshDeletedEntries();
+      await stateManager.refreshEntries();
+
+      print("Vault restored successfully.");
+    } catch (e) {
+      print("Restore Error: ${e.toString()}");
+    }
   }
 
   //Check Master Password availability

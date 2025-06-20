@@ -45,11 +45,13 @@ class _VaultSettingsState extends State<VaultSettings> {
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   title: Text(contents[index]),
-                  onTap: () {
+                  onTap: () async {
                     if (contents[index] == 'Backup Vault') {
-                      _backupVault();
+                      //_backupVault();
+                      await Vault().backupVault();
                     } else if (contents[index] == 'Restore Vault') {
-                      _restoreVault();
+                      //_restoreVault();
+                      await Vault().restoreVault(context);
                     }
                   },
                 );
