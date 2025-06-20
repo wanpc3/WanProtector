@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
 import 'entry_cache.dart';
 import 'deleted_entry_cache.dart';
@@ -27,8 +27,14 @@ class Vault {
     }
   }
 
+  Future<void> clearCacheAndReopen() async {
+    await close();
+    _database = await _initDB();
+  }
+
   Future<Database> _initDB() async {
     String path = join(await getDatabasesPath(), "wp_vault.db");
+
     return await openDatabase(
       path,
       version: 1,

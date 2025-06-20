@@ -38,7 +38,7 @@ class Entry {
     return {
       'id': id,
       'title': title,
-      'username': await EncryptionHelper.encryptText(username ?? ''),
+      'username': await EncryptionHelper.encryptText(username),
       'password': await EncryptionHelper.encryptText(password ?? ''),
       'url': url ?? '',
       'notes': await EncryptionHelper.encryptText(notes ?? ''),
