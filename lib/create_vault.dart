@@ -77,8 +77,8 @@ class _CreateVaultScreen extends State<CreateVault> {
 
       appBar: AppBar(
         title: Text("Create Vault"),
-        backgroundColor: const Color(0xFF2ECC71),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB8B8B8),
+        foregroundColor: Colors.black,
       ),
 
       body: SafeArea(
@@ -202,7 +202,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                         isChecked = value ?? false;
                         isCheckboxValid = true;
                       }),
-                      checkColor: Colors.white,
+                      checkColor: Colors.black,
                       activeColor: Colors.green,
                     ),
                     Expanded(
@@ -283,8 +283,8 @@ class _CreateVaultScreen extends State<CreateVault> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF2ECC71),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFB8B8B8),
+                    foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),
                   ),

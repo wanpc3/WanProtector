@@ -105,8 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       appBar: AppBar(
         title: Text("Login Vault"),
-        backgroundColor: const Color(0xFF2ECC71),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB8B8B8),
+        foregroundColor: Colors.black,
       ),
 
       body: GestureDetector(
@@ -174,8 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: const Color(0xFF2ECC71),
-                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFFB8B8B8),
+                        foregroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
                         shape: const StadiumBorder(),
                       ),
@@ -193,9 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        foregroundColor: Colors.white,
+                        //foregroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
-                        backgroundColor: const Color(0xFF808080),
+                        //backgroundColor: Colors.white,
                         shape: const StadiumBorder(),
                       ),
                       child: const Text("Help"),

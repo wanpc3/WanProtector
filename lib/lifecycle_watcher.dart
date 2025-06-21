@@ -54,7 +54,7 @@ class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBinding
     if (!autoLockState.isAutoLockEnabled || _isOperationInProgress) return;
 
     _screenOff = true;
-    _startLockTimer(autoLockState.lockDuration);
+    widget.onAutoLock();
   }
 
   void _handleScreenOn() {

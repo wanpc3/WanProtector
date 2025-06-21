@@ -9,69 +9,24 @@ class AutoLock extends StatelessWidget {
   Widget build(BuildContext context) {
     final autoLockState = Provider.of<AutoLockState>(context);
     final isEnabled = autoLockState.isAutoLockEnabled;
-    final selectedDuration = autoLockState.lockDuration;
-
-    final List<Map<String, dynamic>> timeIntervals = [
-      {'text': '15 seconds', 'value': 15},
-      {'text': '30 seconds', 'value': 30},
-      {'text': '1 minute', 'value': 60},
-      {'text': '2 minutes', 'value': 120},
-      {'text': '5 minutes', 'value': 300},
-    ];
-
-    final availableValues = timeIntervals.map((e) => e['value']).toList();
-
-    if (!availableValues.contains(selectedDuration)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        autoLockState.setLockDuration(15);
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Auto-Lock"),
-        backgroundColor: const Color(0xFF2ECC71),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB8B8B8),
+        foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             title: const Text("Enable Auto-Lock"),
-            subtitle: const Text("Enable auto-lock when you're not using the app or when your screen is off."),
+            subtitle: const Text("Lock the app after 1 minute in the background and when your screen is off."),
             value: isEnabled,
             onChanged: (bool value) {
               autoLockState.setAutoLockEnabled(value);
             },
             secondary: const Icon(Icons.lock_clock),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: AbsorbPointer(
-              absorbing: !isEnabled,
-              child: Opacity(
-                opacity: isEnabled ? 1.0 : 0.5,
-                child: DropdownButtonFormField<int>(
-                  value: availableValues.contains(selectedDuration) ? selectedDuration : null,
-                  hint: const Text("Select Auto-Lock duration"),
-                  isExpanded: true,
-                  items: timeIntervals.map((interval) {
-                    return DropdownMenuItem<int>(
-                      value: interval['value'],
-                      child: Text(interval['text']),
-                    );
-                  }).toList(),
-                  onChanged: isEnabled
-                      ? (int? newValue) {
-                          if (newValue != null && newValue >= 15) {
-                            autoLockState.setLockDuration(newValue);
-                          }
-                        }
-                      : null,
-                ),
-              ),
-            ),
           ),
         ],
       ),

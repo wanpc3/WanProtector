@@ -148,8 +148,8 @@ class _ViewEntryState extends State<ViewEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2ECC71),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFB8B8B8),
+        foregroundColor: Colors.black,
         title: Text(_currentEntry.title),
         actions: [
           PopupMenuButton<String>(
