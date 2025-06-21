@@ -37,14 +37,18 @@ class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBinding
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final autoLockState = Provider.of<AutoLockState>(context, listen: false);
 
-    if (!autoLockState.isAutoLockEnabled || !autoLockState.isAutoLockEnabled) return;
+    if (!autoLockState.isAutoLockEnabled) return;
 
     if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
-      //Start 1-minute timer
+      //Start timer
       _lockTimer?.cancel();
-      _lockTimer = Timer(const Duration(minutes: 1), () {
+      if (autoLockState.lockDuration == 0) {
         widget.onAutoLock();
-      });
+      } else {
+        _lockTimer = Timer(Duration(seconds: autoLockState.lockDuration), () {
+          widget.onAutoLock();
+        });
+      }
     } else if (state == AppLifecycleState.resumed) {
       _lockTimer?.cancel();
     }

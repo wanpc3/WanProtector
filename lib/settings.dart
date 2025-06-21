@@ -38,7 +38,7 @@ class _SettingsState extends State<Settings> {
     Icons.palette,
     //Icons.sort,
     Icons.lock_clock,
-    Icons.vpn_key,
+    Icons.storage,
     Icons.lock_reset,
     Icons.description,
     Icons.privacy_tip,
