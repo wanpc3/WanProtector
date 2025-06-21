@@ -264,32 +264,47 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.lock),
+              leading: Icon(
+                Icons.folder,
+                color: Colors.blue,
+              ),
               title: Text('All Entries'),
               selected: _selectedIndex == 0,
               onTap: () => _onItemTapped(0),
             ),
             ListTile(
-              leading: Icon(Icons.password),
+              leading: Icon(
+                Icons.password,
+                color: Colors.yellow,
+              ),
               title: Text('Password Generator'),
               selected: _selectedIndex == 1,
               onTap: () => _onItemTapped(1),
             ),
             ListTile(
-              leading: Icon(Icons.delete),
+              leading: Icon(
+                Icons.delete,
+                color: Colors.red
+              ),
               title: Text('Deleted Entries'),
               selected: _selectedIndex == 2,
               onTap: () => _onItemTapped(2),
             ),
             ListTile(
-              leading: Icon(Icons.settings),
+              leading: Icon(
+                Icons.settings,
+                color: Colors.grey,
+              ),
               title: Text('Settings'),
               selected: _selectedIndex == 3,
               onTap: () => _onItemTapped(3),
             ),
             ListTile(
-              leading: Icon(Icons.exit_to_app),
-              title: Text('Lock'),
+              leading: Icon(
+                Icons.exit_to_app,
+                color: Colors.green,
+              ),
+              title: Text('Exit Vault'),
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(

@@ -80,15 +80,22 @@ class AllEntriesState extends State<AllEntries> {
               separatorBuilder: (_, __) => Divider(height: 1, thickness: 0.5, color: Colors.grey),
               itemBuilder: (context, index) {
                 final entry = entriesProvider.entries[index];
-                return ListTile(
-                  leading: Icon(Icons.key, color: Colors.amber),
-                  title: Text(entry.title),
-                  subtitle: Text(entry.username),
-                  trailing: Text(
-                    _formatDate(entry.createdAt),
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                final backgroundColor = index.isEven
+                    ? const Color(0xFFE7E7FF)
+                    : Colors.transparent;
+
+                return Container(
+                  color: const Color(0xFFE7E7FF),
+                  child: ListTile(
+                    leading: Icon(Icons.key, color: Colors.amber),
+                    title: Text(entry.title),
+                    subtitle: Text(entry.username),
+                    trailing: Text(
+                      _formatDate(entry.createdAt),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    onTap: () => _navigateToViewEntry(entry),
                   ),
-                  onTap: () => _navigateToViewEntry(entry),
                 );
               },
             ),
