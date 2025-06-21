@@ -14,14 +14,20 @@ class LifecycleWatcher extends StatefulWidget {
     required this.onAutoLock,
   }) : super(key: key);
 
+  static _LifecycleWatcherState? of (BuildContext context) {
+    final state = context.findAncestorStateOfType<_LifecycleWatcherState>();
+    return state;
+  }
+
   @override
   State<LifecycleWatcher> createState() => _LifecycleWatcherState();
 }
 
 class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBindingObserver {
   Timer? _lockTimer;
-  DateTime? _lastPausedTime;
   bool _screenOff = false;
+  bool _isOperationInProgress = false;
+  bool _isAppBackgrounded = false;
   final MethodChannel _channel = const MethodChannel('com.ilhanidriss.wan_protector/screen');
 
   @override
@@ -45,8 +51,8 @@ class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBinding
   void _handleScreenOff() {
     if (!mounted) return;
     final autoLockState = Provider.of<AutoLockState>(context, listen: false);
-    if (!autoLockState.isAutoLockEnabled) return;
-    
+    if (!autoLockState.isAutoLockEnabled || _isOperationInProgress) return;
+
     _screenOff = true;
     _startLockTimer(autoLockState.lockDuration);
   }
@@ -54,48 +60,47 @@ class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBinding
   void _handleScreenOn() {
     if (!mounted) return;
     _screenOff = false;
-    // Additional logic if needed when screen turns on
+    _lockTimer?.cancel();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final autoLockState = Provider.of<AutoLockState>(context, listen: false);
+    if (!autoLockState.isAutoLockEnabled || _isOperationInProgress) return;
 
-    if (!autoLockState.isAutoLockEnabled) return;
-
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
-      _lastPausedTime = DateTime.now();
+    _isAppBackgrounded = state == AppLifecycleState.paused || state == AppLifecycleState.hidden;
+    
+    if (_isAppBackgrounded) {
       _startLockTimer(autoLockState.lockDuration);
-    } 
-    else if (state == AppLifecycleState.resumed) {
-      _screenOff = false;
+    } else {
       _lockTimer?.cancel();
-      
-      if (_lastPausedTime != null) {
-        final elapsed = DateTime.now().difference(_lastPausedTime!);
-        if (elapsed.inSeconds >= autoLockState.lockDuration) {
-          widget.onAutoLock();
-        }
-      }
     }
   }
 
   void _startLockTimer(int duration) {
     _lockTimer?.cancel();
-    
-    if (duration == 0) {
-      widget.onAutoLock();
-    } else {
-      _lockTimer = Timer(Duration(seconds: duration), () {
-        if (mounted && (_screenOff || _lastPausedTime != null)) {
-          widget.onAutoLock();
-        }
-      });
+    _lockTimer = Timer(Duration(seconds: duration), () {
+      if (mounted && !_isOperationInProgress && (_screenOff || _isAppBackgrounded)) {
+        widget.onAutoLock();
+      }
+    });
+  }
+
+  void pauseAutoLock() {
+    if (!mounted) return;
+    _isOperationInProgress = true;
+    _lockTimer?.cancel();
+  }
+
+  void resumeAutoLock(int duration) {
+    if (!mounted) return;
+    _isOperationInProgress = false;
+    _lockTimer?.cancel();
+    if (duration > 0) {
+      _startLockTimer(duration);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }

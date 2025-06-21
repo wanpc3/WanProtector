@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'models/master_password.dart';
 import 'vault.dart';
 import 'login_screen.dart';
+import 'encryption_helper.dart';
 import 'policy/terms_of_service.dart';
 import 'policy/privacy_policy.dart';
 
@@ -58,7 +59,8 @@ class _CreateVaultScreen extends State<CreateVault> {
     );
 
     //2) Also store it in secure storage for auto login
-    await _secureStorage.write(key: 'auth_token', value: password);
+    final encryptedPassword = await EncryptionHelper.encryptText(password);
+    await _secureStorage.write(key: 'auth_token', value: encryptedPassword);
 
     //3) Go to login screen
     Navigator.pushReplacement(

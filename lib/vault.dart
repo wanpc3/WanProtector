@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -15,6 +17,8 @@ import 'models/entry.dart';
 import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
+import 'autolock_state.dart';
+import 'lifecycle_watcher.dart';
 
 extension IntToBytes on int {
   List<int> get bigEndianBytes => [
@@ -49,6 +53,7 @@ class Vault {
     _database = await _initDB();
   }
 
+  //Vault Initialization
   Future<Database> _initDB() async {
     String path = join(await getDatabasesPath(), "wp_vault.db");
 
@@ -97,42 +102,117 @@ class Vault {
       },
     );
   }
-  
-  Future<String?> backupVault(BuildContext context) async {
+
+  //Verify Database Integrity
+  Future<bool> verifyDatabaseIntegrity() async {
+    final db = await database;
     try {
-      //1) Request permissions
+      // Check master_password table exists
+      final result = await db.rawQuery('''
+        SELECT 1 FROM sqlite_master 
+        WHERE type='table' AND name='master_password'
+      ''');
+      
+      if (result.isEmpty) return false;
+      
+      // Verify we can read password
+      final pw = await getEncryptedMasterPassword();
+      return pw != null;
+    } catch (e) {
+      debugPrint('Database integrity check failed: $e');
+      return false;
+    }
+  }
+  
+  //Backup Vault
+  Future<String?> backupVault(BuildContext context) async {
+    bool isCancelled = false;
+    bool isDialogShowing = false;
+
+    //Pause auto-lock immediately
+    LifecycleWatcher.of(context)?.pauseAutoLock();
+
+    // Show progress dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          title: const Text("Creating Backup"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              const Text("Preparing backup..."),
+              const SizedBox(height: 20),
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  isCancelled = true;
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) => isDialogShowing = false);
+    isDialogShowing = true;
+    
+    try {
+      //1) Check cancellation
+      if (isCancelled) {
+        _showCancellationSnackBar(context, "Backup cancelled");
+        return "Backup cancelled";
+      }
+
+      //2) Request permissions
       if (!await _requestStoragePermissions()) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "Storage permission denied");
         return "Storage permission denied";
       }
 
-      //2) Get database file and encryption key
+      //3) Get database file and encryption key
+      if (isCancelled) {
+        _showCancellationSnackBar(context, "Backup cancelled");
+        return "Backup cancelled";
+      }
+
       final dbPath = await getDatabasesPath();
       final sourceFile = File(join(dbPath, 'wp_vault.db'));
       final key = await EncryptionHelper.backupKey();
-      
-      if (key == null) return "No encryption key found";
-      if (!await sourceFile.exists()) return "No vault database found to backup";
 
-      //3) Read original database and encode key
+      if (isCancelled) {
+        _showCancellationSnackBar(context, "Backup cancelled");
+        return "Backup cancelled";
+      }
+      
+      if (key == null) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "No encryption key found");
+        return "No encryption key found";
+      }
+      
+      if (!await sourceFile.exists()) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "No vault database found to backup");
+        return "No vault database found to backup";
+      }
+
+      //4) Create backup file
       final originalBytes = await sourceFile.readAsBytes();
       final keyBytes = utf8.encode(key);
-
-      //4) Create backup bytes in separate steps
       final backupBytes = Uint8List(8 + keyBytes.length + originalBytes.length);
       
-      //Set magic number "WPVK"
       backupBytes.setRange(0, 4, [0x57, 0x50, 0x56, 0x4B]);
-      
-      //Set key length (big-endian)
       backupBytes.setRange(4, 8, keyBytes.length.bigEndianBytes);
-      
-      //Set key bytes
       backupBytes.setRange(8, 8 + keyBytes.length, keyBytes);
-      
-      //Set original database content
       backupBytes.setRange(8 + keyBytes.length, backupBytes.length, originalBytes);
 
-      //5) Save as single file
+      //5) Save file
       final String? savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Vault Backup',
         fileName: 'wp_vault_backup.db',
@@ -141,20 +221,31 @@ class Vault {
         bytes: backupBytes,
       );
 
-      if(savePath == null) return "Backup cancelled";
+      if (savePath == null) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showCancellationSnackBar(context, "Backup cancelled");
+        return "Backup cancelled";
+      }
 
+      if (isCancelled) {
+        _showCancellationSnackBar(context, "Backup cancelled");
+        return "Backup cancelled";
+      }
+
+      // Close loading dialog
+      if (isDialogShowing) Navigator.of(context).pop();
+
+      // Show success dialog (keep as dialog for important feedback)
       await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Backup Succeed"),
-            content: const Text("Backup vault has been saved in your files"),
+            title: const Text("Backup Succeeded"),
+            content: const Text("Vault backup saved successfully"),
             actions: [
               TextButton(
                 child: const Text("OK"), 
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           );
@@ -163,21 +254,80 @@ class Vault {
 
       return null;
     } catch (e) {
+      if (isDialogShowing) Navigator.of(context).pop();
+      
+      // For unexpected errors, show a dialog with more details
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Backup Error"),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
       return "Backup failed: ${e.toString()}";
+    } finally {
+      final duration = Provider.of<AutoLockState>(context, listen: false).lockDuration;
+      LifecycleWatcher.of(context)?.resumeAutoLock(duration);
     }
   }
   
+  //Restore Vault
   Future<String?> restoreVault(BuildContext context) async {
+    bool isCancelled = false;
+    bool isDialogShowing = false;
+    final secureStorage = FlutterSecureStorage();
+    final currentMasterPasswordRecord = await Vault().getMasterPasswordRecord();
+
+    //Pause auto-lock for a moment
+    LifecycleWatcher.of(context)?.pauseAutoLock();
+  
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Restoring Vault"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            const Text("Preparing restore..."),
+            const SizedBox(height: 20),
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                isCancelled = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      ),
+    ).then((_) => isDialogShowing = false);
+    isDialogShowing = true;
+    
     try {
+      if (isCancelled) {
+        _showErrorSnackBar(context, "Restore cancelled");
+        return "Restore cancelled";
+      }
+
       //1) Request permissions
       if (!await _requestStoragePermissions()) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "Storage permission denied");
         return "Storage permission denied";
       }
 
       FilePickerResult? result;
       
       try {
-        // First attempt: Use any file type but suggest .db files
         result = await FilePicker.platform.pickFiles(
           dialogTitle: 'Select Vault Backup File',
           type: FileType.any,
@@ -185,7 +335,6 @@ class Vault {
         );
       } catch (e) {
         debugPrint("FilePicker error: $e");
-        // Fallback to basic file picker if the first attempt fails
         result = await FilePicker.platform.pickFiles(
           dialogTitle: 'Select Vault Backup File',
           allowMultiple: false,
@@ -193,16 +342,20 @@ class Vault {
       }
 
       if (result == null || result.files.isEmpty) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "Restore cancelled");
         return "Restore cancelled";
       }
 
       final platformFile = result.files.single;
       if (platformFile.path == null) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "Invalid file selected");
         return "Invalid file selected";
       }
 
-      //2) Ask for user confirmation
-       bool proceed = await showDialog<bool>(
+      //2) Ask for user confirmation (keep as dialog - important action)
+      final bool proceed = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
@@ -222,57 +375,78 @@ class Vault {
               ],
             );
           },
-        ) ??
-        false;
+        ) ?? false;
 
       if (!proceed) {
+        if (isDialogShowing) Navigator.of(context).pop();
+        _showErrorSnackBar(context, "Restore cancelled by user");
         return "Restore cancelled by user";
       }
+
+      if (isDialogShowing) Navigator.of(context).pop();
 
       //3) Read and validate backup file
       final backupFile = File(platformFile.path!);
       final backupBytes = await backupFile.readAsBytes();
 
-      //Verify minimum file size and magic number
       if (backupBytes.length < 8 || 
-          backupBytes[0] != 0x57 || // W
-          backupBytes[1] != 0x50 || // P
-          backupBytes[2] != 0x56 || // V
-          backupBytes[3] != 0x4B) { // K
+          backupBytes[0] != 0x57 || 
+          backupBytes[1] != 0x50 || 
+          backupBytes[2] != 0x56 || 
+          backupBytes[3] != 0x4B) {
+        _showErrorSnackBar(context, "Invalid backup file format");
         return "Invalid backup file format";
       }
 
-      //4) Extract key length (big-endian)
+      //4) Process backup file
       final keyLength = (backupBytes[4] << 24) | 
                       (backupBytes[5] << 16) | 
                       (backupBytes[6] << 8) | 
                       backupBytes[7];
 
-      //Validate key length
       if (8 + keyLength > backupBytes.length) {
+        _showErrorSnackBar(context, "Corrupted backup file");
         return "Corrupted backup file (invalid key length)";
       }
 
-      //5) Extract and restore encryption key
       final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
       if (!await EncryptionHelper.restoreKey(key)) {
+        _showErrorSnackBar(context, "Failed to restore encryption key");
         return "Failed to restore encryption key";
       }
 
-      //6) Extract and restore database
       final dbBytes = backupBytes.sublist(8 + keyLength);
       final dbPath = await getDatabasesPath();
       final destFile = File(join(dbPath, 'wp_vault.db'));
       await destFile.writeAsBytes(dbBytes);
+      await Vault().close();
+      final db = await Vault().database;
 
-      //7) Refresh application state
-      await clearCacheAndReopen();
+      if (currentMasterPasswordRecord != null) {
+        await db.delete('master_password');
+
+        await db.insert(
+          'master_password',
+          await currentMasterPasswordRecord.toMapAsync(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+
+        await secureStorage.write(
+          key: 'auth_token', 
+          value: await EncryptionHelper.encryptText(currentMasterPasswordRecord.password)
+        );
+      } else {
+        await db.delete('master_password');
+        await secureStorage.delete(key: 'auth_token');
+      }
+
+      //Refresh application state
       final stateDeletedManager = context.read<DeletedState>();
       final stateManager = context.read<EntriesState>();
       await stateDeletedManager.refreshDeletedEntries();
       await stateManager.refreshEntries();
 
-      //8) Show success message
+      //Show success message (keep as dialog - important feedback)
       await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -292,10 +466,54 @@ class Vault {
       return null;
     } catch (e, stackTrace) {
       debugPrint("Restore error: $e\n$stackTrace");
+      if (isDialogShowing) Navigator.of(context).pop();
+      
+      // For unexpected errors, show a more detailed dialog
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Restore Failed"),
+            content: Text("An unexpected error occurred: ${e.toString()}"),
+            actions: [
+              TextButton(
+                child: const Text("OK"), 
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          );
+        },
+      );
       return "Restore failed: ${e.toString()}";
+    } finally {
+      final duration = Provider.of<AutoLockState>(context, listen: false).lockDuration;
+      LifecycleWatcher.of(context)?.resumeAutoLock(duration);
     }
   }
+
+  //Show Cancel Snackbar
+  void _showCancellationSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  //Show Error Snackbar
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
   
+  //Request Storage Permission: For Backup and Restore Vault
   Future<bool> _requestStoragePermissions() async {
     try {
       if (Platform.isAndroid) {
@@ -320,11 +538,60 @@ class Vault {
     }
   }
 
+  //Verify Mastear Password Consistency
+  Future<bool> verifyMasterPasswordConsistency() async {
+    try {
+      // Get from database
+    final dbRecord = await getMasterPasswordRecord();
+    if (dbRecord == null) return false;
+    
+    // Get from secure storage
+    final secureStorage = FlutterSecureStorage();
+    final storedToken = await secureStorage.read(key: 'auth_token');
+    if (storedToken == null) return false;
+    
+    // Decrypt and compare
+    final decryptedSecure = await EncryptionHelper.decryptText(storedToken);
+    return dbRecord.password == decryptedSecure;
+    } catch (e) {
+      debugPrint("Consistency check error: $e");
+      return false;
+    }
+  }
+
   //Check Master Password availability
   Future<bool> isMasterPasswordSet() async {
     final db = await database;
     final result = await db.query('master_password');
     return result.isNotEmpty;
+  }
+
+  //Get Master Password Record
+  Future<MasterPassword?> getMasterPasswordRecord() async {
+    final db = await database;
+    final result = await db.query('master_password', limit: 1);
+    if (result.isEmpty) return null;
+    return await MasterPassword.fromMapAsync(result.first);
+  }
+
+  //Get Master Password
+  Future<String?> getMasterPassword() async {
+    final db = await database;
+    final result = await db.query('master_password', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['password'] as String;
+    }
+    return null;
+  }
+
+  //Get Encrypted Master Password
+  Future<String?> getEncryptedMasterPassword() async {
+    final db = await database;
+    final result = await db.query('master_password', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first['password'] as String;
+    }
+    return null;
   }
 
   //Insert Master Password
@@ -358,16 +625,6 @@ class Vault {
     final storedMasterPassword = await MasterPassword.fromMapAsync(result.first);
 
     return storedMasterPassword.password == inputPassword;
-  }
-
-  //Get Master Password
-  Future<String?> getEncryptedMasterPassword() async {
-    final db = await database;
-    final result = await db.query('master_password', limit: 1);
-    if (result.isNotEmpty) {
-      return result.first['password'] as String;
-    }
-    return null;
   }
 
   //Update Master Password
@@ -465,6 +722,7 @@ class Vault {
     );
   }
 
+  //Get Entries Paginated
   Future<List<Map<String, dynamic>>> getEntriesPaginated(int limit, int offset) async {
     final db = await database;
     return db.query(
@@ -604,6 +862,7 @@ class Vault {
     );
   }
 
+  //Get Deleted Entries Paginated
   Future<List<Map<String, dynamic>>> getDeletedEntriesPaginated(int limit, int offset) async {
     final db = await database;
     return db.query(
@@ -614,6 +873,7 @@ class Vault {
     );
   }
 
+  //Get Deleted Entry By Id
   Future<DeletedEntry?> getDeletedEntryById(int deletedId) async {
 
     if (DeletedEntryCache().getDeletedEntry(deletedId) != null) {

@@ -12,13 +12,20 @@ class AutoLock extends StatelessWidget {
     final selectedDuration = autoLockState.lockDuration;
 
     final List<Map<String, dynamic>> timeIntervals = [
-      {'text': 'Immediately (Locks quickly)', 'value': 0},
       {'text': '15 seconds', 'value': 15},
       {'text': '30 seconds', 'value': 30},
       {'text': '1 minute', 'value': 60},
       {'text': '2 minutes', 'value': 120},
       {'text': '5 minutes', 'value': 300},
     ];
+
+    final availableValues = timeIntervals.map((e) => e['value']).toList();
+
+    if (!availableValues.contains(selectedDuration)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        autoLockState.setLockDuration(15);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +35,6 @@ class AutoLock extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Auto-Lock Switch
           SwitchListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             title: const Text("Enable Auto-Lock"),
@@ -40,7 +46,6 @@ class AutoLock extends StatelessWidget {
             secondary: const Icon(Icons.lock_clock),
           ),
 
-          // Time interval Dropdown
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: AbsorbPointer(
@@ -48,7 +53,7 @@ class AutoLock extends StatelessWidget {
               child: Opacity(
                 opacity: isEnabled ? 1.0 : 0.5,
                 child: DropdownButtonFormField<int>(
-                  value: selectedDuration,
+                  value: availableValues.contains(selectedDuration) ? selectedDuration : null,
                   hint: const Text("Select Auto-Lock duration"),
                   isExpanded: true,
                   items: timeIntervals.map((interval) {
@@ -57,11 +62,13 @@ class AutoLock extends StatelessWidget {
                       child: Text(interval['text']),
                     );
                   }).toList(),
-                  onChanged: isEnabled ? (int? newValue) {
-                    if (newValue != null) {
-                      autoLockState.setLockDuration(newValue);
-                    }
-                  } : null,
+                  onChanged: isEnabled
+                      ? (int? newValue) {
+                          if (newValue != null && newValue >= 15) {
+                            autoLockState.setLockDuration(newValue);
+                          }
+                        }
+                      : null,
                 ),
               ),
             ),

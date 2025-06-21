@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'encryption_helper.dart';
 import 'main.dart';
 import 'help.dart';
 
@@ -51,40 +52,50 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
-
+  
   void _validatePassword() async {
     final enteredPassword = _passwordController.text;
-    final storedPassword = await _secureStorage.read(key: 'auth_token');
 
-    if (enteredPassword == storedPassword) {
+    try {
+      final storedToken = await _secureStorage.read(key: 'auth_token');
+      final decryptedPassword = storedToken != null
+          ? await EncryptionHelper.decryptText(storedToken)
+          : null;
+
+      if (enteredPassword == decryptedPassword) {
+        setState(() => _isLoading = true);
+        FocusScope.of(context).unfocus();
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            transitionDuration: Duration(milliseconds: 300),
+            pageBuilder: (_, __, ___) => HomeScreen(toggleTheme: widget.toggleTheme),
+            transitionsBuilder: (_, animation, __, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: Offset(0.0, 1.0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          ),
+        );
+      } else {
+        setState(() {
+          _errorText = "Incorrect master password";
+        });
+      }
+    } catch (e) {
       setState(() {
-        _isLoading = true;
+        _errorText = "An error occurred during login";
       });
-
-      FocusScope.of(context).unfocus();
-
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          transitionDuration: Duration(milliseconds: 300),
-          pageBuilder: (_, __, ___) => HomeScreen(toggleTheme: widget.toggleTheme),
-          transitionsBuilder: (_, animation, __, child) {
-            final offsetAnimation = Tween<Offset>(
-              begin: Offset(0.0, 1.0),
-              end: Offset.zero,
-            ).animate(animation);
-            return SlideTransition(position: offsetAnimation, child: child);
-          },
-        ),
-      );
-    } else {
-      setState(() {
-        _errorText = "Incorrect master password";
-      });
+      debugPrint("Login error: $e");
     }
   }
 

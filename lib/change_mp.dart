@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'encryption_helper.dart';
 import 'vault.dart';
 import 'login_screen.dart';
 
@@ -56,7 +57,8 @@ class _ChangeMpScreen extends State<ChangeMp> {
     await Vault().updateMasterPassword(newPassword);
 
     //2) Overwrite secure token
-    await _secureStorage.write(key: 'auth_token', value: newPassword);
+    final encryptedNewPassword = await EncryptionHelper.encryptText(newPassword);
+    await _secureStorage.write(key: 'auth_token', value: encryptedNewPassword);
 
     //3) Force logout for security reasons
     showDialog(
