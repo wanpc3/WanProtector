@@ -47,11 +47,16 @@ void main() async {
   );
 }
 
-  void handleAutoLock(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => LoginScreen(toggleTheme: () {})),
-      (route) => false,
-    );
+  void handleAutoLock(BuildContext context) async {
+    final dbHelper = Vault();
+    bool isMasterPasswordSet = await dbHelper.isMasterPasswordSet();
+
+    if (isMasterPasswordSet) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => LoginScreen(toggleTheme: () {})),
+        (route) => false,
+      );
+    }
   }
 
 class MainApp extends StatefulWidget {
