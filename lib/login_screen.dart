@@ -29,8 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 100), () {
-        FocusScope.of(context).requestFocus(_passwordFocusNode);
+      Future.delayed(Duration(milliseconds: 300), () {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(_passwordFocusNode);
+        }
       });
     });
 
@@ -96,93 +98,101 @@ class _LoginScreenState extends State<LoginScreen> {
         foregroundColor: Colors.white,
       ),
 
-      body: SafeArea(
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          child: _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
 
-                  Center(
-                    child: Text(
-                      "Welcome to WanProtector Password Manager!",
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Ubuntu'
-                      ),
-                    ),
-                  ),
-
-                  Form(
-                    key: _formKey,
-                    child: TextFormField(
-                      focusNode: _passwordFocusNode,
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: "Master Password",
-                        errorText: _errorText,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        )
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter master password";
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _validatePassword();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: const Color(0xFF2ECC71),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: const StadiumBorder(),
-                    ),
-                    child: const Text("OK"),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Help()
+                    Center(
+                      child: Text(
+                        "Welcome to WanProtector Password Manager!",
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Ubuntu'
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: const Color(0xFF808080),
-                      shape: const StadiumBorder(),
+                      ),
                     ),
-                    child: const Text("Help"),
-                  ),
-                ],
+
+                    Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        focusNode: _passwordFocusNode,
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _validatePassword(),
+                        decoration: InputDecoration(
+                          labelText: "Master Password",
+                          errorText: _errorText,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          )
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter master password";
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _validatePassword();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF2ECC71),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text("OK"),
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Help()
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 48),
+                        backgroundColor: const Color(0xFF808080),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text("Help"),
+                    ),
+                  ],
+                ),
               ),
-            ),
+        ),
       ),
     );
   }
