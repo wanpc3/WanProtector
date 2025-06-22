@@ -50,7 +50,7 @@ class _VaultSettingsState extends State<VaultSettings> {
       return Scaffold(
         appBar: AppBar(
           title: Text('Vault Settings'),
-          backgroundColor: const Color(0xFFC0C0C0),
+          backgroundColor: const Color(0xFF000000),
         ),
         body: Center(child: CircularProgressIndicator()),
       );
@@ -59,8 +59,8 @@ class _VaultSettingsState extends State<VaultSettings> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Vault Settings'),
-        backgroundColor: const Color(0xFFC0C0C0),
-        foregroundColor: Colors.black,
+        backgroundColor: const Color(0xFF000000),
+        foregroundColor: Colors.white,
       ),
       body: ListView.separated(
               padding: const EdgeInsets.all(8),

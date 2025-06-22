@@ -52,8 +52,8 @@ class _GetStartedState extends State<GetStarted> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFC0C0C0),
-                  foregroundColor: Colors.black,
+                  backgroundColor: const Color(0xFF000000),
+                  foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 40),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

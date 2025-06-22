@@ -208,16 +208,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ? TextField(
               controller: _searchController,
               autofocus: true,
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search...',
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(color: Colors.white70),
                 border: InputBorder.none,
               ),
             )
           : Text(_titles[_selectedIndex]),
-        backgroundColor: const Color(0xFFC0C0C0),
-        foregroundColor: Colors.black,
+        backgroundColor: const Color(0xFF000000),
+        foregroundColor: Colors.white,
         actions: (_selectedIndex == 0 || _selectedIndex == 2)
             ? [
               if (_isSearching)
@@ -238,14 +238,14 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: const Color(0xFFC0C0C0)),
+              decoration: BoxDecoration(color: const Color(0xFF000000)),
               child: Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                   "WanProtector",
                     style: TextStyle(
-                      color: Colors.black, 
+                      color: Colors.white, 
                       fontSize: 30,
                       fontFamily: 'Ubuntu',
                     ),
@@ -323,8 +323,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ? null
           : FloatingActionButton(
               onPressed: _navigateToAddEntry,
-              backgroundColor: Color(0xFFC0C0C0),
-              foregroundColor: Colors.black,
+              backgroundColor: const Color(0xFF1E88E5),
+              foregroundColor: Colors.white,
               child: const Icon(Icons.add),
             ),
     );

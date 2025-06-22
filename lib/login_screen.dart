@@ -102,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("Login Vault"),
-        backgroundColor: const Color(0xFFC0C0C0),
-        foregroundColor: Colors.black,
+        title: Text("Enter Master Password"),
+        backgroundColor: const Color(0xFF000000),
+        foregroundColor: Colors.white,
       ),
 
       body: GestureDetector(
@@ -172,12 +172,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: const Color(0xFFC0C0C0),
-                        foregroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF1E88E5),
+                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 48),
                         shape: const StadiumBorder(),
                       ),
-                      child: const Text("OK"),
+                      child: const Text(
+                        "OK",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                     const SizedBox(height: 16.0),
                     ElevatedButton(
@@ -191,12 +194,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        //foregroundColor: Colors.black,
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 48),
-                        //backgroundColor: Colors.white,
                         shape: const StadiumBorder(),
                       ),
-                      child: const Text("Help"),
+                      child: const Text(
+                        "Help",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ],
                 ),

@@ -125,8 +125,8 @@ class _AddEntryState extends State<AddEntry> {
         child: Scaffold(
         appBar: AppBar(
           title: const Text("Add Entry"),
-          backgroundColor: const Color(0xFFC0C0C0),
-          foregroundColor: Colors.black,
+          backgroundColor: const Color(0xFF000000),
+          foregroundColor: Colors.white,
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
@@ -205,12 +205,15 @@ class _AddEntryState extends State<AddEntry> {
                   onPressed: _submitForm, 
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFFC0C0C0),
-                    foregroundColor: Colors.black,
+                    backgroundColor: const Color(0xFF1E88E5),
+                    foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),
                   ),
-                  child: const Text("OK"),
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(fontWeight: FontWeight.w600)
+                  ),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).viewInsets.bottom
