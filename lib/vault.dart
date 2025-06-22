@@ -282,17 +282,14 @@ class Vault {
   Future<String?> restoreVault(BuildContext context) async {
     bool isCancelled = false;
     bool isDialogShowing = false;
+    File? tempRestoreFile;
+    File? backupDbFile;
     final secureStorage = FlutterSecureStorage();
 
-    //Get current master password BEFORE restoration
-    final currentMasterPasswordRecord = await Vault().getMasterPasswordRecord();
-    final currentEncryptedPassword = currentMasterPasswordRecord != null
-        ? await EncryptionHelper.encryptText(currentMasterPasswordRecord.password)
-        : null;
-
-    //Pause auto-lock for a moment
+    // Pause auto-lock
     LifecycleWatcher.of(context)?.pauseAutoLock();
-  
+
+    // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -317,57 +314,122 @@ class Vault {
       ),
     ).then((_) => isDialogShowing = false);
     isDialogShowing = true;
-    
+
     try {
       if (isCancelled) {
         _showErrorSnackBar(context, "Restore cancelled");
         return "Restore cancelled";
       }
 
-      //1) Request permissions
+      // 1. Request permissions
       if (!await _requestStoragePermissions()) {
         if (isDialogShowing) Navigator.of(context).pop();
         _showErrorSnackBar(context, "Storage permission denied");
         return "Storage permission denied";
       }
 
-      FilePickerResult? result;
-      
-      try {
-        result = await FilePicker.platform.pickFiles(
-          dialogTitle: 'Select Vault Backup File',
-          type: FileType.any,
-          allowMultiple: false,
-        );
-      } catch (e) {
-        debugPrint("FilePicker error: $e");
-        result = await FilePicker.platform.pickFiles(
-          dialogTitle: 'Select Vault Backup File',
-          allowMultiple: false,
-        );
-      }
+      // 2. Pick backup file
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: 'Select Vault Backup File',
+        type: FileType.any,
+        allowMultiple: false,
+      );
 
-      if (result == null || result.files.isEmpty) {
+      if (result == null || result.files.isEmpty || result.files.single.path == null) {
         if (isDialogShowing) Navigator.of(context).pop();
         _showErrorSnackBar(context, "Restore cancelled");
         return "Restore cancelled";
       }
 
-      final platformFile = result.files.single;
-      if (platformFile.path == null) {
-        if (isDialogShowing) Navigator.of(context).pop();
-        _showErrorSnackBar(context, "Invalid file selected");
-        return "Invalid file selected";
+      final backupFile = File(result.files.single.path!);
+      final backupBytes = await backupFile.readAsBytes();
+
+      // 3. Validate backup file format
+      if (backupBytes.length < 8 ||
+          backupBytes[0] != 0x57 ||
+          backupBytes[1] != 0x50 ||
+          backupBytes[2] != 0x56 ||
+          backupBytes[3] != 0x4B) {
+        _showErrorSnackBar(context, "Invalid backup file format");
+        return "Invalid backup file format";
       }
 
-      //2) Ask for user confirmation (keep as dialog - important action)
-      final bool proceed = await showDialog<bool>(
+      // 4. Extract encryption key and database
+      final keyLength = (backupBytes[4] << 24) |
+          (backupBytes[5] << 16) |
+          (backupBytes[6] << 8) |
+          backupBytes[7];
+
+      if (8 + keyLength > backupBytes.length) {
+        _showErrorSnackBar(context, "Corrupted backup file (invalid key length)");
+        return "Corrupted backup file (invalid key length)";
+      }
+
+      final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
+      final dbBytes = backupBytes.sublist(8 + keyLength);
+
+      // 5. Create temporary restore file
+      final dbPath = await getDatabasesPath();
+      tempRestoreFile = File(join(dbPath, 'wp_vault_temp_restore.db'));
+      await tempRestoreFile.writeAsBytes(dbBytes);
+
+      // 6. Open temp database and extract backup password
+      final tempDb = await openDatabase(tempRestoreFile.path);
+      String? backupPassword;
+      try {
+        final result = await tempDb.query('master_password', limit: 1);
+        if (result.isEmpty) {
+          _showErrorSnackBar(context, "Backup missing master password");
+          return "Backup missing master password";
+        }
+
+        // Use the backup encryption key temporarily
+        EncryptionHelper.useTemporaryKey(key);
+
+        final backupRecord = await MasterPassword.fromMapAsync(result.first);
+        backupPassword = backupRecord.password;
+
+        // Restore previous key immediately after use
+        EncryptionHelper.restorePreviousKey();
+
+      } finally {
+        await tempDb.close();
+      }
+
+      // 7. Compare with current master password
+      final currentRecord = await Vault().getMasterPasswordRecord();
+      final currentPassword = currentRecord?.password;
+
+      if (currentPassword != null && currentPassword != backupPassword) {
+        if (isDialogShowing) Navigator.of(context).pop();
+
+        await showDialog(
           context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
+          builder: (context) => AlertDialog(
+            title: const Text("Restore Blocked"),
+            content: const Text(
+              "This backup uses a different master password.\n\n"
+              "Please use the password that was set when this backup was created.",
+            ),
+            actions: [
+              TextButton(
+                child: const Text("OK"),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+
+        return "Master password mismatch";
+      }
+
+      // 9. Confirm restore
+      final confirm = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
               title: const Text("Confirm Restore"),
               content: const Text(
-                "All current entries will be replaced with the data from this backup. Do you want to proceed?",
+                "All current entries will be replaced with data from this backup. Continue?",
               ),
               actions: [
                 TextButton(
@@ -379,165 +441,127 @@ class Vault {
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],
-            );
-          },
-        ) ?? false;
+            ),
+          ) ??
+          false;
 
-      if (!proceed) {
+      if (!confirm) {
         if (isDialogShowing) Navigator.of(context).pop();
-        _showErrorSnackBar(context, "Restore cancelled by user");
-        return "Restore cancelled by user";
+        _showErrorSnackBar(context, "Restore cancelled");
+        return "Restore cancelled";
       }
 
-      if (isDialogShowing) Navigator.of(context).pop();
-
-      //3) Read and validate backup file
-      final backupFile = File(platformFile.path!);
-      final backupBytes = await backupFile.readAsBytes();
-
-      if (backupBytes.length < 8 || 
-          backupBytes[0] != 0x57 || 
-          backupBytes[1] != 0x50 || 
-          backupBytes[2] != 0x56 || 
-          backupBytes[3] != 0x4B) {
-        _showErrorSnackBar(context, "Invalid backup file format");
-        return "Invalid backup file format";
+      // 10. Backup current database
+      final mainDbFile = File(join(dbPath, 'wp_vault.db'));
+      backupDbFile = File(join(dbPath, 'wp_vault_backup.db'));
+      if (await mainDbFile.exists()) {
+        await mainDbFile.copy(backupDbFile.path);
       }
 
-      //4) Process backup file
-      final keyLength = (backupBytes[4] << 24) | 
-                      (backupBytes[5] << 16) | 
-                      (backupBytes[6] << 8) | 
-                      backupBytes[7];
-
-      if (8 + keyLength > backupBytes.length) {
-        _showErrorSnackBar(context, "Corrupted backup file");
-        return "Corrupted backup file (invalid key length)";
-      }
-
-      final key = utf8.decode(backupBytes.sublist(8, 8 + keyLength));
+      // 11. Restore encryption key
       if (!await EncryptionHelper.restoreKey(key)) {
         _showErrorSnackBar(context, "Failed to restore encryption key");
         return "Failed to restore encryption key";
       }
 
-      final dbBytes = backupBytes.sublist(8 + keyLength);
-      final dbPath = await getDatabasesPath();
-      final destFile = File(join(dbPath, 'wp_vault_temp_restore.db'));
-
-      //Write to temporary file first
-      await destFile.writeAsBytes(dbBytes);
-
-      //Open temporary
-      final tempDb = await openDatabase(destFile.path);
-      final tempMasterPassword = await tempDb.query('master_password', limit: 1);
-      await tempDb.close();
-
-      if (tempMasterPassword.isNotEmpty) {
-        final backupPasswordRecord = await MasterPassword.fromMapAsync(tempMasterPassword.first);
-        final backupEncryptedPassword = await EncryptionHelper.encryptText(backupPasswordRecord.password);
-
-        if (currentEncryptedPassword != null && currentEncryptedPassword != backupEncryptedPassword) {
-          if (isDialogShowing) Navigator.of(context).pop();
-
-          await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-                return AlertDialog(
-                    title: const Text("Restore Blocked"),
-                    content: const Text(
-                        "This backup is protected with a different master password.\n\n"
-                        "To restore it, you need to use the original master password that was active when this backup was created."
-                    ),
-                    actions: [
-                        TextButton(
-                            child: const Text("OK"), 
-                            onPressed: () => Navigator.of(context).pop(),
-                        ),
-                    ],
-                );
-            },
-        );
-
-          //Delete temporary file
-          await destFile.delete();
-          return "Master password mismatch";
-        }
-      }
-      
-      // If passwords match or no master password exists, proceed with restore
-      final mainDbFile = File(join(dbPath, 'wp_vault.db'));
-      
-      // Replace main database file
+      // 12. Replace database
       if (await mainDbFile.exists()) await mainDbFile.delete();
-      await destFile.rename(mainDbFile.path);
-      
-      // Reinitialize database connection
+      await tempRestoreFile.rename(mainDbFile.path);
+
+      // 13. Reinitialize database connection
       await Vault().close();
       final db = await Vault().database;
 
-      // Restore the original master password if it existed
-      if (currentMasterPasswordRecord != null) {
+      // 14. Update master password record
+      if (currentPassword != null) {
+        // Preserve current password
         await db.delete('master_password');
-
         await db.insert(
           'master_password',
-          await currentMasterPasswordRecord.toMapAsync(),
+          await currentRecord!.toMapAsync(),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
-          
-        await secureStorage.write(
-          key: 'auth_token', 
-          value: currentEncryptedPassword!
-        );
 
-        //Refresh application state
-        final stateDeletedManager = context.read<DeletedState>();
-        final stateManager = context.read<EntriesState>();
-        await stateDeletedManager.refreshDeletedEntries();
-        await stateManager.refreshEntries();
-
-        //Show success message (keep as dialog - important feedback)
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Restore Complete"),
-              content: const Text("Your vault has been successfully restored."),
-              actions: [
-                TextButton(
-                  child: const Text("OK"),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
-        );
+        // Update secure storage with current password
+        final encrypted = await EncryptionHelper.encryptText(currentPassword);
+        await secureStorage.write(key: 'auth_token', value: encrypted);
+      } else if (backupPassword != null) {
+        // If no current password, use backup's password
+        final encrypted = await EncryptionHelper.encryptText(backupPassword);
+        await secureStorage.write(key: 'auth_token', value: encrypted);
       }
 
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint("Restore error: $e\n$stackTrace");
+      // 15. Refresh application state
+      final stateManager = context.read<EntriesState>();
+      final deletedManager = context.read<DeletedState>();
+      await stateManager.refreshEntries();
+      await deletedManager.refreshDeletedEntries();
+
       if (isDialogShowing) Navigator.of(context).pop();
-      
-      // For unexpected errors, show a more detailed dialog
+
       await showDialog(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Restore Failed"),
-            content: Text("An unexpected error occurred: ${e.toString()}"),
-            actions: [
-              TextButton(
-                child: const Text("OK"), 
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          );
-        },
+        builder: (context) => AlertDialog(
+          title: const Text("Restore Complete"),
+          content: const Text("Your vault has been successfully restored."),
+          actions: [
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       );
+
+      return null;
+    } catch (e, stack) {
+      debugPrint("Restore error: $e\n$stack");
+
+      // Attempt to restore from backup if available
+      final dbPath = await getDatabasesPath();
+      final mainDbFile = File(join(dbPath, 'wp_vault.db'));
+      final backupDbFile = File(join(dbPath, 'wp_vault_backup.db'));
+
+      if (await backupDbFile.exists()) {
+        try {
+          if (await mainDbFile.exists()) await mainDbFile.delete();
+          await backupDbFile.rename(mainDbFile.path);
+          await Vault().close();
+          await Vault().database;
+        } catch (err) {
+          debugPrint("Rollback failed: $err");
+        }
+      }
+
+      if (isDialogShowing) Navigator.of(context).pop();
+
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Restore Failed"),
+          content: Text("Error occurred: ${e.toString()}"),
+          actions: [
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+
       return "Restore failed: ${e.toString()}";
     } finally {
+      try {
+        if (tempRestoreFile != null && await tempRestoreFile.exists()) {
+          await tempRestoreFile.delete();
+        }
+        if (backupDbFile != null && await backupDbFile.exists()) {
+          await backupDbFile.delete();
+        }
+      } catch (e) {
+        debugPrint("Cleanup failed: $e");
+      }
+
       final duration = Provider.of<AutoLockState>(context, listen: false).lockDuration;
       LifecycleWatcher.of(context)?.resumeAutoLock(duration);
     }

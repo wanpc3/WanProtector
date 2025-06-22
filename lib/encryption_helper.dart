@@ -150,4 +150,20 @@ class EncryptionHelper {
       return false;
     }
   }
+
+  // Temporarily override encryption key
+    static encrypt.Key? _previousKey;
+
+    static void useTemporaryKey(String base64Key) {
+      _previousKey = _cachedKey;
+      _cachedKey = encrypt.Key.fromBase64(base64Key);
+    }
+
+    // Restore previous cached key
+    static void restorePreviousKey() {
+      if (_previousKey != null) {
+        _cachedKey = _previousKey;
+        _previousKey = null;
+      }
+    }
 }
