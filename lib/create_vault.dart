@@ -200,7 +200,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                         isChecked = value ?? false;
                         isCheckboxValid = true;
                       }),
-                      checkColor: Colors.black,
+                      checkColor: Colors.white,
                       activeColor: Colors.green,
                     ),
                     Expanded(
@@ -256,7 +256,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                     padding: const EdgeInsets.only(top: 8.0, left: 12),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
+                      child: const Text(
                         "You must agree to the terms of service and privacy policy.",
                         style: TextStyle(color: Colors.red, fontSize: 12),
                       ),

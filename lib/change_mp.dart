@@ -24,6 +24,8 @@ class _ChangeMpScreen extends State<ChangeMp> {
   bool _obscurePassword_1 = true;
   bool _obscurePassword_2 = true;
   bool _obscurePassword_3 = true;
+  bool isChecked = false;
+  bool isCheckboxValid = true;
 
   String? _currentPasswordError;
 
@@ -107,6 +109,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   controller: _currentPasswordController,
                   obscureText: _obscurePassword_1,
                   decoration: InputDecoration(
+                    labelText: "Current Master Password",
                     hintText: 'Current Master Password',
                     errorText: _currentPasswordError,
                     suffixIcon: IconButton(
@@ -135,6 +138,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   controller: _passwordController,
                   obscureText: _obscurePassword_2,
                   decoration: InputDecoration(
+                    labelText: "New Master Password",
                     hintText: 'New Master Password',
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -162,6 +166,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   controller: _confirmPasswordController,
                   obscureText: _obscurePassword_3,
                   decoration: InputDecoration(
+                    labelText: "Confirm Master Password",
                     hintText: 'Confirm Master Password',
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -232,11 +237,54 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                //const SizedBox(height: 16),
+
+                //Checkbox
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isChecked, 
+                      onChanged: (value) => setState(() {
+                        isChecked = value ?? false;
+                        isCheckboxValid = true;
+                      }),
+                      checkColor: Colors.white,
+                      activeColor: Colors.green,
+                    ),
+                    Expanded(
+                      child: const Text(
+                        "I have read and understand the notes above.",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    )
+                  ],
+                ),
+
+                if (!isCheckboxValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 0.0, left: 12),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        "You must agree with this",
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
 
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    final isFormValid = _formKey.currentState!.validate();
+
+                    if (!isChecked) {
+                      setState(() {
+                        isCheckboxValid = false;
+                      });
+                    }
+
+                    if (isFormValid && isChecked) {
                       _savePassword();
                     }
                   },

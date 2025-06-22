@@ -138,7 +138,9 @@ class _AddEntryState extends State<AddEntry> {
 
                 TextFormField(
                   controller: _titleController,
-                  decoration: InputDecoration(labelText: "Title"),
+                  decoration: InputDecoration(
+                    labelText: "Title"
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please enter title";
@@ -151,7 +153,9 @@ class _AddEntryState extends State<AddEntry> {
 
                 TextFormField(
                   controller: _usernameController,
-                  decoration: InputDecoration(labelText: "Username"),
+                  decoration: InputDecoration(
+                    labelText: "Username"
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please enter username";
@@ -192,7 +196,9 @@ class _AddEntryState extends State<AddEntry> {
                   height: 150,
                   child: TextFormField(
                     controller: _notesController,
-                    decoration: InputDecoration(labelText: "Notes"),
+                    decoration: InputDecoration(
+                      labelText: "Notes"
+                    ),
                     minLines: 4,
                     maxLines: null,
                     keyboardType: TextInputType.multiline,

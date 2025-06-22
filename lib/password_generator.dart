@@ -129,34 +129,50 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
             CheckboxListTile(
               title: const Text("Include Uppercase"),
               value: includeUppercase,
+              checkColor: Colors.white,
+              activeColor: Colors.green,
               onChanged: (val) => setState(() => includeUppercase = val!),
             ),
             CheckboxListTile(
               title: const Text("Include Lowercase"),
               value: includeLowercase,
+              checkColor: Colors.white,
+              activeColor: Colors.green,
               onChanged: (val) => setState(() => includeLowercase = val!),
             ),
             CheckboxListTile(
               title: const Text("Include Numbers"),
               value: includeNumbers,
+              checkColor: Colors.white,
+              activeColor: Colors.green,
               onChanged: (val) => setState(() => includeNumbers = val!),
             ),
             CheckboxListTile(
               title: const Text("Include Special Characters"),
               value: includeSpecial,
+              checkColor: Colors.white,
+              activeColor: Colors.green,
               onChanged: (val) => setState(() => includeSpecial = val!),
             ),
 
+            const SizedBox(height: 16),
+
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF000000),
+                elevation: 0,
+                backgroundColor: const Color(0xFF1E88E5),
                 foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 48),
+                shape: const StadiumBorder(),
               ),
-              child: const Text('Generate Password'),
               onPressed: generatePassword,
+              child: const Text(
+                "Generate Password",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
             Row(
               children: [
                 Icon(Icons.lightbulb, color: Colors.amber),
