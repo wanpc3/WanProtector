@@ -7,8 +7,8 @@ class PrivacyPolicy extends StatelessWidget {
   });
 
   //Static enforcement date
-  static const String enforceDate = "May 1, 2025";
-  static const String lastUpdatedDate = "May 1, 2025";
+  static const String enforceDate = "June 1, 2025";
+  static const String lastUpdatedDate = "June 1, 2025";
   static const String developerName = "ILHAN IDRISS";
   static const String emailAddress = "idrissilhan@gmail.com";
 

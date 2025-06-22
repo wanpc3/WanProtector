@@ -60,11 +60,11 @@ class Help extends StatelessWidget {
                 HelpPage.help_1_text3,
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 16.0),
-              Text(
-                HelpPage.help_1_text4,
-                style: TextStyle(fontSize: 16),
-              ),
+              // const SizedBox(height: 16.0),
+              // Text(
+              //   HelpPage.help_1_text4,
+              //   style: TextStyle(fontSize: 16),
+              // ),
               const SizedBox(height: 20.0),
 
               //2. Trouble Logging In?

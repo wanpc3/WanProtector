@@ -8,8 +8,7 @@ class HelpPage{
     static const String help_1_title = "I forgot my master password. How do I reset it?";
     static const String help_1_text1 = "If you have forgotten your master password, you will not be able to log in or change it.";
     static const String help_1_text2 = "This is a security measure to prevent unauthorized access — for example, a hacker attempting to reset your password to access your vault.";
-    static const String help_1_text3 = "During master password setup, WanProtector reminds users to securely store their password and never share it with anyone.";
-    static const String help_1_text4 = "If you have previously backed up your vault, you can reinstall WanProtector, set a new master password, and restore your vault from the backup.";
+    static const String help_1_text3 = "During master password setup, WanProtector reminds users to always remember master password and never share it with anyone.";
 
     //Second point
     static const String help_2_title = "Trouble Logging In?";
