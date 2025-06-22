@@ -126,6 +126,7 @@ class Vault {
   
   //Backup Vault
   Future<String?> backupVault(BuildContext context) async {
+
     bool isCancelled = false;
     bool isDialogShowing = false;
 
@@ -282,7 +283,12 @@ class Vault {
     bool isCancelled = false;
     bool isDialogShowing = false;
     final secureStorage = FlutterSecureStorage();
+
+    //Get current master password BEFORE restoration
     final currentMasterPasswordRecord = await Vault().getMasterPasswordRecord();
+    final currentEncryptedPassword = currentMasterPasswordRecord != null
+        ? await EncryptionHelper.encryptText(currentMasterPasswordRecord.password)
+        : null;
 
     //Pause auto-lock for a moment
     LifecycleWatcher.of(context)?.pauseAutoLock();
@@ -417,11 +423,60 @@ class Vault {
 
       final dbBytes = backupBytes.sublist(8 + keyLength);
       final dbPath = await getDatabasesPath();
-      final destFile = File(join(dbPath, 'wp_vault.db'));
+      final destFile = File(join(dbPath, 'wp_vault_temp_restore.db'));
+
+      //Write to temporary file first
       await destFile.writeAsBytes(dbBytes);
+
+      //Open temporary
+      final tempDb = await openDatabase(destFile.path);
+      final tempMasterPassword = await tempDb.query('master_password', limit: 1);
+      await tempDb.close();
+
+      if (tempMasterPassword.isNotEmpty) {
+        final backupPasswordRecord = await MasterPassword.fromMapAsync(tempMasterPassword.first);
+        final backupEncryptedPassword = await EncryptionHelper.encryptText(backupPasswordRecord.password);
+
+        if (currentEncryptedPassword != null && currentEncryptedPassword != backupEncryptedPassword) {
+          if (isDialogShowing) Navigator.of(context).pop();
+
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+                return AlertDialog(
+                    title: const Text("Restore Blocked"),
+                    content: const Text(
+                        "This backup is protected with a different master password.\n\n"
+                        "To restore it, you need to use the original master password that was active when this backup was created."
+                    ),
+                    actions: [
+                        TextButton(
+                            child: const Text("OK"), 
+                            onPressed: () => Navigator.of(context).pop(),
+                        ),
+                    ],
+                );
+            },
+        );
+
+          //Delete temporary file
+          await destFile.delete();
+          return "Master password mismatch";
+        }
+      }
+      
+      // If passwords match or no master password exists, proceed with restore
+      final mainDbFile = File(join(dbPath, 'wp_vault.db'));
+      
+      // Replace main database file
+      if (await mainDbFile.exists()) await mainDbFile.delete();
+      await destFile.rename(mainDbFile.path);
+      
+      // Reinitialize database connection
       await Vault().close();
       final db = await Vault().database;
 
+      // Restore the original master password if it existed
       if (currentMasterPasswordRecord != null) {
         await db.delete('master_password');
 
@@ -430,38 +485,35 @@ class Vault {
           await currentMasterPasswordRecord.toMapAsync(),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
-
+          
         await secureStorage.write(
           key: 'auth_token', 
-          value: await EncryptionHelper.encryptText(currentMasterPasswordRecord.password)
+          value: currentEncryptedPassword!
         );
-      } else {
-        await db.delete('master_password');
-        await secureStorage.delete(key: 'auth_token');
+
+        //Refresh application state
+        final stateDeletedManager = context.read<DeletedState>();
+        final stateManager = context.read<EntriesState>();
+        await stateDeletedManager.refreshDeletedEntries();
+        await stateManager.refreshEntries();
+
+        //Show success message (keep as dialog - important feedback)
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Restore Complete"),
+              content: const Text("Your vault has been successfully restored."),
+              actions: [
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
+          },
+        );
       }
-
-      //Refresh application state
-      final stateDeletedManager = context.read<DeletedState>();
-      final stateManager = context.read<EntriesState>();
-      await stateDeletedManager.refreshDeletedEntries();
-      await stateManager.refreshEntries();
-
-      //Show success message (keep as dialog - important feedback)
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Restore Complete"),
-            content: const Text("Your vault has been successfully restored."),
-            actions: [
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          );
-        },
-      );
 
       return null;
     } catch (e, stackTrace) {
@@ -655,6 +707,15 @@ class Vault {
     return rowsUpdated;
   }
 
+  //Count how many entries are there
+  Future<int> getEntryCount() async {
+    final db = await database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM entry')
+    );
+    return count ?? 0;
+  }
+
   //Insert Entry
   Future<int> insertEntry(
     String title,
@@ -823,6 +884,15 @@ class Vault {
       debugPrint("Soft delete error: $e");
       return false;
     }
+  }
+
+  //Count how many deleted entries are there
+  Future<int> getDeletedEntryCount() async {
+    final db = await database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM deleted_entry')
+    );
+    return count ?? 0;
   }
 
   //Read Deleted Entry

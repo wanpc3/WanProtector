@@ -8,7 +8,10 @@ import 'vault.dart';
 class EditEntry extends StatefulWidget {
   final Entry? entry;
 
-  EditEntry({this.entry});
+  const EditEntry({
+    Key? key,
+    this.entry,
+  }): super(key: key);
 
   @override
   _EditEntryState createState() => _EditEntryState();
@@ -144,7 +147,7 @@ class _EditEntryState extends State<EditEntry> {
               }
             },
           ),
-          backgroundColor: const Color(0xFFB8B8B8),
+          backgroundColor: const Color(0xFFC0C0C0),
           foregroundColor: Colors.black,
           actions: [
             IconButton(

@@ -5,11 +5,9 @@ import 'main.dart';
 import 'help.dart';
 
 class LoginScreen extends StatefulWidget {
-  final VoidCallback toggleTheme;
 
   const LoginScreen({
-    Key? key, 
-    required this.toggleTheme
+    Key? key,
   }) : super(key: key);
   
   @override
@@ -74,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           PageRouteBuilder(
             transitionDuration: Duration(milliseconds: 300),
-            pageBuilder: (_, __, ___) => HomeScreen(toggleTheme: widget.toggleTheme),
+            pageBuilder: (_, __, ___) => HomeScreen(),
             transitionsBuilder: (_, animation, __, child) {
               return SlideTransition(
                 position: Tween<Offset>(
@@ -105,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       appBar: AppBar(
         title: Text("Login Vault"),
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
       ),
 
@@ -174,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
-                        backgroundColor: const Color(0xFFB8B8B8),
+                        backgroundColor: const Color(0xFFC0C0C0),
                         foregroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
                         shape: const StadiumBorder(),

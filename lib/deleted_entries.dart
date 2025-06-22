@@ -77,20 +77,54 @@ class DeletedEntriesState extends State<DeletedEntries> {
     return Scaffold(
       body: deletedEntriesProvider.isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.separated(
+          : deletedEntriesProvider.deletedEntries.isEmpty
+            ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                      "No Deleted Entries Available",
+                        style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
               itemCount: deletedEntriesProvider.deletedEntries.length,
-              separatorBuilder: (_, __) => Divider(height: 1, thickness: 0.5, color: Colors.grey),
               itemBuilder: (context, index) {
                 final deletedEntry = deletedEntriesProvider.deletedEntries[index];
-                return ListTile(
-                  leading: Icon(Icons.close, color: Colors.red),
-                  title: Text(deletedEntry.title),
-                  subtitle: Text(deletedEntry.username),
-                  trailing: Text(
-                    _formatDate(deletedEntry.createdAt),
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  onTap: () => _navigateToViewDeletedEntry(deletedEntry),
+                final backgroundColor = index.isEven
+                    ? const Color(0xFFEFEFFF)
+                    : Colors.transparent;
+
+                return Column(
+                  children: [
+                    Container(
+                      color: backgroundColor,
+                      child: ListTile(
+                        leading: Icon(Icons.close, color: Colors.red),
+                        title: Text(
+                          deletedEntry.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          deletedEntry.username,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Text(
+                          _formatDate(deletedEntry.createdAt),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        onTap: () => _navigateToViewDeletedEntry(deletedEntry),
+                      ),
+                    ),
+                    Divider(height: 1, thickness: 0.5, color: Colors.grey),
+                  ],
                 );
               },
             )

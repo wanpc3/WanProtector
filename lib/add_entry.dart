@@ -6,7 +6,10 @@ class AddEntry extends StatefulWidget {
 
   final Entry? entry;
 
-  AddEntry({this.entry});
+  const AddEntry({
+    Key? key,
+    this.entry
+  }): super(key: key);
 
   @override
   _AddEntryState createState() => _AddEntryState();
@@ -122,7 +125,7 @@ class _AddEntryState extends State<AddEntry> {
         child: Scaffold(
         appBar: AppBar(
           title: const Text("Add Entry"),
-          backgroundColor: const Color(0xFFB8B8B8),
+          backgroundColor: const Color(0xFFC0C0C0),
           foregroundColor: Colors.black,
         ),
         body: SingleChildScrollView(
@@ -202,7 +205,7 @@ class _AddEntryState extends State<AddEntry> {
                   onPressed: _submitForm, 
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFFB8B8B8),
+                    backgroundColor: const Color(0xFFC0C0C0),
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'lifecycle_watcher.dart';
 import 'autolock_state.dart';
-import 'theme_provider.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'vault.dart';
@@ -27,15 +26,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => EntriesState()..fetchEntries()),
         ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
         ChangeNotifierProvider(create: (_) => AutoLockState()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: LifecycleWatcher(
         onAutoLock: () => handleAutoLock(navigatorKey.currentContext!),
-        child: Consumer<ThemeProvider>(
+        child: Consumer(
           builder: (context, themeProvider, _) {
             return MaterialApp(
               navigatorKey: navigatorKey,
-              themeMode: themeProvider.themeMode,
               theme: ThemeData.light(),
               darkTheme: ThemeData.dark(),
               home: MainApp(),
@@ -53,7 +50,7 @@ void main() async {
 
     if (isMasterPasswordSet) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => LoginScreen(toggleTheme: () {})),
+        MaterialPageRoute(builder: (_) => LoginScreen()),
         (route) => false,
       );
     }
@@ -83,12 +80,8 @@ class _MainAppState extends State<MainApp> {
     bool isSet = await dbHelper.isMasterPasswordSet();
     setState(() {
       _initialScreen = isSet
-          ? LoginScreen(toggleTheme: () {
-              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-            })
-          : GetStarted(toggleTheme: () {
-              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
-            });
+          ? LoginScreen()
+          : GetStarted();
     });
   }
 
@@ -104,9 +97,6 @@ class _MainAppState extends State<MainApp> {
 }
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback toggleTheme;
-
-  HomeScreen({required this.toggleTheme});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -131,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         isSearching: _isSearching,
         searchController: _searchController,
       ),
-      Settings(toggleTheme: widget.toggleTheme),
+      Settings(),
     ];
   }
 
@@ -226,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : Text(_titles[_selectedIndex]),
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
         actions: (_selectedIndex == 0 || _selectedIndex == 2)
             ? [
@@ -248,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: const Color(0xFFB8B8B8)),
+              decoration: BoxDecoration(color: const Color(0xFFC0C0C0)),
               child: Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -275,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(
                 Icons.password,
-                color: Colors.yellow,
+                color: Colors.amber[600],
               ),
               title: Text('Password Generator'),
               selected: _selectedIndex == 1,
@@ -284,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(
                 Icons.delete,
-                color: Colors.red
+                color: Colors.blueGrey
               ),
               title: Text('Deleted Entries'),
               selected: _selectedIndex == 2,
@@ -302,14 +292,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: Icon(
                 Icons.exit_to_app,
-                color: Colors.green,
+                color: Colors.redAccent,
               ),
               title: Text('Exit Vault'),
               onTap: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   PageRouteBuilder(
                     transitionDuration: Duration(milliseconds: 300),
-                    pageBuilder: (_, __, ___) => LoginScreen(toggleTheme: () {}),
+                    pageBuilder: (_, __, ___) => LoginScreen(),
                     transitionsBuilder: (_, animation, __, child) {
                       final offset = Tween<Offset>(
                         begin: Offset(0, -1),
@@ -333,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ? null
           : FloatingActionButton(
               onPressed: _navigateToAddEntry,
-              backgroundColor: Color(0xFFB8B8B8),
+              backgroundColor: Color(0xFFC0C0C0),
               foregroundColor: Colors.black,
               child: const Icon(Icons.add),
             ),

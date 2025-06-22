@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'autolock_state.dart';
 
 class AutoLock extends StatelessWidget {
-  const AutoLock({super.key});
+  const AutoLock({
+    Key? key,
+  }): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +15,7 @@ class AutoLock extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Auto-Lock"),
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
       ),
       body: Column(
@@ -26,7 +28,10 @@ class AutoLock extends StatelessWidget {
             onChanged: (bool value) {
               autoLockState.setAutoLockEnabled(value);
             },
-            secondary: const Icon(Icons.lock_clock),
+            secondary: const Icon(
+              Icons.lock_clock,
+              color: const Color(0xFF4CAF50),
+            ),
           ),
         ],
       ),

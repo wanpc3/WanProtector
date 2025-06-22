@@ -9,11 +9,9 @@ import 'policy/terms_of_service.dart';
 import 'policy/privacy_policy.dart';
 
 class CreateVault extends StatefulWidget {
-  final VoidCallback toggleTheme;
 
   const CreateVault({
-    Key? key, 
-    required this.toggleTheme
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -66,7 +64,7 @@ class _CreateVaultScreen extends State<CreateVault> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
+        builder: (context) => LoginScreen(),
       ),
     );
   }
@@ -77,7 +75,7 @@ class _CreateVaultScreen extends State<CreateVault> {
 
       appBar: AppBar(
         title: Text("Create Vault"),
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
       ),
 
@@ -283,7 +281,7 @@ class _CreateVaultScreen extends State<CreateVault> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFFB8B8B8),
+                    backgroundColor: const Color(0xFFC0C0C0),
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AutoLockState extends ChangeNotifier {
   bool _isAutoLockEnabled = true;
-  final int _lockDuration = 60; // Fixed at 1 minute
+  final int _lockDuration = 60; //Fixed at 1 minute
 
   bool get isAutoLockEnabled => _isAutoLockEnabled;
   int get lockDuration => _lockDuration;

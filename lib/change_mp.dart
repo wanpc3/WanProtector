@@ -5,12 +5,10 @@ import 'vault.dart';
 import 'login_screen.dart';
 
 class ChangeMp extends StatefulWidget {
-  final VoidCallback toggleTheme;
 
   const ChangeMp({
-    super.key,
-    required this.toggleTheme
-  });
+    Key? key,
+  }): super(key: key);
 
   @override
   _ChangeMpScreen createState() => _ChangeMpScreen();
@@ -74,7 +72,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
               onPressed: () {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
-                    builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
+                    builder: (context) => LoginScreen(),
                   ),
                   (route) => false,
                 );
@@ -92,7 +90,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
 
       appBar: AppBar(
         title: Text("Change Master Password"),
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
       ),
 
@@ -244,7 +242,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFFB8B8B8),
+                    backgroundColor: const Color(0xFFC0C0C0),
                     foregroundColor: Colors.black,
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),

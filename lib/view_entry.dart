@@ -11,7 +11,7 @@ import 'edit_entry.dart';
 class ViewEntry extends StatefulWidget {
   final Entry entry;
 
-  ViewEntry({
+  const ViewEntry({
     Key? key,
     required this.entry,
   }): super(key: key);
@@ -148,7 +148,7 @@ class _ViewEntryState extends State<ViewEntry> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFB8B8B8),
+        backgroundColor: const Color(0xFFC0C0C0),
         foregroundColor: Colors.black,
         title: Text(_currentEntry.title),
         actions: [

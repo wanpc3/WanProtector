@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 
 class PasswordGenerator extends StatefulWidget {
+
+  const PasswordGenerator({
+    Key? key,
+  }): super(key: key);
+
   @override
   _PasswordGeneratorState createState() => _PasswordGeneratorState();
 }
@@ -144,7 +149,7 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB8B8B8),
+                backgroundColor: const Color(0xFFC0C0C0),
                 foregroundColor: Colors.black,
               ),
               child: const Text('Generate Password'),

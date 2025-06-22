@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'create_vault.dart';
 
 class GetStarted extends StatefulWidget {
-  final VoidCallback toggleTheme;
 
   const GetStarted({
-    super.key,
-    required this.toggleTheme
-  });
+    Key? key,
+  }): super(key: key);
 
   @override
   State<GetStarted> createState() => _GetStartedState();
@@ -54,7 +52,7 @@ class _GetStartedState extends State<GetStarted> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFB8B8B8),
+                  backgroundColor: const Color(0xFFC0C0C0),
                   foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 40),
                   shape: RoundedRectangleBorder(
@@ -66,9 +64,7 @@ class _GetStartedState extends State<GetStarted> {
                   Navigator.pushReplacement(
                     context,
                     PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => CreateVault(
-                        toggleTheme: widget.toggleTheme,
-                      ),
+                      pageBuilder: (context, animation, secondaryAnimation) => CreateVault(),
                       transitionsBuilder: (context, animation, secondaryAnimation, child) {
                         const begin = Offset(1.0, 0.0);
                         const end = Offset.zero;
