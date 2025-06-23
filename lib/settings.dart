@@ -114,9 +114,9 @@ class _SettingsState extends State<Settings> {
                             title: const Text("Important Notice"),
                             content: const Text(
                                 "After changing your master password:\n\n"
-                                "• You can still restore future backups\n"
-                                "• Previous backups will require the old master password\n"
-                                "• Consider creating a new backup after changing your password"
+                                "• You will still be able to restore any backups created after the change.\n"
+                                "• Backups made before the change will require the old master password.\n"
+                                "• It is recommended to create a new backup after updating your master password."
                             ),
                             actions: [
                                 TextButton(
