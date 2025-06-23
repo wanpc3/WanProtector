@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'entries_state.dart';
 import 'models/entry.dart';
 import 'vault.dart';
+import 'normalize_url.dart';
 
 class EditEntry extends StatefulWidget {
   final Entry? entry;
@@ -113,12 +114,16 @@ class _EditEntryState extends State<EditEntry> {
       final newUrl = _urlController.text.trim();
       final newNotes = _notesController.text.trim();
 
+      //Auto-correct URL
+      String formattedUrl = NormalizeUrl.urlFormatter(newUrl);
+      
+
       await _dbHelper.updateEntry(
         id!, 
         newTitle, 
         newUsername, 
         newPassword, 
-        newUrl, 
+        formattedUrl, 
         newNotes
       );
 

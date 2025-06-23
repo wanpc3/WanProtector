@@ -121,11 +121,11 @@ class _SettingsState extends State<Settings> {
                             actions: [
                                 TextButton(
                                   child: const Text("Cancel"),
-                                    onPressed: () => Navigator.of(context).pop(false),
+                                  onPressed: () => Navigator.of(context).pop(false),
                                 ),
                                 TextButton(
-                                    child: const Text("I Understand"),
-                                    onPressed: () => Navigator.of(context).pop(true),
+                                  child: const Text("I Understand"),
+                                  onPressed: () => Navigator.of(context).pop(true),
                                 ),
                             ],
                         );

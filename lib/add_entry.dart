@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/entry.dart';
 import 'vault.dart';
+import 'normalize_url.dart';
 
 class AddEntry extends StatefulWidget {
 
@@ -67,11 +68,15 @@ class _AddEntryState extends State<AddEntry> {
     if (_formKey.currentState!.validate()) {
     //Hides keyboard right away
     FocusScope.of(context).unfocus();
+
+      //Auto-correct URL
+      String formattedUrl = NormalizeUrl.urlFormatter(_urlController.text);
+      
       await _dbHelper.insertEntry(
         _titleController.text, 
         _usernameController.text, 
         _passwordController.text, 
-        _urlController.text, 
+        formattedUrl, 
         _notesController.text,
       );
       Navigator.pop(context, true);

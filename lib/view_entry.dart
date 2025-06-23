@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'models/entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
@@ -263,14 +264,46 @@ class _ViewEntryState extends State<ViewEntry> {
             const SizedBox(height: 16),
 
             //Url
-            Hero(
-              tag: 'url-${_currentEntry.url}',
-              child: Material(
-                type: MaterialType.transparency,
-                child: TextFormField(
-                  controller: _urlController,
-                  decoration: InputDecoration(labelText: "Url"),
-                  enabled: false,
+            GestureDetector(
+              onTap: () async {
+
+                //Ask permission to leave the app to access clicked link
+                final confirmed = await showDialog(
+                  context: context, 
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Open Link in Browser?"),
+                      content: const Text("You are about to leave this app to open the link in your browser. Do you want to proceed?"),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        TextButton(
+                          child: const Text('Open'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                      ],
+                    );
+                  }
+                );
+
+                if (confirmed == true) {
+                  final url = _currentEntry.url;
+                  if (url != null && await canLaunchUrl(Uri.parse(url))) {
+                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                  }
+                }
+              },
+              child: Hero(
+                tag: 'url-${_currentEntry.url}',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: TextFormField(
+                    controller: _urlController,
+                    decoration: InputDecoration(labelText: "Url"),
+                    enabled: false,
+                  ),
                 ),
               ),
             ),
