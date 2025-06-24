@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import 'encryption_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +19,7 @@ import 'get_started.dart';
 void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await EncryptionHelper.initialize();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

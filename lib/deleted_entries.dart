@@ -96,14 +96,14 @@ class DeletedEntriesState extends State<DeletedEntries> {
               itemCount: deletedEntriesProvider.deletedEntries.length,
               itemBuilder: (context, index) {
                 final deletedEntry = deletedEntriesProvider.deletedEntries[index];
-                final backgroundColor = index.isEven
-                    ? const Color(0xFFEFEFFF)
-                    : Colors.transparent;
+                // final backgroundColor = index.isEven
+                //     ? const Color(0xFFEFEFFF)
+                //     : Colors.transparent;
 
                 return Column(
                   children: [
                     Container(
-                      color: backgroundColor,
+                      //color: backgroundColor,
                       child: ListTile(
                         leading: Icon(Icons.close, color: Colors.red),
                         title: Text(

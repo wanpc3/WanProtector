@@ -3,6 +3,8 @@ class NormalizeUrl {
   static String urlFormatter(String rawUrl) {
     String url = rawUrl;
 
+    if (url.isEmpty) return '';
+
     //Remove leading slash if exists
     url = url.replaceFirst(RegExp(r'^/+'), '');
 

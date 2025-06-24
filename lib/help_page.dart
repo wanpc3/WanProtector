@@ -28,7 +28,8 @@ class HelpPage{
 
     //Fourth point
     static const String help_4_title = "Need More Help?";
-    static const String help_4_text1 = "Contact support at:";
+    //static const String help_4_text1 = "Contact support at:";
+    static const String help_4_text1 = "Press the button below:";
     static const String help_4_text2 = "📧 idrissilhan@gmail.com";
     static const String help_4_text3 = "(ILHAN IDRISS, WanProtector Developer)";
     

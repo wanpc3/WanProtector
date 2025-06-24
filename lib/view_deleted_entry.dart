@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'models/deleted_entry.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'vault.dart';
+import 'normalize_url.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
   final DeletedEntry deletedEntry;
@@ -168,7 +170,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     content: Text('This action cannot be undone. Are you sure?'),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false), 
+                        onPressed: () => Navigator.pop(context, false),
                         child: Text('Cancel')
                       ),
                       TextButton(
@@ -288,14 +290,53 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             const SizedBox(height: 16),
 
             //Url
-            Hero(
-              tag: 'url-${_currentDeletedEntry.url}',
-              child: Material(
-                type: MaterialType.transparency,
-                child: TextFormField(
-                  controller: _urlController,
-                  decoration: InputDecoration(labelText: "Url"),
-                  enabled: false,
+            GestureDetector(
+              onTap: () async {
+                
+                final rawUrl = _currentDeletedEntry.url ?? '';
+                final formattedUrl = NormalizeUrl.urlFormatter(rawUrl);
+
+                if (formattedUrl.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: const Text('The URL field is empty.')),
+                  );
+                  return;
+                }
+
+                //Ask permission to leave the app to access clicked link
+                final confirmed = await showDialog(
+                  context: context, 
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Open Link in Browser?"),
+                      content: const Text("You are about to leave this app to open the link in your browser. Do you want to proceed?"),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                        TextButton(
+                          child: const Text('Open'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                      ],
+                    );
+                  }
+                );
+
+                if (confirmed == true && await canLaunchUrl(Uri.parse(formattedUrl))) {
+                  await launchUrl(Uri.parse(formattedUrl), mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Hero(
+                tag: 'url-${_currentDeletedEntry.url}',
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: TextFormField(
+                    controller: _urlController,
+                    decoration: InputDecoration(labelText: "Url"),
+                    enabled: false,
+                  ),
                 ),
               ),
             ),

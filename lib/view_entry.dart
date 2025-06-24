@@ -8,6 +8,7 @@ import 'deleted_state.dart';
 import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
+import 'normalize_url.dart';
 
 class ViewEntry extends StatefulWidget {
   final Entry entry;
@@ -266,6 +267,16 @@ class _ViewEntryState extends State<ViewEntry> {
             //Url
             GestureDetector(
               onTap: () async {
+                
+                final rawUrl = _currentEntry.url ?? '';
+                final formattedUrl = NormalizeUrl.urlFormatter(rawUrl);
+
+                if (formattedUrl.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: const Text('The URL field is empty.')),
+                  );
+                  return;
+                }
 
                 //Ask permission to leave the app to access clicked link
                 final confirmed = await showDialog(
@@ -288,11 +299,8 @@ class _ViewEntryState extends State<ViewEntry> {
                   }
                 );
 
-                if (confirmed == true) {
-                  final url = _currentEntry.url;
-                  if (url != null && await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
+                if (confirmed == true && await canLaunchUrl(Uri.parse(formattedUrl))) {
+                  await launchUrl(Uri.parse(formattedUrl), mode: LaunchMode.externalApplication);
                 }
               },
               child: Hero(

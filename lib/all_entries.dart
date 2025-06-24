@@ -94,14 +94,14 @@ class AllEntriesState extends State<AllEntries> {
               itemCount: entriesProvider.entries.length,
               itemBuilder: (context, index) {
                 final entry = entriesProvider.entries[index];
-                final backgroundColor = index.isEven
-                    ? const Color(0xFFEFEFFF)
-                    : Colors.transparent;
+                // final backgroundColor = index.isEven
+                //     ? const Color(0xFFEFEFFF)
+                //     : Colors.transparent;
 
                 return Column(
                   children: [
                     Container(
-                      color: backgroundColor,
+                      //color: backgroundColor,
                       child: ListTile(
                         leading: Icon(Icons.key, color: Colors.amber),
                         title: Text(

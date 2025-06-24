@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'help_page.dart';
 
@@ -146,7 +147,25 @@ class Help extends StatelessWidget {
                 HelpPage.help_4_text1,
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 4.0),
+              
+              const SizedBox(height: 8.0),
+
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.5, // 50% of the screen
+                height: 40, // Optional: set fixed height
+                child: ElevatedButton(
+                  onPressed: () => _contactUs(context),
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFFEF5350),
+                    foregroundColor: Colors.white,
+                    shape: const StadiumBorder(),
+                  ),
+                  child: const Text('Contact us'),
+                ),
+              ),
+
+              /*
               Text(
                 HelpPage.help_4_text2,
                 style: TextStyle(fontSize: 16),
@@ -156,11 +175,27 @@ class Help extends StatelessWidget {
                 HelpPage.help_4_text3,
                 style: TextStyle(fontSize: 16),
               ),
-
+              */
             ],
           ),
         ),
       ),
-    );      
+    );
+  }
+
+  //Contact WanProtector
+  Future<void> _contactUs(BuildContext context) async {
+    final String subject = Uri.encodeComponent('Report a Bug - WanProtector');
+    final String body = Uri.encodeComponent('Hello WanProtector team,\n\n');
+
+    final String emailUri = 'mailto:idrissilhan@gmail.com?subject=$subject&body=$body';
+
+    try {
+      await launchUrl(Uri.parse(emailUri), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not open email app. Please email idrissilhan@gmail.com manually.')),
+      );
+    }
   }
 }
