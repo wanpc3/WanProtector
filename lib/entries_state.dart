@@ -13,7 +13,9 @@ class EntriesState with ChangeNotifier {
     final lowerQuery = _searchText.toLowerCase();
     return _entries.where((entry) {
       return entry.title.toLowerCase().contains(lowerQuery) ||
-             entry.username.toLowerCase().contains(lowerQuery);
+             entry.username.toLowerCase().contains(lowerQuery) ||
+             entry.url?.toLowerCase().contains(lowerQuery) == true ||
+             entry.notes?.toLowerCase().contains(lowerQuery) == true;
     }).toList();
   }
 

@@ -17,7 +17,7 @@ class PolicyPage {
 
   //3. How We Use Your Information
   static const String use_info_header = "3. How We Use Your Information";
-  static const String use_info_text1 = "We use the collected information for the following purposes:";
+  static const String use_info_text1 = "We use the collected information (Master Password) for the following purposes:";
   static const String use_info_text2 = "• To authenticate users and provide access to their secured data";
   //static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";
   //static const String use_info_text3 = "• To enable Google login for secure vault backup and restoration";

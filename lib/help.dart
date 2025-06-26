@@ -185,7 +185,7 @@ class Help extends StatelessWidget {
 
   //Contact WanProtector
   Future<void> _contactUs(BuildContext context) async {
-    final String subject = Uri.encodeComponent('Report a Bug - WanProtector');
+    final String subject = Uri.encodeComponent('Contact - WanProtector');
     final String body = Uri.encodeComponent('Hello WanProtector team,\n\n');
 
     final String emailUri = 'mailto:idrissilhan@gmail.com?subject=$subject&body=$body';

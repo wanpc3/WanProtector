@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-
 import 'encryption_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

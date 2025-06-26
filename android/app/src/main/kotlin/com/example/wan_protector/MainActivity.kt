@@ -55,7 +55,13 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
-        // Register the BroadcastReceiver to listen for screen on/off events
+
+        window.setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_SECURE,
+            android.view.WindowManager.LayoutParams.FLAG_SECURE
+        )
+
+        //Register the BroadcastReceiver to listen for screen on/off events
         screenReceiver = ScreenBroadcastReceiver()
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_OFF)

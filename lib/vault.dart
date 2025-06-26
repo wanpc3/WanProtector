@@ -794,11 +794,12 @@ class Vault {
     final db = await this.database;
     final result = await db.query(
       'entry',
-      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(notes) LIKE ?',
+      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(url) LIKE ? OR LOWER(notes) LIKE ?',
       whereArgs: [
         '%${query.toLowerCase()}%',
         '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%'
+        '%${query.toLowerCase()}%',
+        '%${query.toLowerCase()}%',
       ],
     );
 
