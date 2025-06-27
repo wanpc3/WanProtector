@@ -105,6 +105,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  DateTime? _lastBackPressed;
   int _selectedIndex = 0;
   late final List<Widget> _pageOptions;
   bool _isSearching = false;
@@ -204,131 +205,166 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
-            ? TextField(
-              controller: _searchController,
-              autofocus: true,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                hintStyle: TextStyle(color: Colors.white70),
-                border: InputBorder.none,
-              ),
-            )
-          : Text(_titles[_selectedIndex]),
-        backgroundColor: const Color(0xFF000000),
-        foregroundColor: Colors.white,
-        actions: (_selectedIndex == 0 || _selectedIndex == 2)
-            ? [
-              if (_isSearching)
-                IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: _toggleSearch,
-                )
-              else
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: _toggleSearch,
-                )
-            ]
-          : [],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: const Color(0xFF000000)),
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                  "WanProtector",
-                    style: TextStyle(
-                      color: Colors.white, 
-                      fontSize: 30,
-                      fontFamily: 'Ubuntu',
+    return WillPopScope(
+      onWillPop: () async {
+        final now = DateTime.now();
+        final isExiting = _lastBackPressed == null ||
+            now.difference(_lastBackPressed!) > const Duration(seconds: 2);
+
+        if (isExiting) {
+          _lastBackPressed = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Press back again to exit and log out'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return false;
+        }
+
+        //Now log out and exit
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            transitionDuration: Duration(milliseconds: 300),
+            pageBuilder: (_, __, ___) => LoginScreen(),
+            transitionsBuilder: (_, animation, __, child) {
+              final offset = Tween<Offset>(
+                begin: Offset(0, -1),
+                end: Offset.zero,
+              ).animate(animation);
+              return SlideTransition(position: offset, child: child);
+            },
+          ),
+          (route) => false,
+        );
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
+              ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+              )
+            : Text(_titles[_selectedIndex]),
+          backgroundColor: const Color(0xFF000000),
+          foregroundColor: Colors.white,
+          actions: (_selectedIndex == 0 || _selectedIndex == 2)
+              ? [
+                if (_isSearching)
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: _toggleSearch,
+                  )
+                else
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: _toggleSearch,
+                  )
+              ]
+            : [],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(color: const Color(0xFF000000)),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                    "WanProtector",
+                      style: TextStyle(
+                        color: Colors.white, 
+                        fontSize: 30,
+                        fontFamily: 'Ubuntu',
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.folder,
-                color: Colors.blue,
+              ListTile(
+                leading: Icon(
+                  Icons.folder,
+                  color: Colors.blue,
+                ),
+                title: Text('All Entries'),
+                selected: _selectedIndex == 0,
+                onTap: () => _onItemTapped(0),
               ),
-              title: Text('All Entries'),
-              selected: _selectedIndex == 0,
-              onTap: () => _onItemTapped(0),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.password,
-                color: Colors.amber[600],
+              ListTile(
+                leading: Icon(
+                  Icons.password,
+                  color: Colors.amber[600],
+                ),
+                title: Text('Password Generator'),
+                selected: _selectedIndex == 1,
+                onTap: () => _onItemTapped(1),
               ),
-              title: Text('Password Generator'),
-              selected: _selectedIndex == 1,
-              onTap: () => _onItemTapped(1),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.delete,
-                color: Colors.blueGrey
+              ListTile(
+                leading: Icon(
+                  Icons.delete,
+                  color: Colors.blueGrey
+                ),
+                title: Text('Deleted Entries'),
+                selected: _selectedIndex == 2,
+                onTap: () => _onItemTapped(2),
               ),
-              title: Text('Deleted Entries'),
-              selected: _selectedIndex == 2,
-              onTap: () => _onItemTapped(2),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.settings,
-                color: Colors.grey,
+              ListTile(
+                leading: Icon(
+                  Icons.settings,
+                  color: Colors.grey,
+                ),
+                title: Text('Settings'),
+                selected: _selectedIndex == 3,
+                onTap: () => _onItemTapped(3),
               ),
-              title: Text('Settings'),
-              selected: _selectedIndex == 3,
-              onTap: () => _onItemTapped(3),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.exit_to_app,
-                color: Colors.redAccent,
+              ListTile(
+                leading: Icon(
+                  Icons.exit_to_app,
+                  color: Colors.redAccent,
+                ),
+                title: Text('Exit Vault'),
+                onTap: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    PageRouteBuilder(
+                      transitionDuration: Duration(milliseconds: 300),
+                      pageBuilder: (_, __, ___) => LoginScreen(),
+                      transitionsBuilder: (_, animation, __, child) {
+                        final offset = Tween<Offset>(
+                          begin: Offset(0, -1),
+                          end: Offset.zero,
+                        ).animate(animation);
+                        return SlideTransition(position: offset, child: child);
+                      },
+                    ),
+                    (route) => false,
+                  );
+                },
               ),
-              title: Text('Exit Vault'),
-              onTap: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  PageRouteBuilder(
-                    transitionDuration: Duration(milliseconds: 300),
-                    pageBuilder: (_, __, ___) => LoginScreen(),
-                    transitionsBuilder: (_, animation, __, child) {
-                      final offset = Tween<Offset>(
-                        begin: Offset(0, -1),
-                        end: Offset.zero,
-                      ).animate(animation);
-                      return SlideTransition(position: offset, child: child);
-                    },
-                  ),
-                  (route) => false,
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _pageOptions,
+        ),
+        floatingActionButton: _isSearching || _selectedIndex != 0
+            ? null
+            : FloatingActionButton(
+                onPressed: _navigateToAddEntry,
+                backgroundColor: const Color(0xFF1E88E5),
+                foregroundColor: Colors.white,
+                child: const Icon(Icons.add),
+              ),
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pageOptions,
-      ),
-      floatingActionButton: _isSearching || _selectedIndex != 0
-          ? null
-          : FloatingActionButton(
-              onPressed: _navigateToAddEntry,
-              backgroundColor: const Color(0xFF1E88E5),
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add),
-            ),
     );
   }
 }
