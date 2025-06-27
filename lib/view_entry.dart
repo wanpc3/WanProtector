@@ -83,7 +83,7 @@ class _ViewEntryState extends State<ViewEntry> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('The entry has been moved to Deleted Entries'),
+            content: const Text('Entry moved to Deleted Entries'),
             backgroundColor: Colors.red[400],
             duration: Duration(seconds: 2),
           ),

@@ -74,7 +74,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("The entry has been restored"),
+            content: Text("Entry Restored"),
             backgroundColor: Colors.green[400],
             duration: Duration(seconds: 2),
           )
@@ -111,7 +111,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('The entry has been permanently deleted'),
+            content: const Text('Entry permanently deleted'),
             backgroundColor: Colors.red[400],
             duration: Duration(seconds: 2),
           ),

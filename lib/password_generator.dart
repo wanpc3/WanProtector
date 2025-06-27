@@ -93,7 +93,32 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
                 fontSize: 20, 
                 fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 16),
+
+            SizedBox(
+              height: 120,
+              child: Row(
+                children: [
+                  Icon(Icons.lightbulb, color: Colors.amber),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      tips[currentTipIndex],
+                      style: TextStyle(fontStyle: FontStyle.italic),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: rotateTip,
+                    tooltip: "New tip",
+                  )
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             TextField(
               controller: controller,
               readOnly: true,
@@ -172,24 +197,24 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
               ),
             ),
 
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Icon(Icons.lightbulb, color: Colors.amber),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    tips[currentTipIndex],
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.refresh),
-                  onPressed: rotateTip,
-                  tooltip: "New tip",
-                )
-              ],
-            ),
+            //const SizedBox(height: 32),
+            // Row(
+            //   children: [
+            //     Icon(Icons.lightbulb, color: Colors.amber),
+            //     const SizedBox(width: 10),
+            //     Expanded(
+            //       child: Text(
+            //         tips[currentTipIndex],
+            //         style: TextStyle(fontStyle: FontStyle.italic),
+            //       ),
+            //     ),
+            //     IconButton(
+            //       icon: Icon(Icons.refresh),
+            //       onPressed: rotateTip,
+            //       tooltip: "New tip",
+            //     )
+            //   ],
+            // ),
           ],
         ),
       ),
