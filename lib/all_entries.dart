@@ -103,7 +103,7 @@ class AllEntriesState extends State<AllEntries> {
                     Container(
                       //color: backgroundColor,
                       child: ListTile(
-                        leading: Icon(Icons.key, color: Colors.amber),
+                        leading: Icon(Icons.key_outlined, color: Colors.amber),
                         title: Text(
                           entry.title,
                           maxLines: 1,

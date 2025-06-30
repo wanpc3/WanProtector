@@ -14,8 +14,8 @@ class _VaultSettingsState extends State<VaultSettings> {
   ];
 
   final List<IconData> leadingIcons = <IconData>[
-    Icons.save,
-    Icons.restore,
+    Icons.save_outlined,
+    Icons.restore_outlined,
   ];
 
   final List<Color> iconColors = <Color>[

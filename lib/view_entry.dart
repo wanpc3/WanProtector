@@ -1,3 +1,4 @@
+import 'alerts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -62,39 +63,42 @@ class _ViewEntryState extends State<ViewEntry> {
   //Entry removal
   void _removeEntry(int id) async {
     showDialog(
-      context: context, 
+      context: context,
       builder: (_) => const Center(
-        child: CircularProgressIndicator()
-      )
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false,
     );
-    
+
     try {
       await _dbHelper.softDeleteEntry(id);
 
-      //Refresh the entry so it updates.
       final stateManager = context.read<EntriesState>();
       await stateManager.refreshEntries();
 
-      //Refresh deleted entry as well
       final deletedStateManager = context.read<DeletedState>();
       await deletedStateManager.refreshDeletedEntries();
-      
-      if (context.mounted) {
-        Navigator.of(context).pop();
+
+      if (context.mounted) Navigator.of(context).pop();
+
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Entry moved to Deleted Entries'),
+            content: Text('"${_currentEntry.title}" moved to Deleted Entries'),
             backgroundColor: Colors.red[400],
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
           ),
         );
-        Navigator.pop(context, true);
       }
+
+      if (context.mounted) Navigator.pop(context, true);
+
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${e.toString()}"))
+          SnackBar(content: Text("Error: ${e.toString()}")),
         );
       }
     }

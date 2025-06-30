@@ -5,6 +5,7 @@ import 'policy/privacy_policy.dart';
 import 'vault_settings.dart';
 import 'change_mp.dart';
 import 'auto_lock.dart';
+import 'alerts.dart';
 
 class Settings extends StatefulWidget {
 
@@ -22,6 +23,7 @@ class _SettingsState extends State<Settings> {
   final List<String> settings = <String>[
     //'App Theme', //Reserve for the next version
     //'Sort Entries', //Reserve for the next version
+    'Alerts',
     'Auto-Lock',
     'Vault Settings',
     'Change Master Password',
@@ -35,17 +37,19 @@ class _SettingsState extends State<Settings> {
   final List<IconData> leadingIcons = <IconData>[
     //Icons.palette,
     //Icons.sort,
-    Icons.lock_clock,
-    Icons.storage,
-    Icons.lock_reset,
-    Icons.description,
-    Icons.privacy_tip,
-    Icons.star_rate,
-    Icons.bug_report,
+    Icons.notifications_active_outlined,
+    Icons.lock_clock_outlined,
+    Icons.storage_outlined,
+    Icons.lock_reset_outlined,
+    Icons.description_outlined,
+    Icons.privacy_tip_outlined,
+    Icons.star_rate_outlined,
+    Icons.bug_report_outlined,
   ];
 
   //Icons theme
   final List<Color> iconColors = <Color>[
+    const Color(0xFF2196F3),
     const Color(0xFF4CAF50),
     const Color(0xFF607D8B),
     const Color(0xFFFF9800),
@@ -69,7 +73,25 @@ class _SettingsState extends State<Settings> {
             ),
             title: Text(settings[index]),
             onTap: () async {
-              if (settings[index] == 'Auto-Lock') {
+              if (settings[index] == 'Alerts') {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => Alerts(),
+                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
+                      const begin = Offset(1.0, 0.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              } else if (settings[index] == 'Auto-Lock') {
                 Navigator.push(
                   context,
                   PageRouteBuilder(

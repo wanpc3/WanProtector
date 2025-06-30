@@ -6,6 +6,7 @@ import 'lifecycle_watcher.dart';
 import 'autolock_state.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
+import 'alerts.dart';
 import 'vault.dart';
 import 'all_entries.dart';
 import 'add_entry.dart';
@@ -27,6 +28,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => EntriesState()..fetchEntries()),
         ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
+        ChangeNotifierProvider(create: (_) => AlertsProvider()),
         ChangeNotifierProvider(create: (_) => AutoLockState()),
       ],
       child: LifecycleWatcher(
@@ -292,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.folder,
+                  Icons.folder_outlined,
                   color: Colors.blue,
                 ),
                 title: Text('All Entries'),
@@ -301,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.password,
+                  Icons.password_outlined,
                   color: Colors.amber[600],
                 ),
                 title: Text('Password Generator'),
@@ -310,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.delete,
+                  Icons.delete_outline,
                   color: Colors.blueGrey
                 ),
                 title: Text('Deleted Entries'),
@@ -319,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.settings,
+                  Icons.settings_outlined,
                   color: Colors.grey,
                 ),
                 title: Text('Settings'),
@@ -328,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.exit_to_app,
+                  Icons.exit_to_app_outlined,
                   color: Colors.redAccent,
                 ),
                 title: Text('Exit Vault'),

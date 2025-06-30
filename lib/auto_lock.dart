@@ -29,7 +29,7 @@ class AutoLock extends StatelessWidget {
               autoLockState.setAutoLockEnabled(value);
             },
             secondary: const Icon(
-              Icons.lock_clock,
+              Icons.lock_clock_outlined,
               color: const Color(0xFF4CAF50),
             ),
           ),

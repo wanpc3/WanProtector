@@ -5,6 +5,7 @@ import 'entries_state.dart';
 import 'models/entry.dart';
 import 'vault.dart';
 import 'normalize_url.dart';
+import 'alerts.dart';
 
 class EditEntry extends StatefulWidget {
   final Entry? entry;
@@ -126,6 +127,18 @@ class _EditEntryState extends State<EditEntry> {
         formattedUrl, 
         newNotes
       );
+
+      //Snackbar message
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Entry Updated'),
+            backgroundColor: Colors.green[400],
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
 
       //Refresh the entry so it updates.
       final stateManager = context.read<EntriesState>();
