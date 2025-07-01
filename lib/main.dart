@@ -3,7 +3,7 @@ import 'encryption_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'lifecycle_watcher.dart';
-import 'autolock_state.dart';
+import 'auto_lock.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'alerts.dart';

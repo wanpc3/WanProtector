@@ -81,6 +81,7 @@ class _ViewEntryState extends State<ViewEntry> {
 
       if (context.mounted) Navigator.of(context).pop();
 
+      //Snackbar message
       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -220,9 +221,14 @@ class _ViewEntryState extends State<ViewEntry> {
                         Clipboard.setData(
                           ClipboardData(text: _usernameController.text),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Username copied to clipboard')),
-                        );
+
+                        //Snackbar message
+                        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                        if (alertsEnabled && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Username copied to clipboard')),
+                          );
+                        }
                       },
                     ),
                   ],
@@ -253,9 +259,14 @@ class _ViewEntryState extends State<ViewEntry> {
                         Clipboard.setData(
                           ClipboardData(text: _passwordController.text),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Password copied to clipboard')),
-                        );
+
+                        //Snackbar message
+                        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                        if (alertsEnabled && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Password copied to clipboard')),
+                          );
+                        }
                       },
                     ),
                     IconButton(

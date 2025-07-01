@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'alerts.dart';
 
 class Alerts extends StatelessWidget {
   const Alerts({super.key,});
@@ -32,7 +33,7 @@ class Alerts extends StatelessWidget {
                 subtitle: const Text('Control whether the app shows brief alerts when you perform actions.'),
                 trailing: Switch(
                   value: alertProvider.showAlerts,
-                  onChanged: alertProvider.toggleAlerts,
+                  onChanged: (value) => alertProvider.toggleAlerts(value, context),
                 ),
               ),
             ]),
@@ -50,10 +51,19 @@ class AlertsProvider extends ChangeNotifier {
 
   bool get showAlerts => _showAlerts;
 
-  void toggleAlerts(bool value) async {
+  void toggleAlerts(bool value, BuildContext context) async {
     _showAlerts = value;
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('showAlerts', _showAlerts);
     notifyListeners();
+
+    //Snackbar message
+    final message = _showAlerts ? 'Alert Messages Enabled' : 'Alert Messages Disabled';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 }

@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'models/deleted_entry.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
+import 'alerts.dart';
 import 'vault.dart';
 import 'normalize_url.dart';
 
@@ -70,8 +71,11 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       final stateManager = context.read<EntriesState>();
       await stateManager.refreshEntries();
 
-      if (context.mounted) {
-        Navigator.of(context).pop();
+      if (context.mounted) Navigator.of(context).pop();
+
+      //Snackbar message
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('"${_currentDeletedEntry.title}" Restored'),
@@ -79,8 +83,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             duration: Duration(seconds: 2),
           )
         );
-        Navigator.pop(context, true);
       }
+
+      if (context.mounted) Navigator.pop(context, true);
+
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -107,8 +113,11 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       final stateDeletedManager = context.read<DeletedState>();
       await stateDeletedManager.refreshDeletedEntries();
 
-      if (context.mounted) {
-        Navigator.of(context).pop();
+      if (context.mounted) Navigator.of(context).pop();
+
+      //Snackbar message
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('"${_currentDeletedEntry.title}" permanently deleted'),
@@ -116,8 +125,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             duration: Duration(seconds: 2),
           ),
         );
-        Navigator.pop(context, true);
       }
+      
+      if (context.mounted) Navigator.pop(context, true);
+
     } catch(e) {
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -234,9 +245,14 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         Clipboard.setData(
                           ClipboardData(text: _usernameController.text),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Username copied to clipboard')),
-                        );
+
+                        //Snackbar message
+                        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                        if (alertsEnabled && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Username copied to clipboard')),
+                          );
+                        }
                       },
                     ),
                   ],
@@ -267,9 +283,14 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         Clipboard.setData(
                           ClipboardData(text: _passwordController.text),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Password copied to clipboard')),
-                        );
+
+                        //Snackbar message
+                        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                        if (alertsEnabled && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Password copied to clipboard')),
+                          );
+                        }
                       },
                     ),
                     IconButton(

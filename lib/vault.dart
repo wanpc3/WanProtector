@@ -17,7 +17,8 @@ import 'models/entry.dart';
 import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
-import 'autolock_state.dart';
+import 'auto_lock.dart';
+import 'alerts.dart';
 import 'lifecycle_watcher.dart';
 
 extension IntToBytes on int {
@@ -569,24 +570,30 @@ class Vault {
 
   //Show Cancel Snackbar
   void _showCancellationSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+    if (alertsEnabled && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   //Show Error Snackbar
   void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+    if (alertsEnabled && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
   
   //Request Storage Permission: For Backup and Restore Vault

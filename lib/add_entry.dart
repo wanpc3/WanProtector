@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/entry.dart';
 import 'vault.dart';
+import 'alerts.dart';
 import 'normalize_url.dart';
 
 class AddEntry extends StatefulWidget {
@@ -79,7 +81,20 @@ class _AddEntryState extends State<AddEntry> {
         formattedUrl, 
         _notesController.text,
       );
-      Navigator.pop(context, true);
+
+      //Snackbar message
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('New Entry Added'),
+            backgroundColor: Colors.green[400],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      
+      if (context.mounted) Navigator.pop(context, true);
     }
   }
 
