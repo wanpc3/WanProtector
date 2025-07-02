@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'encryption_helper.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'auto_lock.dart';
 import 'entries_state.dart';
 import 'deleted_state.dart';
 import 'alerts.dart';
+import 'sort_provider.dart';
 import 'vault.dart';
 import 'all_entries.dart';
 import 'add_entry.dart';
@@ -19,6 +21,13 @@ import 'get_started.dart';
 void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+
+  if (!prefs.containsKey('allowScreenshot')) {
+    await prefs.setBool('allowScreenshot', false);
+  }
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await EncryptionHelper.initialize();
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -30,6 +39,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DeletedState()..fetchDeletedEntries()),
         ChangeNotifierProvider(create: (_) => AlertsProvider()),
         ChangeNotifierProvider(create: (_) => AutoLockState()),
+        ChangeNotifierProvider(create: (_) => SortProvider()),
       ],
       child: LifecycleWatcher(
         onAutoLock: () => handleAutoLock(navigatorKey.currentContext!),
@@ -208,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  //Title in Drawer
   final List<String> _titles = [
     'All Entries',
     'Password Generator',
@@ -226,12 +237,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (isExiting) {
           _lastBackPressed = now;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Press back again to exit and log out'),
-              duration: Duration(seconds: 2),
-            ),
-          );
+          final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+          if (alertsEnabled && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Press back again to exit and log out'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
           return false;
         }
 
@@ -253,6 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return true;
       },
       child: Scaffold(
+
+        //Appbar
         appBar: AppBar(
           title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
               ? TextField(
@@ -305,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.folder_outlined,
+                  _selectedIndex == 0 ? Icons.folder : Icons.folder_outlined,
                   color: Colors.blue,
                 ),
                 title: Text('All Entries'),
@@ -314,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.password_outlined,
+                  _selectedIndex == 1 ? Icons.password : Icons.password_outlined,
                   color: Colors.amber[600],
                 ),
                 title: Text('Password Generator'),
@@ -323,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.delete_outline,
+                  _selectedIndex == 2 ? Icons.delete : Icons.delete_outline,
                   color: Colors.blueGrey
                 ),
                 title: Text('Deleted Entries'),
@@ -332,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: Icon(
-                  Icons.settings_outlined,
+                  _selectedIndex == 3 ? Icons.settings : Icons.settings_outlined,
                   color: Colors.grey,
                 ),
                 title: Text('Settings'),

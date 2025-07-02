@@ -88,7 +88,7 @@ class _ViewEntryState extends State<ViewEntry> {
           SnackBar(
             content: Text('"${_currentEntry.title}" moved to Deleted Entries'),
             backgroundColor: Colors.red[400],
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
           ),
         );
       }

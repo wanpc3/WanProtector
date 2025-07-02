@@ -1,3 +1,6 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'policy/terms_of_service.dart';
@@ -6,6 +9,7 @@ import 'vault_settings.dart';
 import 'change_mp.dart';
 import 'auto_lock.dart';
 import 'alerts.dart';
+import 'sort_provider.dart';
 
 class Settings extends StatefulWidget {
 
@@ -19,12 +23,34 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
 
+  static const platform = MethodChannel('com.ilhanidriss.wan_protector/screen');
+  bool _allowScreenshot = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScreenshotPreference();
+  }
+
+  void _loadScreenshotPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final allowed = prefs.getBool('allowScreenshot') ?? false;
+
+    setState(() {
+      _allowScreenshot = allowed;
+    });
+
+    if (!allowed) {
+      toggleScreenshot(false);
+    }
+  }
+
   //Setting contents
   final List<String> settings = <String>[
-    //'App Theme', //Reserve for the next version
-    //'Sort Entries', //Reserve for the next version
-    'Alerts',
+    'Show Alert Messages',
     'Auto-Lock',
+    'Allow Screenshot',
+    'Sort Entries',
     'Vault Settings',
     'Change Master Password',
     'Terms of Service',
@@ -35,22 +61,24 @@ class _SettingsState extends State<Settings> {
 
   //leading icons
   final List<IconData> leadingIcons = <IconData>[
-    //Icons.palette,
-    //Icons.sort,
-    Icons.notifications_active_outlined,
-    Icons.lock_clock_outlined,
-    Icons.storage_outlined,
-    Icons.lock_reset_outlined,
-    Icons.description_outlined,
-    Icons.privacy_tip_outlined,
-    Icons.star_rate_outlined,
-    Icons.bug_report_outlined,
+    Icons.notifications_active,
+    Icons.lock_clock,
+    Icons.screenshot,
+    Icons.sort,
+    Icons.storage,
+    Icons.lock_reset,
+    Icons.description,
+    Icons.privacy_tip,
+    Icons.star_rate,
+    Icons.bug_report,
   ];
 
   //Icons theme
   final List<Color> iconColors = <Color>[
     const Color(0xFF2196F3),
     const Color(0xFF4CAF50),
+    const Color(0xFF9C27B0),
+    const Color.fromARGB(255, 8, 8, 8),
     const Color(0xFF607D8B),
     const Color(0xFFFF9800),
     const Color(0xFF3F51B5),
@@ -59,13 +87,142 @@ class _SettingsState extends State<Settings> {
     const Color(0xFFF44336),
   ];
 
+  //Toggle Screenshot
+  Future<void> toggleScreenshot(bool allow) async {
+    try {
+      await platform.invokeMethod(allow ? 'enableScreenshot' : 'disableScreenshot');
+    } catch (e) {
+      debugPrint('Failed to toggle screenshot: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: ListView.separated(
         padding: const EdgeInsets.all(8),
         itemCount: settings.length,
         itemBuilder: (BuildContext context, int index) {
+
+          final setting = settings[index];
+
+          //Show Alert Messages
+          if (setting == 'Show Alert Messages') {
+
+            final alerts = context.watch<AlertsProvider>();
+
+            return SwitchListTile(
+              secondary: Icon(leadingIcons[index], color: iconColors[index]),
+              title: const Text('Show Alert Messages'),
+              subtitle: const Text(
+                'Control whether the app shows brief alerts when you perform actions.',
+              ),
+              value: alerts.showAlerts,
+              onChanged: (value) {
+                alerts.toggleAlerts(value, context);
+              },
+            );
+          }
+
+          //Auto-Lock
+          if (setting == 'Auto-Lock') {
+
+            final autoLock = context.watch<AutoLockState>();
+
+            return SwitchListTile(
+              secondary: Icon(leadingIcons[index], color: iconColors[index]),
+              title: const Text('Auto-Lock'),
+              subtitle: const Text(
+                'Lock the app after 1 minute in the background and when your screen is off.',
+              ),
+              value: autoLock.isAutoLockEnabled,
+              onChanged: (value) {
+                autoLock.setAutoLockEnabled(value, context);
+              },
+            );
+          }
+
+          //Allow Screenshot
+          if (setting == 'Allow Screenshot') {
+            return SwitchListTile(
+              secondary: Icon(leadingIcons[index], color: iconColors[index]),
+              title: const Text('Allow Screenshots'),
+              subtitle: const Text(
+                'Enable or disable the ability to take screenshots within the app. Turning this off adds extra privacy.',
+              ),
+              value: _allowScreenshot,
+              onChanged: (value) async {
+
+                final prefs = await SharedPreferences.getInstance();
+
+                setState(() {
+                  _allowScreenshot = value;
+                  prefs.setBool('allowScreenshot', value);
+                  if (value) {
+                    //Enable screenshots
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      
+                      toggleScreenshot(true);
+
+                      //Snackbar message
+                      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                      if (alertsEnabled && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Screenshot Allowed'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      }
+
+                    });
+                  } else {
+                    //Disable screenshots
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+                      toggleScreenshot(false);
+
+                      //Snackbar message
+                      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                      if (alertsEnabled && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Screenshot Not Allowed'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      }
+                    });
+                  }
+                });
+              },
+            );
+          }
+
+          //Sort Entries
+          if (setting == 'Sort Entries') {
+
+            final sortProvider = Provider.of<SortProvider>(context);
+
+            return ListTile(
+              leading: Icon(leadingIcons[index], color: iconColors[index]),
+              title: const Text('Sort Entries by'),
+              trailing: DropdownButton<String>(
+                value: sortProvider.sortMode,
+                underline: const SizedBox(),
+                items: const [
+                  DropdownMenuItem(value: 'Recently Added', child: Text('Recently Added')),
+                  DropdownMenuItem(value: 'Title (A-Z)', child: Text('Title (A-Z)')),
+                  DropdownMenuItem(value: 'Last Updated', child: Text('Last Updated')),
+                ],
+                onChanged: (value) {
+                  if (value != null) sortProvider.setSortMode(value);
+                },
+              ),
+            );
+          }
+
           return ListTile(
             leading: Icon(
               leadingIcons[index],
@@ -73,43 +230,7 @@ class _SettingsState extends State<Settings> {
             ),
             title: Text(settings[index]),
             onTap: () async {
-              if (settings[index] == 'Alerts') {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => Alerts(),
-                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
-                      const begin = Offset(1.0, 0.0);
-                      const end = Offset.zero;
-                      const curve = Curves.easeInOut;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-              } else if (settings[index] == 'Auto-Lock') {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => AutoLock(),
-                    transitionsBuilder:(context, animation, secondaryAnimation, child) {
-                      const begin = Offset(1.0, 0.0);
-                      const end = Offset.zero;
-                      const curve = Curves.easeInOut;
-
-                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-              } else if (settings[index] == 'Vault Settings') {
+              if (settings[index] == 'Vault Settings') {
                 Navigator.push(
                   context,
                   PageRouteBuilder(

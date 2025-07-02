@@ -135,7 +135,7 @@ class _EditEntryState extends State<EditEntry> {
           SnackBar(
             content: Text('Entry Updated'),
             backgroundColor: Colors.green[400],
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
           ),
         );
       }

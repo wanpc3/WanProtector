@@ -55,7 +55,7 @@ class DeletedState with ChangeNotifier {
 
   Future<void> refreshDeletedEntries() async {
     if (_isLoading) return;
-    notifyListeners();
+    await fetchDeletedEntries();
   }
 
   void clearError() {

@@ -29,6 +29,10 @@ class DeletedEntriesState extends State<DeletedEntries> {
   void initState() {
     super.initState();
     widget.searchController.addListener(_onSearchChanged);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DeletedState>().fetchDeletedEntries();
+    });
   }
 
   void _onSearchChanged() {

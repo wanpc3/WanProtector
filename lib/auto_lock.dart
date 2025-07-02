@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'alerts.dart';
 
+/*
 class AutoLock extends StatelessWidget {
   const AutoLock({
     Key? key,
@@ -37,6 +38,7 @@ class AutoLock extends StatelessWidget {
     );
   }
 }
+*/
 
 class AutoLockState extends ChangeNotifier {
   bool _isAutoLockEnabled = true;
@@ -68,7 +70,7 @@ class AutoLockState extends ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 1),
         ),
       );
     }

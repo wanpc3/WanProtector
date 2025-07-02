@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -42,6 +43,17 @@ class MainActivity : FlutterActivity() {
                 // Currently, no methods are expected from Flutter to Android regarding screen state.
                 // The 'initialize' method was likely a placeholder or for other purposes.
                 when (call.method) {
+                    "enableScreenshot" -> {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                        result.success(null)
+                    }
+                    "disableScreenshot" -> {
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                            WindowManager.LayoutParams.FLAG_SECURE
+                        )
+                        result.success(null)
+                    }
                     "initialize" -> {
                         // You can keep this if 'initialize' is used for other purposes,
                         // otherwise, it can be removed.
@@ -56,10 +68,12 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
+        /*
         window.setFlags(
             android.view.WindowManager.LayoutParams.FLAG_SECURE,
             android.view.WindowManager.LayoutParams.FLAG_SECURE
         )
+        */
 
         //Register the BroadcastReceiver to listen for screen on/off events
         screenReceiver = ScreenBroadcastReceiver()

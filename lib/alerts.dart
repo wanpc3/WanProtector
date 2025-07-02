@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+//import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'alerts.dart';
 
+/*
 class Alerts extends StatelessWidget {
   const Alerts({super.key,});
 
@@ -43,6 +43,7 @@ class Alerts extends StatelessWidget {
     );
   }
 }
+*/
 
 //Alert Provider
 class AlertsProvider extends ChangeNotifier {
@@ -62,7 +63,7 @@ class AlertsProvider extends ChangeNotifier {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
