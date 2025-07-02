@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/entry.dart';
@@ -22,6 +23,7 @@ class AllEntries extends StatefulWidget {
 }
 
 class AllEntriesState extends State<AllEntries> {
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -30,16 +32,17 @@ class AllEntriesState extends State<AllEntries> {
   }
 
   void _onSearchChanged() {
-    final query = widget.searchController.text;
-    if (query.isNotEmpty) {
+    if (_searchDebounce?.isActive ?? false) _searchDebounce?.cancel();
+
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+      final query = widget.searchController.text;
       context.read<EntriesState>().searchEntries(query);
-    } else {
-      context.read<EntriesState>().fetchEntries();
-    }
+    });
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     widget.searchController.removeListener(_onSearchChanged);
     super.dispose();
   }

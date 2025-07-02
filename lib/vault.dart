@@ -799,20 +799,24 @@ class Vault {
   //Search Entry
   Future<List<Entry>> searchEntries(String query) async {
     final db = await this.database;
-    final result = await db.query(
-      'entry',
-      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(url) LIKE ? OR LOWER(notes) LIKE ?',
-      whereArgs: [
-        '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%',
-      ],
+    final lowerQuery = query.toLowerCase();
+
+    final result = await db.query('entry');
+
+    final entries = await Future.wait(
+      result.map((map) => Entry.fromMapAsync(map)),
     );
 
-    return Future.wait(
-      result.map((map) => Entry.fromMapAsync(map))
-    );
+    return entries.where((entry) {
+      return _matchesSearch(entry, lowerQuery);
+    }).toList();
+  }
+
+  bool _matchesSearch(Entry entry, String lowerQuery) {
+    return entry.title.toLowerCase().contains(lowerQuery) ||
+          entry.username.toLowerCase().contains(lowerQuery) ||
+          (entry.url?.toLowerCase().contains(lowerQuery) ?? false) ||
+          (entry.notes?.toLowerCase().contains(lowerQuery) ?? false);
   }
 
   //Get Entries Paginated

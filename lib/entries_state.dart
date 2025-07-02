@@ -5,44 +5,58 @@ import 'vault.dart';
 class EntriesState with ChangeNotifier {
   List<Entry> _entries = [];
   bool _isLoading = true;
-  final String _searchText = "";
+  String _searchText = "";
+  String? _error;
 
-  List<Entry> get entries {
-    if (_searchText.isEmpty) return _entries;
-
-    final lowerQuery = _searchText.toLowerCase();
-    return _entries.where((entry) {
-      return entry.title.toLowerCase().contains(lowerQuery) ||
-             entry.username.toLowerCase().contains(lowerQuery) ||
-             entry.url?.toLowerCase().contains(lowerQuery) == true ||
-             entry.notes?.toLowerCase().contains(lowerQuery) == true;
-    }).toList();
-  }
-
+  List<Entry> get entries => List.unmodifiable(_entries);
+  String get searchText => _searchText;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Future<void> fetchEntries() async {
-    _isLoading = true;
-    notifyListeners();
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
 
-    final newEntries = _entries = await Vault().getEntries();
-
-    _entries = newEntries;
-    _isLoading = false;
-    notifyListeners();
+      _entries = await Vault().getEntries();
+    } catch (e) {
+      _error = 'Failed to load entries';
+      debugPrint('Fetch error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> searchEntries(String query) async {
+    if (_searchText == query && _entries.isNotEmpty) return;
+
+    _searchText = query;
     _isLoading = true;
+    _error = null;
     notifyListeners();
-    _entries = await Vault().searchEntries(query);
-    _isLoading = false;
-    notifyListeners();
+
+    try {
+      _entries = query.isEmpty
+        ? await Vault().getEntries()
+        : await Vault().searchEntries(query);
+    } catch (e) {
+      _error = 'Search failed';
+      debugPrint('Search error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  //Refresh entries
   Future<void> refreshEntries() async {
-    _entries = await Vault().getEntries();
+    if (_isLoading) return;
+    await fetchEntries();
+  }
+
+  void clearError() {
+    _error = null;
     notifyListeners();
   }
 }
