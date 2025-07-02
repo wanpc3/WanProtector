@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:WanProtector/vault.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class DeletedEntries extends StatefulWidget {
 }
 
 class DeletedEntriesState extends State<DeletedEntries> {
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -30,12 +32,19 @@ class DeletedEntriesState extends State<DeletedEntries> {
   }
 
   void _onSearchChanged() {
-    final query = widget.searchController.text;
-    if (query.isNotEmpty) {
-      context.read<DeletedState>().searchDeletedEntries(query);
-    } else {
-      context.read<DeletedState>().fetchDeletedEntries();
-    }
+    if (_searchDebounce?.isActive ?? false) _searchDebounce?.cancel();
+
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      final query = widget.searchController.text;
+
+      if (query.isEmpty) {
+        if (context.read<DeletedState>().searchText.isNotEmpty) {
+          context.read<DeletedState>().fetchDeletedEntries();
+        }
+      } else {
+        context.read<DeletedState>().searchDeletedEntries(query);
+      }
+    });
   }
 
   @override

@@ -30,13 +30,20 @@ class AllEntriesState extends State<AllEntries> {
     super.initState();
     widget.searchController.addListener(_onSearchChanged);
   }
-
+  
   void _onSearchChanged() {
     if (_searchDebounce?.isActive ?? false) _searchDebounce?.cancel();
 
-    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       final query = widget.searchController.text;
-      context.read<EntriesState>().searchEntries(query);
+
+      if (query.isEmpty) {
+        if (context.read<EntriesState>().searchText.isNotEmpty) {
+          context.read<EntriesState>().fetchEntries();
+        }
+      } else {
+        context.read<EntriesState>().searchEntries(query);
+      }
     });
   }
 
@@ -76,59 +83,42 @@ class AllEntriesState extends State<AllEntries> {
     final entriesProvider = Provider.of<EntriesState>(context);
 
     return Scaffold(
-      body: entriesProvider.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : entriesProvider.entries.isEmpty
-            ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                      "No Entries Available",
-                        style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey[600],
-                    ),
+      body: Column(
+        children: [
+          if (entriesProvider.isLoading && widget.isSearching)
+            const LinearProgressIndicator(minHeight: 2),
+          Expanded(
+            child: entriesProvider.entries.isEmpty
+              ? Center(
+                  child: Text(
+                    "No Entries Available",
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: entriesProvider.entries.length,
-              itemBuilder: (context, index) {
-                final entry = entriesProvider.entries[index];
-                // final backgroundColor = index.isEven
-                //     ? const Color(0xFFEFEFFF)
-                //     : Colors.transparent;
-
-                return Column(
-                  children: [
-                    Container(
-                      //color: backgroundColor,
-                      child: ListTile(
-                        leading: Icon(Icons.key_outlined, color: Colors.amber),
-                        title: Text(
-                          entry.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                )
+              : ListView.builder(
+                  itemCount: entriesProvider.entries.length,
+                  itemBuilder: (context, index) {
+                    final entry = entriesProvider.entries[index];
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.key_outlined, color: Colors.amber),
+                          title: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(entry.username, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          trailing: Text(
+                            _formatDate(entry.createdAt),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          onTap: () => _navigateToViewEntry(entry),
                         ),
-                        subtitle: Text(
-                          entry.username,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Text(
-                          _formatDate(entry.createdAt),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onTap: () => _navigateToViewEntry(entry),
-                      ),
-                    ),
-                    Divider(height: 1, thickness: 0.5, color: Colors.grey),
-                  ],
-                );
-              },
-            ),
+                        const Divider(height: 1, thickness: 0.5, color: Colors.grey),
+                      ],
+                    );
+                  },
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

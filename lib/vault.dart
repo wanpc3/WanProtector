@@ -808,13 +808,14 @@ class Vault {
     );
 
     return entries.where((entry) {
-      return _matchesSearch(entry, lowerQuery);
+      return _matchesSearchEntries(entry, lowerQuery);
     }).toList();
   }
 
-  bool _matchesSearch(Entry entry, String lowerQuery) {
+  bool _matchesSearchEntries(Entry entry, String lowerQuery) {
     return entry.title.toLowerCase().contains(lowerQuery) ||
-          entry.username.toLowerCase().contains(lowerQuery) ||
+           entry.username.toLowerCase().contains(lowerQuery) ||
+          (entry.password?.toLowerCase().contains(lowerQuery) ?? false ) ||
           (entry.url?.toLowerCase().contains(lowerQuery) ?? false) ||
           (entry.notes?.toLowerCase().contains(lowerQuery) ?? false);
   }
@@ -953,19 +954,25 @@ class Vault {
   //Search Deleted Entries
   Future<List<DeletedEntry>> searchDeletedEntries(String query) async {
     final db = await this.database;
-    final result = await db.query(
-      'deleted_entry',
-      where: 'LOWER(title) LIKE ? OR LOWER(username) LIKE ? OR LOWER(notes) LIKE ?',
-      whereArgs: [
-        '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%',
-        '%${query.toLowerCase()}%'
-      ],
+    final lowerQuery = query.toLowerCase();
+
+    final result = await db.query('deleted_entry');
+
+    final deletedEntries = await Future.wait(
+      result.map((map) => DeletedEntry.fromMapAsync(map)),
     );
-    
-    return Future.wait(
-      result.map((map) => DeletedEntry.fromMapAsync(map))
-    );
+
+    return deletedEntries.where((deletedEntry) {
+      return _matchesSearchDeletedEntries(deletedEntry, lowerQuery);
+    }).toList();
+  }
+
+  bool _matchesSearchDeletedEntries(DeletedEntry deletedEntry, String lowerQuery) {
+    return deletedEntry.title.toLowerCase().contains(lowerQuery) ||
+           deletedEntry.username.toLowerCase().contains(lowerQuery) ||
+          (deletedEntry.password?.toLowerCase().contains(lowerQuery) ?? false ) ||
+          (deletedEntry.url?.toLowerCase().contains(lowerQuery) ?? false) ||
+          (deletedEntry.notes?.toLowerCase().contains(lowerQuery) ?? false);
   }
 
   //Get Deleted Entries Paginated

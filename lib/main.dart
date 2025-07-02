@@ -131,18 +131,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //Search Entry
-  void _toggleSearch() {
+  void _toggleSearch() async {
+    final hadQuery = _searchController.text.isNotEmpty;
+    
     setState(() {
       _isSearching = !_isSearching;
-      if (!_isSearching) {
+      if (!_isSearching && hadQuery) {
         _searchController.clear();
-        if (_selectedIndex == 0) {
-          Provider.of<EntriesState>(context, listen: false).fetchEntries();
-        } else if (_selectedIndex == 2) {
-          Provider.of<DeletedState>(context, listen: false).fetchDeletedEntries();
-        }
       }
     });
+
+    if (!_isSearching && hadQuery) {
+      try {
+        if (_selectedIndex == 0) {
+          context.read<EntriesState>().resetSearch();
+          await context.read<EntriesState>().fetchEntries();
+        } else if (_selectedIndex == 2) {
+          context.read<DeletedState>().resetSearch();
+          await context.read<DeletedState>().fetchDeletedEntries();
+        }
+      } catch (e) {
+        debugPrint('Error resetting search: $e');
+      }
+    }
   }
 
   void _navigateToAddEntry() async {

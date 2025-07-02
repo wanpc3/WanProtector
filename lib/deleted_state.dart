@@ -5,42 +5,66 @@ import 'vault.dart';
 class DeletedState with ChangeNotifier {
   List<DeletedEntry> _deletedEntries = [];
   bool _isLoading = true;
-  final String _searchText = "";
+  String _searchText = "";
+  String? _error;
 
-  List<DeletedEntry> get deletedEntries {
-    if (_searchText.isEmpty) return _deletedEntries;
-
-    final lowerQuery = _searchText.toLowerCase();
-    return _deletedEntries.where((deletedEntry) {
-      return deletedEntry.title.toLowerCase().contains(lowerQuery) ||
-             deletedEntry.username.toLowerCase().contains(lowerQuery);
-    }).toList();
-  }
-
+  List<DeletedEntry> get deletedEntries => List.unmodifiable(_deletedEntries);
+  String get searchText => _searchText;
   bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Future<void> fetchDeletedEntries() async {
-    _isLoading = true;
-    notifyListeners();
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
 
-    final newDeletedEntries = _deletedEntries = await Vault().getDeletedEntries();
-
-    _deletedEntries = newDeletedEntries;
-    _isLoading = false;
-    notifyListeners();
+      _deletedEntries = await Vault().getDeletedEntries();
+    } catch (e) {
+      _error = 'Failed to load deleted entries';
+      debugPrint('Fetch error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> searchDeletedEntries(String query) async {
-    _isLoading = true;
-    notifyListeners();
-    _deletedEntries = await Vault().searchDeletedEntries(query);
-    _isLoading = false;
+    if (_searchText == query && _deletedEntries.isNotEmpty) return;
+
+    _searchText = query;
+
+    if (query.isNotEmpty) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
+
+    try {
+      _deletedEntries = query.isEmpty
+          ? _deletedEntries
+          : await Vault().searchDeletedEntries(query);
+    } catch (e) {
+      _error = 'Search failed';
+      debugPrint('Search error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshDeletedEntries() async {
+    if (_isLoading) return;
     notifyListeners();
   }
 
-  //Refresh entries
-  Future<void> refreshDeletedEntries() async {
-    _deletedEntries = await Vault().getDeletedEntries();
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  void resetSearch() {
+    _searchText = '';
     notifyListeners();
   }
 }

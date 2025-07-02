@@ -33,14 +33,17 @@ class EntriesState with ChangeNotifier {
     if (_searchText == query && _entries.isNotEmpty) return;
 
     _searchText = query;
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+
+    if (query.isNotEmpty) {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
 
     try {
       _entries = query.isEmpty
-        ? await Vault().getEntries()
-        : await Vault().searchEntries(query);
+          ? _entries
+          : await Vault().searchEntries(query);
     } catch (e) {
       _error = 'Search failed';
       debugPrint('Search error: $e');
@@ -57,6 +60,11 @@ class EntriesState with ChangeNotifier {
 
   void clearError() {
     _error = null;
+    notifyListeners();
+  }
+
+  void resetSearch() {
+    _searchText = '';
     notifyListeners();
   }
 }
