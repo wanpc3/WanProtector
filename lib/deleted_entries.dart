@@ -64,18 +64,21 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
     final result = await Navigator.push(
       context,
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => ViewDeletedEntry(
-          deletedEntry: fullDeletedEntry,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return ScaleTransition(
-            scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        transitionDuration: Duration(milliseconds: 300),
+      MaterialPageRoute(
+        builder: (context) => ViewDeletedEntry(deletedEntry: fullDeletedEntry)
       ),
+      // PageRouteBuilder(
+      //   pageBuilder: (_, __, ___) => ViewDeletedEntry(
+      //     deletedEntry: fullDeletedEntry,
+      //   ),
+      //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //     return ScaleTransition(
+      //       scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+      //       child: FadeTransition(opacity: animation, child: child),
+      //     );
+      //   },
+      //   transitionDuration: Duration(milliseconds: 400),
+      // ),
     );
 
     if (result == true) {

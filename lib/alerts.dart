@@ -49,8 +49,17 @@ class Alerts extends StatelessWidget {
 class AlertsProvider extends ChangeNotifier {
   
   bool _showAlerts = true;
-
   bool get showAlerts => _showAlerts;
+
+  AlertsProvider() {
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    _showAlerts = prefs.getBool('showAlerts') ?? true;
+    notifyListeners();
+  }
 
   void toggleAlerts(bool value, BuildContext context) async {
     _showAlerts = value;

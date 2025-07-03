@@ -49,7 +49,7 @@ class _VaultSettingsState extends State<VaultSettings> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Vault Settings'),
+          title: const Text('Vault Settings'),
           backgroundColor: const Color(0xFF000000),
         ),
         body: Center(child: CircularProgressIndicator()),
@@ -83,12 +83,7 @@ class _VaultSettingsState extends State<VaultSettings> {
                       color: isBackup && !canBackup ? Colors.grey : null,
                     ),
                   ),
-                  subtitle: Text(
-                    subtitleText,
-                    style: TextStyle(
-                      color: isBackup && !canBackup ? Colors.grey.shade400 : Colors.black54,
-                    ),
-                  ),
+                  subtitle: Text(subtitleText),
                   onTap: (isBackup && !canBackup)
                       ? null
                       : () async {

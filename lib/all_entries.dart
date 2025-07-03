@@ -61,16 +61,19 @@ class AllEntriesState extends State<AllEntries> {
 
     final result = await Navigator.push(
       context,
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => ViewEntry(entry: fullEntry),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return ScaleTransition(
-            scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        transitionDuration: Duration(milliseconds: 300),
+      MaterialPageRoute(
+        builder: (context) => ViewEntry(entry: entry),
       ),
+      // PageRouteBuilder(
+      //   pageBuilder: (_, __, ___) => ViewEntry(entry: fullEntry),
+      //   transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      //     return ScaleTransition(
+      //       scale: animation.drive(CurveTween(curve: Curves.fastOutSlowIn)),
+      //       child: FadeTransition(opacity: animation, child: child),
+      //     );
+      //   },
+      //   transitionDuration: Duration(milliseconds: 400),
+      // ),
     );
 
     if (result == true) {

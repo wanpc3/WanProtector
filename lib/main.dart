@@ -24,6 +24,7 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
+  //Allow Screenshot State Management
   if (!prefs.containsKey('allowScreenshot')) {
     await prefs.setBool('allowScreenshot', false);
   }

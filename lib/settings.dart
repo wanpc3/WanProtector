@@ -78,7 +78,7 @@ class _SettingsState extends State<Settings> {
     const Color(0xFF2196F3),
     const Color(0xFF4CAF50),
     const Color(0xFF9C27B0),
-    const Color.fromARGB(255, 8, 8, 8),
+    const Color.fromARGB(255, 128, 128, 128),
     const Color(0xFF607D8B),
     const Color(0xFFFF9800),
     const Color(0xFF3F51B5),
