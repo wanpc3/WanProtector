@@ -168,7 +168,8 @@ class _CreateVaultScreen extends State<CreateVault> {
                         child: const Text(
                           "Important notes:",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
                           )
                         ),
                       ),

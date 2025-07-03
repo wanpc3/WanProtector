@@ -17,11 +17,16 @@ class TermsOfServicePage {
 
   //3. User Data and Privacy
   static const String tos_3_header = "3. User Data and Privacy";
-  static const String tos_3_text1 = "No personal information is collected.";
-  static const String tos_3_text2 = "• The app uses local storage on your device to store encrypted password data.";
-  static const String tos_3_text3 = "• The data is not shared, transmitted, or synced to any external servers unless you explicitly use external backup features such as Google Drive (optional).";
-  static const String tos_3_text4 = "• We do not send newsletters, promotional emails, or third-party advertisements.";
-  static const String tos_3_text5 = "• For more information, please read our Privacy Policy.";
+  static const String tos_3_text1 = "We do not collect any personal information. All data, including your saved passwords, remains strictly on your device and under your control.";
+  static const String tos_3_text2 = "• Password data is encrypted locally using AES-256 in CBC mode with a unique IV for each encryption, and protected using HMAC-SHA256 to prevent tampering.";
+  static const String tos_3_text3 = 
+    "• Your encryption key is securely stored using platform-provided secure storage (Android Keystore or iOS Keychain). "
+    "No unencrypted data is stored or sent to any server.";
+  static const String tos_3_text4 = 
+    "• If you choose to enable optional backup features, encrypted data may be stored in your personal Google Drive or other cloud storage. "
+    "This action is user-initiated and remains unreadable by the developer.";
+  static const String tos_3_text5 = 
+    "• The app does not use analytics, advertising SDKs, or send any promotional or marketing content. For full details, please read our Privacy Policy.";
 
   //4. User Responsibilities
   static const String tos_4_header = "4. User Responsibilities";
@@ -32,7 +37,9 @@ class TermsOfServicePage {
 
   //5. Children's Use
   static const String tos_5_header = "5. Children's Use";
-  static const String tos_5_text = "Although the app is available to users under 13, parental supervision is recommended. We do not knowingly collect or process personal data from children under 13.";
+  static const String tos_5_text = 
+    "WanProtector is available to users of all ages, including those under 13. However, we strongly recommend that children use the app under the supervision of a parent or guardian. "
+    "We do not knowingly collect, store, or share personal data from children under the age of 13, in accordance with applicable child data protection laws.";
 
   //6. Intellectual Property
   static const String tos_6_header = "6. Intellectual Property";
@@ -44,7 +51,7 @@ class TermsOfServicePage {
 
   //8. Limitation of Liability
   static const String tos_8_header = "8. Limitation of Liability";
-  static const String tos_8_text = "In no event shall the developer be held liable for any direct, indirect, incidental, or consequential damages arising out of your use or inability to use WanProtector.";
+  static const String tos_8_text = "The developer shall not be responsible for any loss, damage, or inconvenience caused by the use or inability to use WanProtector, including but not limited to data loss or device malfunction.";
 
   //9. Changes to the Terms
   static const String tos_9_header = "9. Changes to the Terms";

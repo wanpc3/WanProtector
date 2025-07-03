@@ -172,7 +172,7 @@ class PrivacyPolicy extends StatelessWidget {
               const SizedBox(height: 8.0),
               //Information We Collect - Text5
               Text(
-                PolicyPage.info_collect_text5,
+                PolicyPage.use_info_text5,
                 style: TextStyle(fontSize: 16),
               ),
 
@@ -196,6 +196,18 @@ class PrivacyPolicy extends StatelessWidget {
               //Data Security and Storage - Text2
               Text(
                 PolicyPage.data_storage_text2,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              //Data Security and Storage - Text3
+              Text(
+                PolicyPage.data_storage_text3,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              //Data Security and Storage - Text4
+              Text(
+                PolicyPage.data_storage_text4,
                 style: TextStyle(fontSize: 16),
               ),
 

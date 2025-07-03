@@ -26,12 +26,27 @@ class PolicyPage {
 
   //4. Data Security and Storage
   static const String data_storage_header = "4. Data Security and Storage";
-  static const String data_storage_text1= "We implement industry-standard encryption practices, including strong local encryption, to ensure that user passwords and sensitive data are stored securely. We never store plaintext passwords, and the developer has no access to your master password or stored vault contents.";
-  static const String data_storage_text2 = "We do not use external analytics, tracking technologies, or advertising SDKs. All password data remains local unless backed up via Google (with user permission).";
+  static const String data_storage_text1 = 
+    "We implement strong, industry-standard encryption techniques to protect your data. "
+    "All sensitive information, such as passwords and vault contents, is encrypted using AES-256 in CBC mode, "
+    "with a unique Initialization Vector (IV) generated for every encryption operation. This ensures that even identical data is encrypted differently each time.";
+  static const String data_storage_text2 = 
+    "To maintain data integrity and prevent tampering, we apply HMAC-SHA256 authentication. "
+    "Encryption keys are securely generated and stored on your device using platform-specific secure storage "
+    "(Android Keystore or iOS Keychain). We never store plaintext passwords, and the developer has no access "
+    "to your master password or any of your vault data.";
+  static const String data_storage_text3 =
+    "Your data remains strictly on your device. We do not use external analytics tools, advertising SDKs, or any form of tracking. "
+    "If you choose to back up your encrypted data to Google Drive or another provider, it is done entirely at your discretion and remains unreadable by the developer.";
+  static const String data_storage_text4 =
+    "We also employ constant-time comparisons to guard against timing attacks and provide key backup functionality to support secure migration or recovery across devices.";
 
   //5. Children’s Privacy
   static const String child_privacy_header = "5. Children’s Privacy";
-  static const String child_privacy_text = "WanProtector is accessible to users under the age of 13. However, we strongly advise parental guidance when minors use password management tools. We do not knowingly collect more personal data than necessary and comply with child protection requirements under relevant laws.";
+  static const String child_privacy_text = 
+    "WanProtector is accessible to users under the age of 13. We strongly advise parental or guardian supervision when children use password management tools. "
+    "We do not knowingly collect personal data from children, and we comply with laws such as COPPA (Children’s Online Privacy Protection Act) and similar global child privacy regulations. "
+    "All data remains local on the device, and no personal identifiers are collected or transmitted.";
 
   //6. Third-Party Services
   static const String third_party_header = "6. Third-Party Services";
@@ -43,7 +58,7 @@ class PolicyPage {
 
   //11. Policy Updates
   static const String policy_update_header = "8. Policy Updates";
-  static const String policy_update_text = "We may update this Privacy Policy to reflect changes in our practices or legal requirements. We encourage users to review this policy periodically. Updates will be posted within the app and, where appropriate, via user email.";
+  static const String policy_update_text = "We may update this Privacy Policy to reflect changes in our practices or legal requirements. We encourage users to review this policy periodically. Updates will be posted within the app.";
 
   //12. Contact
   static const String contact_header = "9. Contact";

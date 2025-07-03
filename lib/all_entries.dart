@@ -121,7 +121,7 @@ class AllEntriesState extends State<AllEntries> {
                     return Column(
                       children: [
                         ListTile(
-                          leading: Icon(Icons.key_outlined, color: Colors.amber),
+                          leading: Icon(Icons.key, color: Colors.amber),
                           title: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                           subtitle: Text(entry.username, maxLines: 1, overflow: TextOverflow.ellipsis),
                           trailing: Text(
