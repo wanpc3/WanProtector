@@ -133,7 +133,10 @@ class _EditEntryState extends State<EditEntry> {
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Entry Updated'),
+            content: const Text(
+              'Entry Updated',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.green[400],
             duration: const Duration(seconds: 2),
           ),

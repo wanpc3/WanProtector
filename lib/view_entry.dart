@@ -86,7 +86,10 @@ class _ViewEntryState extends State<ViewEntry> {
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${_currentEntry.title}" moved to Deleted Entries'),
+            content: Text(
+              '${_currentEntry.title} moved to Deleted Entries',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.red[400],
             duration: const Duration(seconds: 2),
           ),

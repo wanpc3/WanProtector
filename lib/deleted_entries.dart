@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'models/deleted_entry.dart';
 import 'deleted_state.dart';
 import 'view_deleted_entry.dart';
+import 'sort_provider.dart';
 
 class DeletedEntries extends StatefulWidget {
   final bool isSearching;
@@ -29,10 +30,6 @@ class DeletedEntriesState extends State<DeletedEntries> {
   void initState() {
     super.initState();
     widget.searchController.addListener(_onSearchChanged);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DeletedState>().fetchDeletedEntries();
-    });
   }
 
   void _onSearchChanged() {
@@ -53,6 +50,7 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     widget.searchController.removeListener(_onSearchChanged);
     super.dispose();
   }
@@ -88,62 +86,60 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
   @override
   Widget build(BuildContext context) {
+
     final deletedEntriesProvider = Provider.of<DeletedState>(context);
+    final sortProvider = Provider.of<SortProvider>(context);
+
+    List <DeletedEntry> sortedDeletedEntries = [...deletedEntriesProvider.deletedEntries];
+
+    if (sortProvider.sortMode == 'Title (A-Z)') {
+      sortedDeletedEntries.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    } else if (sortProvider.sortMode == 'Username (A-Z)') {
+      sortedDeletedEntries.sort((a, b) => a.username.toLowerCase().compareTo(b.username.toLowerCase()));
+    } else if (sortProvider.sortMode == 'Last Updated') {
+      sortedDeletedEntries.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
+    } else {
+      //Recently Added
+      sortedDeletedEntries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
 
     return Scaffold(
-      body: deletedEntriesProvider.isLoading
-          ? Center(child: CircularProgressIndicator())
-          : deletedEntriesProvider.deletedEntries.isEmpty
-            ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                      "No Deleted Entries Available",
-                        style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey[600],
-                    ),
+      body: Column(
+        children: [
+          if (deletedEntriesProvider.isLoading && widget.isSearching)
+            const LinearProgressIndicator(minHeight: 2),
+          Expanded(
+            child: deletedEntriesProvider.deletedEntries.isEmpty
+              ? Center(
+                  child: Text(
+                    "No Deleted Entries Available",
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: deletedEntriesProvider.deletedEntries.length,
-              itemBuilder: (context, index) {
-                final deletedEntry = deletedEntriesProvider.deletedEntries[index];
-                // final backgroundColor = index.isEven
-                //     ? const Color(0xFFEFEFFF)
-                //     : Colors.transparent;
-
-                return Column(
-                  children: [
-                    Container(
-                      //color: backgroundColor,
-                      child: ListTile(
-                        leading: Icon(Icons.close, color: Colors.red),
-                        title: Text(
-                          deletedEntry.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                )
+              : ListView.builder(
+                  itemCount: sortedDeletedEntries.length,
+                  itemBuilder: (context, index) {
+                    final deletedEntry = sortedDeletedEntries[index];
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.close, color: Colors.red),
+                          title: Text(deletedEntry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          subtitle: Text(deletedEntry.username, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          trailing: Text(
+                            _formatDate(deletedEntry.createdAt),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          onTap: () => _navigateToViewDeletedEntry(deletedEntry),
                         ),
-                        subtitle: Text(
-                          deletedEntry.username,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Text(
-                          _formatDate(deletedEntry.createdAt),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onTap: () => _navigateToViewDeletedEntry(deletedEntry),
-                      ),
-                    ),
-                    Divider(height: 1, thickness: 0.5, color: Colors.grey),
-                  ],
-                );
-              },
-            )
+                        const Divider(height: 1, thickness: 0.5, color: Colors.grey),
+                      ],
+                    );
+                  },
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

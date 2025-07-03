@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final List<Widget> _pageOptions;
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -151,6 +152,11 @@ class _HomeScreenState extends State<HomeScreen> {
         _searchController.clear();
       }
     });
+
+    if (_isSearching) {
+      await Future.delayed(Duration(milliseconds: 100));
+      _searchFocusNode.requestFocus();
+    }
 
     if (!_isSearching && hadQuery) {
       try {
@@ -193,6 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -274,6 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: _isSearching && (_selectedIndex == 0 || _selectedIndex == 2)
               ? TextField(
                 controller: _searchController,
+                focusNode: _searchFocusNode,
                 autofocus: true,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(

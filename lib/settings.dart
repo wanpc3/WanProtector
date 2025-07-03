@@ -78,7 +78,7 @@ class _SettingsState extends State<Settings> {
     const Color(0xFF2196F3),
     const Color(0xFF4CAF50),
     const Color(0xFF9C27B0),
-    const Color.fromARGB(255, 128, 128, 128),
+    const Color(0xFFFFBF00),
     const Color(0xFF607D8B),
     const Color(0xFFFF9800),
     const Color(0xFF3F51B5),
@@ -148,9 +148,9 @@ class _SettingsState extends State<Settings> {
             return SwitchListTile(
               secondary: Icon(leadingIcons[index], color: iconColors[index]),
               title: const Text('Allow Screenshots'),
-              subtitle: const Text(
-                'Enable or disable the ability to take screenshots within the app. Turning this off adds extra privacy.',
-              ),
+              // subtitle: const Text(
+              //   'Enable or disable the ability to take screenshots within the app. Turning this off adds extra privacy.',
+              // ),
               value: _allowScreenshot,
               onChanged: (value) async {
 
@@ -214,6 +214,7 @@ class _SettingsState extends State<Settings> {
                 items: const [
                   DropdownMenuItem(value: 'Recently Added', child: Text('Recently Added')),
                   DropdownMenuItem(value: 'Title (A-Z)', child: Text('Title (A-Z)')),
+                  DropdownMenuItem(value: 'Username (A-Z)', child: Text('Username (A-Z)'),),
                   DropdownMenuItem(value: 'Last Updated', child: Text('Last Updated')),
                 ],
                 onChanged: (value) {

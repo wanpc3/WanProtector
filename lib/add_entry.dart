@@ -87,7 +87,10 @@ class _AddEntryState extends State<AddEntry> {
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('New Entry Added'),
+            content: const Text(
+              'New Entry Added',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.green[400],
             duration: const Duration(seconds: 2),
           ),

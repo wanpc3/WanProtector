@@ -78,7 +78,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${_currentDeletedEntry.title}" Restored'),
+            content: Text(
+              '${_currentDeletedEntry.title} Restored',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.green[400],
             duration: Duration(seconds: 2),
           )
@@ -120,7 +123,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
       if (alertsEnabled && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${_currentDeletedEntry.title}" permanently deleted'),
+            content: Text(
+              '${_currentDeletedEntry.title} permanently deleted',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Colors.red[400],
             duration: Duration(seconds: 2),
           ),

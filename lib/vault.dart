@@ -574,7 +574,10 @@ class Vault {
     if (alertsEnabled && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(
+            message,
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
@@ -588,7 +591,10 @@ class Vault {
     if (alertsEnabled && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(
+            message,
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),

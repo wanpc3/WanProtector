@@ -5,6 +5,7 @@ import 'models/entry.dart';
 import 'vault.dart';
 import 'entries_state.dart';
 import 'view_entry.dart';
+import 'sort_provider.dart';
 
 class AllEntries extends StatefulWidget {
   final bool isSearching;
@@ -83,7 +84,22 @@ class AllEntriesState extends State<AllEntries> {
 
   @override
   Widget build(BuildContext context) {
+
     final entriesProvider = Provider.of<EntriesState>(context);
+    final sortProvider = Provider.of<SortProvider>(context);
+
+    List <Entry> sortedEntries = [...entriesProvider.entries];
+
+    if (sortProvider.sortMode == 'Title (A-Z)') {
+      sortedEntries.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    } else if (sortProvider.sortMode == 'Username (A-Z)') {
+      sortedEntries.sort((a, b) => a.username.toLowerCase().compareTo(b.username.toLowerCase()));
+    } else if (sortProvider.sortMode == 'Last Updated') {
+      sortedEntries.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
+    } else {
+      //Recently Added
+      sortedEntries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
 
     return Scaffold(
       body: Column(
@@ -99,9 +115,9 @@ class AllEntriesState extends State<AllEntries> {
                   ),
                 )
               : ListView.builder(
-                  itemCount: entriesProvider.entries.length,
+                  itemCount: sortedEntries.length,
                   itemBuilder: (context, index) {
-                    final entry = entriesProvider.entries[index];
+                    final entry = sortedEntries[index];
                     return Column(
                       children: [
                         ListTile(
