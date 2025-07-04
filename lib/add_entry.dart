@@ -19,7 +19,7 @@ class AddEntry extends StatefulWidget {
 }
 
 class _AddEntryState extends State<AddEntry> {
-  
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
@@ -93,6 +93,10 @@ class _AddEntryState extends State<AddEntry> {
             ),
             backgroundColor: Colors.green[400],
             duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }

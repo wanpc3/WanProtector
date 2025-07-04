@@ -251,6 +251,10 @@ class _HomeScreenState extends State<HomeScreen> {
               SnackBar(
                 content: const Text('Press back again to exit and log out'),
                 duration: Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }
@@ -394,6 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _selectedIndex,
           children: _pageOptions,
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: _isSearching || _selectedIndex != 0
             ? null
             : FloatingActionButton(

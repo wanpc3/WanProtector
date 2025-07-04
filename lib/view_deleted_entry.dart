@@ -84,6 +84,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             ),
             backgroundColor: Colors.green[400],
             duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           )
         );
       }
@@ -129,6 +133,10 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
             ),
             backgroundColor: Colors.red[400],
             duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }

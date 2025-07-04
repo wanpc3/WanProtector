@@ -139,6 +139,10 @@ class _EditEntryState extends State<EditEntry> {
             ),
             backgroundColor: Colors.green[400],
             duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }

@@ -92,6 +92,10 @@ class _ViewEntryState extends State<ViewEntry> {
             ),
             backgroundColor: Colors.red[400],
             duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
