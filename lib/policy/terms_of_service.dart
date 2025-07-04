@@ -20,7 +20,7 @@ class TermsOfService extends StatelessWidget {
         title: const Text(
           "Terms of Service",
         ),
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: const Color(0xFF424242),
         foregroundColor: Colors.white,
       ),
 

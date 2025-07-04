@@ -92,7 +92,7 @@ class _ChangeMpScreen extends State<ChangeMp> {
 
       appBar: AppBar(
         title: Text("Change Master Password"),
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: const Color(0xFF424242),
         foregroundColor: Colors.white,
       ),
 
@@ -209,8 +209,13 @@ class _ChangeMpScreen extends State<ChangeMp> {
                               Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
                               SizedBox(width: 8.0),
                               Expanded(
-                                child: const Text(
+                                child: Text(
                                   "You are about to change your master password.",
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                  ),
                                 ),
                               ),
                             ],
@@ -225,8 +230,13 @@ class _ChangeMpScreen extends State<ChangeMp> {
                               Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
                               SizedBox(width: 8.0),
                               Expanded(
-                                child: const Text(
+                                child: Text(
                                   "Always remember your master password. Never share it with anyone else.",
+                                  style: TextStyle(
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                  ),
                                 ),
                               ),
                             ],
@@ -252,9 +262,13 @@ class _ChangeMpScreen extends State<ChangeMp> {
                       activeColor: Colors.green,
                     ),
                     Expanded(
-                      child: const Text(
+                      child: Text(
                         "I have read and understand the notes above.",
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                        ),
                       ),
                     )
                   ],
@@ -290,8 +304,8 @@ class _ChangeMpScreen extends State<ChangeMp> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF1E88E5),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.amber,
+                    foregroundColor: const Color(0xFF212121),
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),
                   ),

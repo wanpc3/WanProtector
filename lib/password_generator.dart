@@ -185,8 +185,8 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: const Color(0xFF1E88E5),
-                foregroundColor: Colors.white,
+                backgroundColor: Colors.amber,
+                foregroundColor: const Color(0xFF212121),
                 minimumSize: const Size(double.infinity, 48),
                 shape: const StadiumBorder(),
               ),

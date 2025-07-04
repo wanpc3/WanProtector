@@ -46,11 +46,6 @@ flutter:
 
   uses-material-design: true
 
-  assets:
-    - assets/get_started_1.png
-    - assets/get_started_2.png
-    - assets/get_started_3.png
-
   fonts:
     - family: Ubuntu
       fonts:

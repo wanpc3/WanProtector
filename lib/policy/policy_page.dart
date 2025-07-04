@@ -28,7 +28,7 @@ class PolicyPage {
   static const String data_storage_header = "4. Data Security and Storage";
   static const String data_storage_text1 = 
     "We implement strong, industry-standard encryption techniques to protect your data. "
-    "All sensitive information, such as passwords and vault contents, is encrypted using AES-256 in CBC mode, "
+    "All sensitive information, such as master password, entry's username, entry's password, and notes are encrypted using AES-256 in CBC mode, "
     "with a unique Initialization Vector (IV) generated for every encryption operation. This ensures that even identical data is encrypted differently each time.";
   static const String data_storage_text2 = 
     "To maintain data integrity and prevent tampering, we apply HMAC-SHA256 authentication. "

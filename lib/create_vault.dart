@@ -23,7 +23,7 @@ class _CreateVaultScreen extends State<CreateVault> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _secureStorage = FlutterSecureStorage();
-  
+
   bool _obscurePassword_1 = true;
   bool _obscurePassword_2 = true;
   bool isChecked = false;
@@ -68,14 +68,15 @@ class _CreateVaultScreen extends State<CreateVault> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text("Create Vault"),
-        backgroundColor: const Color(0xFF000000),
+        centerTitle: true,
+        title: const Text("Create Vault"),
+        backgroundColor: const Color(0xFF424242),
         foregroundColor: Colors.white,
       ),
 
@@ -88,11 +89,14 @@ class _CreateVaultScreen extends State<CreateVault> {
               children: [
                 
                 Center(
-                  child: const Text(
+                  child: Text(
                     "Let's create a new Vault!",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20.0,
+                      color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                     ),
                   ),
                 ),
@@ -165,26 +169,44 @@ class _CreateVaultScreen extends State<CreateVault> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Center(
-                        child: const Text(
+                        child: Text(
                           "Important notes:",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black,
                           )
                         ),
                       ),
                       
                       const SizedBox(height: 16),
-                      const Text(
-                        "1. Always remember your master password."
+                      Text(
+                        "1. Always remember your master password.",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        "2. Never share your master password with anyone else."
+                      Text(
+                        "2. Never share your master password with anyone else.",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        "3. This password manager stores all your passwords locally on your device. We recommend backing up your vault to prevent data loss."
+                      Text(
+                        "3. This password manager stores all your passwords locally on your device. We recommend backing up your vault to prevent data loss.",
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                        ),
                       ),
                     ],
                   ),
@@ -208,7 +230,11 @@ class _CreateVaultScreen extends State<CreateVault> {
                       child: RichText(
                         text: TextSpan(
                           text: "I have read the important notes above, and I agree with WanProtector's ",
-                          style: TextStyle(color: Colors.black),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black87,
+                          ),
                           children: [
 
                             //Terms of Service
@@ -282,8 +308,8 @@ class _CreateVaultScreen extends State<CreateVault> {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF1E88E5),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.amber,
+                    foregroundColor: const Color(0xFF212121),
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),
                   ),

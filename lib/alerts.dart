@@ -14,7 +14,7 @@ class Alerts extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alerts'),
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: const Color(0xFF424242),
         foregroundColor: Colors.white,
       ),
 

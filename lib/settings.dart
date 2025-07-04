@@ -134,7 +134,7 @@ class _SettingsState extends State<Settings> {
               secondary: Icon(leadingIcons[index], color: iconColors[index]),
               title: const Text('Auto-Lock'),
               subtitle: const Text(
-                'Lock the app after 1 minute in the background and when your screen is off.',
+                'Lock the app after 1 minute in the background or when your screen is off.',
               ),
               value: autoLock.isAutoLockEnabled,
               onChanged: (value) {

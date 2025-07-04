@@ -16,7 +16,7 @@ class Help extends StatelessWidget {
         title: Text(
           HelpPage.help_page,
         ),
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: const Color(0xFF424242),
         foregroundColor: Colors.white,
       ),
 
