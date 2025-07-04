@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'create_vault.dart';
+import 'dart:io';
 
 class GetStarted extends StatefulWidget {
   const GetStarted({
@@ -11,6 +13,7 @@ class GetStarted extends StatefulWidget {
 }
 
 class _GetStartedState extends State<GetStarted> {
+  DateTime? _lastBackPressed;
   int pageCount = 0;
   final PageController _pageController = PageController();
 
@@ -27,176 +30,211 @@ class _GetStartedState extends State<GetStarted> {
         ? Colors.white
         : Colors.black87;
 
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Welcome to WanProtector!'),
-        backgroundColor: const Color(0xFF424242),
-        foregroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              flex: 14,
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: 2,
-                onPageChanged: (value) {
-                  setState(() {
-                    pageCount = value;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final cardColor = Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF212121)
-                      : Colors.white;
+    return WillPopScope(
+      onWillPop: () async {
+        final now = DateTime.now();
+        final isExiting = _lastBackPressed == null ||
+            now.difference(_lastBackPressed!) > const Duration(seconds: 2);
 
-                  final pointTitleColor = Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black;
+        if (isExiting) {
+          _lastBackPressed = now;
 
-                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0), // Added vertical padding
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      color: cardColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (index == 0) ...[
-                              Text(
-                                "Get Started with WanProtector Password Manager 🔑",
-                                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Press back again to exit'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          );
+          return false;
+        }
+
+        //Exit the app
+        if (Platform.isAndroid) {
+          SystemNavigator.pop();
+        } else {
+          exit(0);
+        }
+
+        return true;
+      },
+      child: Scaffold(
+
+        //Appbar
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text('Welcome to WanProtector!'),
+          backgroundColor: const Color(0xFF424242),
+          foregroundColor: Colors.white,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                flex: 14,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: 2,
+                  onPageChanged: (value) {
+                    setState(() {
+                      pageCount = value;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final cardColor = Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF212121)
+                        : Colors.white;
+
+                    final pointTitleColor = Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0), // Added vertical padding
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        color: cardColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (index == 0) ...[
+                                Text(
+                                  "Get Started with WanProtector Password Manager 🔑",
+                                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24.0),
-                              ...description.take(3).map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item["title"],
-                                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: pointTitleColor,
+                                const SizedBox(height: 24.0),
+                                ...description.take(3).map((item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item["title"],
+                                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: pointTitleColor,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4.0),
-                                    Text(
-                                      item["text"],
-                                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                        color: textColor,
+                                      const SizedBox(height: 4.0),
+                                      Text(
+                                        item["text"],
+                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                          color: textColor,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                )).toList(),
+                              ] else if (index == 1) ...[
+                                Text(
+                                  "Key Features",
+                                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                              )).toList(),
-                            ] else if (index == 1) ...[
-                              Text(
-                                "Key Features",
-                                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24.0),
-                              ...description.sublist(3, 8).map((item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item["title"],
-                                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: pointTitleColor,
+                                const SizedBox(height: 24.0),
+                                ...description.sublist(3, 8).map((item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item["title"],
+                                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: pointTitleColor,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4.0),
-                                    Text(
-                                      item["text"],
-                                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                        color: textColor,
+                                      const SizedBox(height: 4.0),
+                                      Text(
+                                        item["text"],
+                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                          color: textColor,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              )).toList(),
-                            ]
-                          ],
+                                    ],
+                                  ),
+                                )).toList(),
+                              ]
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                2,
-                (index) => DotIndicator(
-                  isActive: index == pageCount,
-                  activeColor: Colors.amber,
-                  inActiveColor: textColor.withOpacity(0.5),
+                    );
+                  },
                 ),
               ),
-            ),
 
-            const Spacer(flex: 2),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: const Color(0xFF212121),
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  2,
+                  (index) => DotIndicator(
+                    isActive: index == pageCount,
+                    activeColor: Colors.amber,
+                    inActiveColor: textColor.withOpacity(0.5),
                   ),
                 ),
-                child: Text(
-                  "Get Started".toUpperCase(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          CreateVault(),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(1.0, 0.0);
-                        const end = Offset.zero;
-                        const curve = Curves.easeInOut;
-                        var tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-                },
               ),
-            ),
-            const Spacer(),
-          ],
+
+              const Spacer(flex: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: const Color(0xFF212121),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    "Get Started".toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: () async {
+                    Navigator.pushReplacement(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            CreateVault(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.easeInOut;
+                          var tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          return SlideTransition(
+                            position: animation.drive(tween),
+                            child: child,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
         ),
       ),
     );

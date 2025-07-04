@@ -87,11 +87,14 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
         padding: const EdgeInsets.all(24.0),
         child: ListView(
           children: [
-            const Text(
-              'Generate Secure Password',
-              style: TextStyle(
-                fontSize: 20, 
-                fontWeight: FontWeight.bold),
+            Center(
+              child: const Text(
+                'Generate Secure Password',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20, 
+                  fontWeight: FontWeight.bold),
+              ),
             ),
 
             const SizedBox(height: 16),

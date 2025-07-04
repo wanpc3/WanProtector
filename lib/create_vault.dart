@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'login_screen.dart';
 import 'encryption_helper.dart';
 import 'policy/terms_of_service.dart';
 import 'policy/privacy_policy.dart';
+import 'dart:io';
 
 class CreateVault extends StatefulWidget {
 
@@ -28,6 +30,8 @@ class _CreateVaultScreen extends State<CreateVault> {
   bool _obscurePassword_2 = true;
   bool isChecked = false;
   bool isCheckboxValid = true;
+
+  DateTime? _lastBackPressed;
 
   void _savePassword() async {
     final password = _passwordController.text;
@@ -71,254 +75,288 @@ class _CreateVaultScreen extends State<CreateVault> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        final now = DateTime.now();
+        final isExiting = _lastBackPressed == null ||
+            now.difference(_lastBackPressed!) > const Duration(seconds: 2);
 
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Create Vault"),
-        backgroundColor: const Color(0xFF424242),
-        foregroundColor: Colors.white,
-      ),
+        if (isExiting) {
+          _lastBackPressed = now;
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                
-                Center(
-                  child: Text(
-                    "Let's create a new Vault!",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                      color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
-                    ),
-                  ),
-                ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Press back again to exit'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          );
+          return false;
+        }
 
-                const SizedBox(height: 16),
+        //Exit the app
+        if (Platform.isAndroid) {
+          SystemNavigator.pop();
+        } else {
+          exit(0);
+        }
 
-                //Master Password
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword_1,
-                  decoration: InputDecoration(
-                    hintText: 'Master Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword_1 ? Icons.visibility_off : Icons.visibility,
+        return true;
+      },
+      child: Scaffold(
+      
+        //Appbar
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text("Create Vault"),
+          backgroundColor: const Color(0xFF424242),
+          foregroundColor: Colors.white,
+        ),
+
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  
+                  Center(
+                    child: Text(
+                      "Let's create a new Vault!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                        color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword_1 = !_obscurePassword_1;
-                        });
-                      },
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 6) {
-                      return 'Enter at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Confirm Password
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscurePassword_2,
-                  decoration: InputDecoration(
-                    hintText: 'Confirm Master Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword_2 ? Icons.visibility_off : Icons.visibility,
+                  //Master Password
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword_1,
+                    decoration: InputDecoration(
+                      hintText: 'Master Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword_1 ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword_1 = !_obscurePassword_1;
+                          });
+                        },
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword_2 = !_obscurePassword_2;
-                        });
-                      },
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty || value.length < 6) {
+                        return 'Enter at least 6 characters';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
 
-                const SizedBox(height: 32),
+                  const SizedBox(height: 16),
 
-                //Important notes
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    //color: const Color(0xFF121212),
-                    border: Border.all(color: Colors.red, width: 2),
-                    borderRadius: BorderRadius.circular(8),
+                  // Confirm Password
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: _obscurePassword_2,
+                    decoration: InputDecoration(
+                      hintText: 'Confirm Master Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword_2 ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword_2 = !_obscurePassword_2;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          "Important notes:",
+
+                  const SizedBox(height: 32),
+
+                  //Important notes
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      //color: const Color(0xFF121212),
+                      border: Border.all(color: Colors.red, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            "Important notes:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black,
+                            )
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        Text(
+                          "1. Always remember your master password.",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
                             color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
-                          )
+                                  ? Colors.white
+                                  : Colors.black87,
+                          ),
                         ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "2. Never share your master password with anyone else.",
+                          style: TextStyle(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "3. This password manager stores all your passwords locally on your device. We recommend backing up your vault to prevent data loss.",
+                          style: TextStyle(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  //Checkboxes
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isChecked,
+                        onChanged: (value) => setState(() {
+                          isChecked = value ?? false;
+                          isCheckboxValid = true;
+                        }),
+                        checkColor: Colors.white,
+                        activeColor: Colors.green,
                       ),
-                      
-                      const SizedBox(height: 16),
-                      Text(
-                        "1. Always remember your master password.",
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: "I have read the important notes above, and I agree with WanProtector's ",
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).brightness == Brightness.dark
                                 ? Colors.white
                                 : Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "2. Never share your master password with anyone else.",
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        "3. This password manager stores all your passwords locally on your device. We recommend backing up your vault to prevent data loss.",
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black87,
+                            ),
+                            children: [
+
+                              //Terms of Service
+                              TextSpan(
+                                text: "Terms of Service",
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const TermsOfService(),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              const TextSpan(text: " and "),
+
+                              //Privacy Policy
+                              TextSpan(
+                                text: "Privacy Policy",
+                                style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const PrivacyPolicy(),
+                                    ),
+                                  );
+                                }
+                              ),
+                              const TextSpan(text: "."),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
 
-                const SizedBox(height: 16),
-
-                //Checkboxes
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isChecked,
-                      onChanged: (value) => setState(() {
-                        isChecked = value ?? false;
-                        isCheckboxValid = true;
-                      }),
-                      checkColor: Colors.white,
-                      activeColor: Colors.green,
-                    ),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          text: "I have read the important notes above, and I agree with WanProtector's ",
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.white
-                              : Colors.black87,
-                          ),
-                          children: [
-
-                            //Terms of Service
-                            TextSpan(
-                              text: "Terms of Service",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const TermsOfService(),
-                                  ),
-                                );
-                              },
-                            ),
-
-                            const TextSpan(text: " and "),
-
-                            //Privacy Policy
-                            TextSpan(
-                              text: "Privacy Policy",
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const PrivacyPolicy(),
-                                  ),
-                                );
-                              }
-                            ),
-                            const TextSpan(text: "."),
-                          ],
+                  if (!isCheckboxValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 12),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: const Text(
+                          "You must agree to the terms of service and privacy policy.",
+                          style: TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
                     ),
-                  ],
-                ),
 
-                if (!isCheckboxValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0, left: 12),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: const Text(
-                        "You must agree to the terms of service and privacy policy.",
-                        style: TextStyle(color: Colors.red, fontSize: 12),
-                      ),
+                  const SizedBox(height: 32),
+
+                  ElevatedButton(
+                    onPressed: () {
+                      final isFormValid = _formKey.currentState!.validate();
+
+                      if (!isChecked) {
+                        setState(() {
+                          isCheckboxValid = false;
+                        });
+                      }
+
+                      if (isFormValid && isChecked) {
+                        _savePassword();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.amber,
+                      foregroundColor: const Color(0xFF212121),
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: const StadiumBorder(),
+                    ),
+                    child: const Text(
+                      "Create Vault",
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
-
-                const SizedBox(height: 32),
-
-                ElevatedButton(
-                  onPressed: () {
-                    final isFormValid = _formKey.currentState!.validate();
-
-                    if (!isChecked) {
-                      setState(() {
-                        isCheckboxValid = false;
-                      });
-                    }
-
-                    if (isFormValid && isChecked) {
-                      _savePassword();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: Colors.amber,
-                    foregroundColor: const Color(0xFF212121),
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: const Text(
-                    "Create Vault",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

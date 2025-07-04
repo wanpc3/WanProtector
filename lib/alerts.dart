@@ -73,6 +73,10 @@ class AlertsProvider extends ChangeNotifier {
       SnackBar(
         content: Text(message),
         duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }

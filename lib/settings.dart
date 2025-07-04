@@ -172,6 +172,10 @@ class _SettingsState extends State<Settings> {
                           SnackBar(
                             content: const Text('Screenshot Allowed'),
                             duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         );
                       }
@@ -190,6 +194,10 @@ class _SettingsState extends State<Settings> {
                           SnackBar(
                             content: const Text('Screenshot Not Allowed'),
                             duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         );
                       }
@@ -218,7 +226,24 @@ class _SettingsState extends State<Settings> {
                   DropdownMenuItem(value: 'Last Updated', child: Text('Last Updated')),
                 ],
                 onChanged: (value) {
-                  if (value != null) sortProvider.setSortMode(value);
+                  if (value != null) {
+                    sortProvider.setSortMode(value);
+
+                    //Snackbar message
+                    final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                    if (alertsEnabled && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Entries Sorted by "$value"'),
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
             );
