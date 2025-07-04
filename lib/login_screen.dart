@@ -20,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _passwordFocusNode = FocusNode();
   final _secureStorage = const FlutterSecureStorage();
   String? _errorText;
-  bool _isLoading = false;
 
   bool _obscurePassword = true;
 
@@ -61,11 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
           : null;
 
       if (enteredPassword == decryptedPassword) {
-        setState(() => _isLoading = true);
+        
         FocusScope.of(context).unfocus();
-
-        await Future.delayed(const Duration(seconds: 1));
-
         if (!mounted) return;
 
         Navigator.pushReplacement(
@@ -114,9 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(
-          child: _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
+          child: SingleChildScrollView(
                   child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
