@@ -235,7 +235,7 @@ class _SettingsState extends State<Settings> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Entries Sorted by "$value"'),
-                          duration: const Duration(seconds: 2),
+                          duration: const Duration(seconds: 1),
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

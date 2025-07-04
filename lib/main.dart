@@ -17,6 +17,7 @@ import 'password_generator.dart';
 import 'settings.dart';
 import 'login_screen.dart';
 import 'get_started.dart';
+import 'app_update.dart';
 
 void main() async {
   
@@ -98,6 +99,13 @@ class _MainAppState extends State<MainApp> {
           ? LoginScreen()
           : GetStarted();
     });
+
+    //Check for app update
+    try {
+      checkForUpdate();
+    } catch (e) {
+      debugPrint('Update check failed: $e');
+    }
   }
 
   @override

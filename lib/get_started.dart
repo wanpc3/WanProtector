@@ -137,14 +137,14 @@ class _GetStartedState extends State<GetStarted> {
                                   ),
                                 )).toList(),
                               ] else if (index == 1) ...[
-                                Text(
-                                  "Key Features",
-                                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                // Text(
+                                //   "Key Features",
+                                //   style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                //     fontWeight: FontWeight.bold,
+                                //     color: textColor,
+                                //   ),
+                                //   textAlign: TextAlign.center,
+                                // ),
                                 const SizedBox(height: 24.0),
                                 ...description.sublist(3, 8).map((item) => Padding(
                                   padding: const EdgeInsets.only(bottom: 16.0),

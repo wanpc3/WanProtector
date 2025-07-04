@@ -264,7 +264,14 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                         if (alertsEnabled && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Username copied to clipboard')),
+                            SnackBar(
+                              content: const Text('Username copied to clipboard'),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
                           );
                         }
                       },
@@ -302,7 +309,14 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                         if (alertsEnabled && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Password copied to clipboard')),
+                            SnackBar(
+                              content: const Text('Password copied to clipboard'),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              duration: const Duration(seconds: 1),
+                            ),
                           );
                         }
                       },
