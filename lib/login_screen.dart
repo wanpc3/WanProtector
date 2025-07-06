@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            transitionDuration: Duration(milliseconds: 300),
+            transitionDuration: const Duration(milliseconds: 150),
             pageBuilder: (_, __, ___) => HomeScreen(),
             transitionsBuilder: (_, animation, __, child) {
               return SlideTransition(
