@@ -231,8 +231,15 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                 type: MaterialType.transparency,
                 child: TextFormField(
                   controller: _titleController,
-                  decoration: InputDecoration(labelText: "Title"),
+                  decoration: InputDecoration(
+                    labelText: "Title",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   enabled: false,
+                  maxLines: null,
+                  minLines: 1,
                 ),
               ),
             ),
@@ -250,7 +257,13 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                       child: TextFormField(
                         controller: _usernameController,
                         enabled: false,
-                        decoration: InputDecoration(labelText: "Username"),
+                        decoration: InputDecoration(
+                          labelText: "Username",
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),  
+                        ),
+                        maxLines: null,
                       ),
                     ),
                     IconButton(
@@ -295,9 +308,18 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         controller: _passwordController,
                         enabled: false,
                         obscureText: _obscurePassword,
-                        decoration: InputDecoration(labelText: "Password"),
+                        decoration: InputDecoration(
+                          labelText: "Password",
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        maxLines: null,
                       ),
                     ),
+
+                    const SizedBox(width: 4),
+
                     IconButton(
                       icon: Icon(Icons.copy),
                       onPressed: () {
@@ -377,14 +399,22 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                   await launchUrl(Uri.parse(formattedUrl), mode: LaunchMode.externalApplication);
                 }
               },
-              child: Hero(
-                tag: 'url-${_currentDeletedEntry.url}',
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: TextFormField(
-                    controller: _urlController,
-                    decoration: InputDecoration(labelText: "Url"),
-                    enabled: false,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Hero(
+                  tag: 'url-${_currentDeletedEntry.url}',
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: TextFormField(
+                      controller: _urlController,
+                      decoration: InputDecoration(
+                        labelText: "Url",
+                        suffixIcon: Icon(Icons.open_in_new, size: 18),
+                      ),
+                      enabled: false,
+                      maxLines: null,
+                      style: TextStyle(color: Colors.blue[800]),
+                    ),
                   ),
                 ),
               ),
@@ -397,14 +427,19 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
               tag: 'notes-${_currentDeletedEntry.notes}',
               child: Material(
                 type: MaterialType.transparency,
-                child: Container(
-                  height: 150,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: 100),
                   child: TextFormField(
                     controller: _notesController,
-                    decoration: InputDecoration(labelText: "Notes"),
-                    minLines: 4,
+                    decoration: InputDecoration(
+                      labelText: "Notes",
+                      alignLabelWithHint: true,
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    minLines: 3,
                     maxLines: null,
-                    keyboardType: TextInputType.multiline,
                     enabled: false,
                   ),
                 ),
