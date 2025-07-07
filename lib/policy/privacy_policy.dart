@@ -114,7 +114,7 @@ class PrivacyPolicy extends StatelessWidget {
                 PolicyPage.info_collect_text1,
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 8.0),
+              //const SizedBox(height: 8.0),
               // //Information We Collect - Text2
               // Text(
               //   PolicyPage.info_collect_text2,
@@ -224,7 +224,19 @@ class PrivacyPolicy extends StatelessWidget {
               const SizedBox(height: 8.0),
               //Children's Privacy - Text1
               Text(
-                PolicyPage.child_privacy_text,
+                PolicyPage.child_privacy_text_1,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              //Children's Privacy - Text2
+              Text(
+                PolicyPage.child_privacy_text_2,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              //Children's Privacy - Text3
+              Text(
+                PolicyPage.child_privacy_text_3,
                 style: TextStyle(fontSize: 16),
               ),
 
@@ -278,6 +290,7 @@ class PrivacyPolicy extends StatelessWidget {
                 PolicyPage.contact_text,
                 style: TextStyle(fontSize: 16),
               ),
+              const SizedBox(height: 8.0),
               //Contact - Text2
               Text(
                 PolicyPage.contact_email,

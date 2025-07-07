@@ -37,9 +37,9 @@ class TermsOfServicePage {
 
   //5. Children's Use
   static const String tos_5_header = "5. Children's Use";
-  static const String tos_5_text = 
-    "WanProtector is available to users of all ages, including those under 13. However, we strongly recommend that children use the app under the supervision of a parent or guardian. "
-    "We do not knowingly collect, store, or share personal data from children under the age of 13, in accordance with applicable child data protection laws.";
+  static const String tos_5_text_1 = "WanProtector is designed for individuals aged 13 and older. Children under 13 should not use this app.";
+  static const String tos_5_text_2 = "Since the app operates without user accounts, we do not knowingly collect, store, or share personal information from any user, including those under 13, in line with applicable child privacy laws.";
+  static const String tos_5_text_3 = "We encourage users between 13 and 17 years old to use the app with guidance from a parent or guardian.";
 
   //6. Intellectual Property
   static const String tos_6_header = "6. Intellectual Property";

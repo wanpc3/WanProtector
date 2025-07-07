@@ -43,10 +43,9 @@ class PolicyPage {
 
   //5. Children’s Privacy
   static const String child_privacy_header = "5. Children’s Privacy";
-  static const String child_privacy_text = 
-    "WanProtector is accessible to users under the age of 13. We strongly advise parental or guardian supervision when children use password management tools. "
-    "We do not knowingly collect personal data from children, and we comply with laws such as COPPA (Children’s Online Privacy Protection Act) and similar global child privacy regulations. "
-    "All data remains local on the device, and no personal identifiers are collected or transmitted.";
+  static const String child_privacy_text_1 = "WanProtector is intended for users aged 13 and above. It does not require account creation and does not knowingly collect any personal data from users, including children under the age of 13.";
+  static const String child_privacy_text_2 = "If we become aware that a child under 13 is using the app and personal data has been unintentionally collected, we will take appropriate steps to delete such information as required by law.";
+  static const String child_privacy_text_3 = "We recommend parental supervision for users aged 13 to 17, especially when using password management tools.";
 
   //6. Third-Party Services
   static const String third_party_header = "6. Third-Party Services";
@@ -63,6 +62,6 @@ class PolicyPage {
   //12. Contact
   static const String contact_header = "9. Contact";
   static const String contact_text = "If you have any questions about this Privacy Policy or your personal data, you may contact us at:";
-  static const String contact_email = "Email: idrissilhan@gmail.com";
+  static const String contact_email = "idrissilhan@gmail.com";
 
 }

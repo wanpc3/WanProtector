@@ -204,7 +204,17 @@ class TermsOfService extends StatelessWidget {
               ),
               const SizedBox(height: 8.0),
               Text(
-                TermsOfServicePage.tos_5_text,
+                TermsOfServicePage.tos_5_text_1,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                TermsOfServicePage.tos_5_text_2,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                TermsOfServicePage.tos_5_text_3,
                 style: TextStyle(fontSize: 16),
               ),
 
