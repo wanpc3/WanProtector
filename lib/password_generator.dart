@@ -129,7 +129,6 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
               readOnly: true,
               enableInteractiveSelection: false,
               decoration: InputDecoration(
-                filled: true,
                 suffixIcon: IconButton(
                   icon: Icon(Icons.copy),
                   onPressed: () {

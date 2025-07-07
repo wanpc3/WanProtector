@@ -236,8 +236,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: "Title",
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
                   enabled: false,
                   maxLines: null,
@@ -261,8 +259,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         enabled: false,
                         decoration: InputDecoration(
                           labelText: "Username",
-                          filled: true,
-                          fillColor: Colors.grey[100],
                         ),
                         maxLines: null,
                       ),
@@ -311,8 +307,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: "Password",
-                          filled: true,
-                          fillColor: Colors.grey[100],
                         ),
                         maxLines: null,
                       ),
@@ -409,8 +403,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                       controller: _urlController,
                       decoration: InputDecoration(
                         labelText: "Url",
-                        filled: true,
-                        fillColor: Colors.grey[100],
                         suffixIcon: Icon(Icons.open_in_new, size: 18),
                       ),
                       enabled: false,
@@ -436,8 +428,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     decoration: InputDecoration(
                       labelText: "Notes",
                       alignLabelWithHint: true,
-                      filled: true,
-                      fillColor: Colors.grey[100],
                     ),
                     minLines: 3,
                     maxLines: null,

@@ -140,7 +140,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           onFieldSubmitted: (_) => _validatePassword(),
                           decoration: InputDecoration(
                             labelText: "Master Password",
-                            filled: true,
                             errorText: _errorText,
                             suffixIcon: IconButton(
                               icon: Icon(

@@ -201,8 +201,6 @@ class _EditEntryState extends State<EditEntry> {
                           controller: _titleController,
                           decoration: InputDecoration(
                             labelText: "Title",
-                            filled: true,
-                            fillColor: Colors.grey[100],
                           ),
                           maxLines: null,
                           minLines: 1,
@@ -230,8 +228,6 @@ class _EditEntryState extends State<EditEntry> {
                                 controller: _usernameController,
                                 decoration: InputDecoration(
                                   labelText: "Username",
-                                  filled: true,
-                                  fillColor: Colors.grey[100],
                                 ),
                                 maxLines: null,
                               ),
@@ -264,8 +260,6 @@ class _EditEntryState extends State<EditEntry> {
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
                                   labelText: "Password",
-                                  filled: true,
-                                  fillColor: Colors.grey[100],
                                 ),
                                 maxLines: null,
                               ),
@@ -304,8 +298,6 @@ class _EditEntryState extends State<EditEntry> {
                           controller: _urlController,
                           decoration: InputDecoration(
                             labelText: "Url",
-                            filled: true,
-                            fillColor: Colors.grey[100],
                           ),
                         ),
                       ),
@@ -322,8 +314,6 @@ class _EditEntryState extends State<EditEntry> {
                           controller: _notesController,
                           decoration: InputDecoration(
                             labelText: "Notes",
-                            filled: true,
-                            fillColor: Colors.grey[100],
                           ),
                           minLines: 3,
                           maxLines: null,

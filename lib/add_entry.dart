@@ -169,8 +169,6 @@ class _AddEntryState extends State<AddEntry> {
                   controller: _titleController,
                   decoration: InputDecoration(
                     labelText: "Title",
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -186,8 +184,6 @@ class _AddEntryState extends State<AddEntry> {
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: "Username",
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -204,8 +200,7 @@ class _AddEntryState extends State<AddEntry> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: "Password",
-                    filled: true,
-                    fillColor: Colors.grey[100],
+                    : Colors.grey[100],
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -224,8 +219,6 @@ class _AddEntryState extends State<AddEntry> {
                   controller: _urlController,
                   decoration: InputDecoration(
                     labelText: "Url",
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
                 ),
 
@@ -237,8 +230,6 @@ class _AddEntryState extends State<AddEntry> {
                     controller: _notesController,
                     decoration: InputDecoration(
                       labelText: "Notes",
-                      filled: true,
-                      fillColor: Colors.grey[100],
                     ),
                     minLines: 3,
                     maxLines: null,
