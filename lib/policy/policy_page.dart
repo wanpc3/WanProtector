@@ -37,7 +37,7 @@ class PolicyPage {
     "to your master password or any of your vault data.";
   static const String data_storage_text3 =
     "Your data remains strictly on your device. We do not use external analytics tools, advertising SDKs, or any form of tracking. "
-    "If you choose to back up your encrypted data to Google Drive or another provider, it is done entirely at your discretion and remains unreadable by the developer.";
+    "If you choose to back up your encrypted data locally or to cloud services like Google Drive, WanProtector uses the device’s storage access permission to let you select where to save or restore your data. All backups are encrypted and remain unreadable by the developer.";
   static const String data_storage_text4 =
     "We also employ constant-time comparisons to guard against timing attacks and provide key backup functionality to support secure migration or recovery across devices.";
 

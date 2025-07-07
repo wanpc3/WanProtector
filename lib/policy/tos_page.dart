@@ -23,8 +23,9 @@ class TermsOfServicePage {
     "• Your encryption key is securely stored using platform-provided secure storage (Android Keystore or iOS Keychain). "
     "No unencrypted data is stored or sent to any server.";
   static const String tos_3_text4 = 
-    "• If you choose to enable optional backup features, encrypted data may be stored in your personal Google Drive or other cloud storage. "
-    "This action is user-initiated and remains unreadable by the developer.";
+  "• If you choose to enable optional backup features, encrypted data may be stored in your personal Google Drive or other cloud storage. "
+  "WanProtector uses device storage access permission to allow you to select where to save or restore your backup data. "
+  "All backups are encrypted and remain unreadable by the developer.";
   static const String tos_3_text5 = 
     "• The app does not use analytics, advertising SDKs, or send any promotional or marketing content. For full details, please read our Privacy Policy.";
 
