@@ -185,6 +185,9 @@ class _EditEntryState extends State<EditEntry> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
+
+              const SizedBox(height: 16),
+
               Form(
                 key: _formKey,
                 child: Column(
@@ -196,7 +199,13 @@ class _EditEntryState extends State<EditEntry> {
                         type: MaterialType.transparency,
                         child: TextFormField(
                           controller: _titleController,
-                          decoration: InputDecoration(labelText: "Title"),
+                          decoration: InputDecoration(
+                            labelText: "Title",
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
+                          maxLines: null,
+                          minLines: 1,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Please enter title";
@@ -219,7 +228,12 @@ class _EditEntryState extends State<EditEntry> {
                             Expanded(
                               child: TextFormField(
                                 controller: _usernameController,
-                                decoration: InputDecoration(labelText: "Username"),
+                                decoration: InputDecoration(
+                                  labelText: "Username",
+                                  filled: true,
+                                  fillColor: Colors.grey[100],
+                                ),
+                                maxLines: null,
                               ),
                             ),
                             IconButton(
@@ -248,7 +262,12 @@ class _EditEntryState extends State<EditEntry> {
                               child: TextFormField(
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
-                                decoration: InputDecoration(labelText: "Password"),
+                                decoration: InputDecoration(
+                                  labelText: "Password",
+                                  filled: true,
+                                  fillColor: Colors.grey[100],
+                                ),
+                                maxLines: null,
                               ),
                             ),
                             IconButton(
@@ -283,7 +302,11 @@ class _EditEntryState extends State<EditEntry> {
                         type: MaterialType.transparency,
                         child: TextFormField(
                           controller: _urlController,
-                          decoration: InputDecoration(labelText: "Url"),
+                          decoration: InputDecoration(
+                            labelText: "Url",
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
                         ),
                       ),
                     ),
@@ -297,8 +320,12 @@ class _EditEntryState extends State<EditEntry> {
                         type: MaterialType.transparency,
                         child: TextFormField(
                           controller: _notesController,
-                          decoration: InputDecoration(labelText: "Notes"),
-                          minLines: 4,
+                          decoration: InputDecoration(
+                            labelText: "Notes",
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                          ),
+                          minLines: 3,
                           maxLines: null,
                           keyboardType: TextInputType.multiline,
                         ),

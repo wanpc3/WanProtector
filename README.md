@@ -1,5 +1,5 @@
 # WanProtector - Password Manager Application
-**Developer:** ILHAN IDRISS
+**Developer:** ILHAN IDRISS\n
 **Platform:** Android
 
 # What is WanProtector?

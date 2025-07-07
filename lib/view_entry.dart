@@ -193,6 +193,9 @@ class _ViewEntryState extends State<ViewEntry> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
+
+            const SizedBox(height: 16),
+
             //Title
             Hero(
               tag: 'title-${_currentEntry.title}',
@@ -204,7 +207,6 @@ class _ViewEntryState extends State<ViewEntry> {
                     labelText: "Title",
                     filled: true,
                     fillColor: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
                   ),
                   enabled: false,
                   maxLines: null,
@@ -230,7 +232,6 @@ class _ViewEntryState extends State<ViewEntry> {
                           labelText: "Username",
                           filled: true,
                           fillColor: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
                         ),
                         maxLines: null,
                       ),
@@ -281,7 +282,6 @@ class _ViewEntryState extends State<ViewEntry> {
                           labelText: "Password",
                           filled: true,
                           fillColor: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
                         ),
                         maxLines: null,
                       ),
@@ -378,6 +378,8 @@ class _ViewEntryState extends State<ViewEntry> {
                       controller: _urlController,
                       decoration: InputDecoration(
                         labelText: "Url",
+                        filled: true,
+                        fillColor: Colors.grey[100],
                         suffixIcon: Icon(Icons.open_in_new, size: 18),
                       ),
                       enabled: false,
@@ -405,7 +407,6 @@ class _ViewEntryState extends State<ViewEntry> {
                       alignLabelWithHint: true,
                       filled: true,
                       fillColor: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
                     ),
                     minLines: 3,
                     maxLines: null,

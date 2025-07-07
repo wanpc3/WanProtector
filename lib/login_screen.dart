@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 150),
+            transitionDuration: const Duration(milliseconds: 300),
             pageBuilder: (_, __, ___) => HomeScreen(),
             transitionsBuilder: (_, animation, __, child) {
               return SlideTransition(
@@ -140,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onFieldSubmitted: (_) => _validatePassword(),
                           decoration: InputDecoration(
                             labelText: "Master Password",
+                            filled: true,
                             errorText: _errorText,
                             suffixIcon: IconButton(
                               icon: Icon(

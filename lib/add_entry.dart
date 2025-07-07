@@ -163,10 +163,14 @@ class _AddEntryState extends State<AddEntry> {
               mainAxisSize: MainAxisSize.min,
               children: [
 
+                const SizedBox(height: 16),
+
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: "Title"
+                    labelText: "Title",
+                    filled: true,
+                    fillColor: Colors.grey[100],
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -181,7 +185,9 @@ class _AddEntryState extends State<AddEntry> {
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
-                    labelText: "Username"
+                    labelText: "Username",
+                    filled: true,
+                    fillColor: Colors.grey[100],
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -198,6 +204,8 @@ class _AddEntryState extends State<AddEntry> {
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: "Password",
+                    filled: true,
+                    fillColor: Colors.grey[100],
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -214,7 +222,11 @@ class _AddEntryState extends State<AddEntry> {
 
                 TextFormField(
                   controller: _urlController,
-                  decoration: InputDecoration(labelText: "Url"),
+                  decoration: InputDecoration(
+                    labelText: "Url",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -224,9 +236,11 @@ class _AddEntryState extends State<AddEntry> {
                   child: TextFormField(
                     controller: _notesController,
                     decoration: InputDecoration(
-                      labelText: "Notes"
+                      labelText: "Notes",
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
-                    minLines: 4,
+                    minLines: 3,
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                   ),

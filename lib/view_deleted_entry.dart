@@ -224,6 +224,9 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
+            
+            const SizedBox(height: 16),
+
             //Title
             Hero(
               tag: 'title-${_currentDeletedEntry.title}',
@@ -235,7 +238,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     labelText: "Title",
                     filled: true,
                     fillColor: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
                   ),
                   enabled: false,
                   maxLines: null,
@@ -261,7 +263,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                           labelText: "Username",
                           filled: true,
                           fillColor: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),  
                         ),
                         maxLines: null,
                       ),
@@ -312,7 +313,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                           labelText: "Password",
                           filled: true,
                           fillColor: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
                         ),
                         maxLines: null,
                       ),
@@ -409,6 +409,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                       controller: _urlController,
                       decoration: InputDecoration(
                         labelText: "Url",
+                        filled: true,
+                        fillColor: Colors.grey[100],
                         suffixIcon: Icon(Icons.open_in_new, size: 18),
                       ),
                       enabled: false,
@@ -436,7 +438,6 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                       alignLabelWithHint: true,
                       filled: true,
                       fillColor: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
                     ),
                     minLines: 3,
                     maxLines: null,
