@@ -448,6 +448,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text("Last updated at: ${formatDateTime(_currentDeletedEntry.lastUpdated)}"),
             ),
+
+            const SizedBox(height: 16),
           ],
         ),
       ),

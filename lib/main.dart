@@ -272,16 +272,18 @@ class _HomeScreenState extends State<HomeScreen> {
         //Now log out and exit
         Navigator.of(context).pushAndRemoveUntil(
           PageRouteBuilder(
-            transitionDuration: Duration(milliseconds: 300),
-            pageBuilder: (_, __, ___) => LoginScreen(),
-            transitionsBuilder: (_, animation, __, child) {
-              final offset = Tween<Offset>(
-                begin: Offset(0, -1),
-                end: Offset.zero,
-              ).animate(animation);
-              return SlideTransition(position: offset, child: child);
-            },
-          ),
+            pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(-1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+                );
+              }
+            ),
           (route) => false,
         );
         return true;
@@ -329,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(
+                    child: const Text(
                     "WanProtector",
                       style: TextStyle(
                         color: Colors.white, 
@@ -345,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedIndex == 0 ? Icons.folder : Icons.folder_outlined,
                   color: Colors.blue,
                 ),
-                title: Text('All Entries'),
+                title: const Text('All Entries'),
                 selected: _selectedIndex == 0,
                 onTap: () => _onItemTapped(0),
               ),
@@ -354,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedIndex == 1 ? Icons.password : Icons.password_outlined,
                   color: Colors.amber[600],
                 ),
-                title: Text('Password Generator'),
+                title: const Text('Password Generator'),
                 selected: _selectedIndex == 1,
                 onTap: () => _onItemTapped(1),
               ),
@@ -363,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedIndex == 2 ? Icons.delete : Icons.delete_outline,
                   color: Colors.blueGrey
                 ),
-                title: Text('Deleted Entries'),
+                title: const Text('Deleted Entries'),
                 selected: _selectedIndex == 2,
                 onTap: () => _onItemTapped(2),
               ),
@@ -372,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _selectedIndex == 3 ? Icons.settings : Icons.settings_outlined,
                   color: Colors.grey,
                 ),
-                title: Text('Settings'),
+                title: const Text('Settings'),
                 selected: _selectedIndex == 3,
                 onTap: () => _onItemTapped(3),
               ),
@@ -381,22 +383,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   Icons.exit_to_app_outlined,
                   color: Colors.redAccent,
                 ),
-                title: Text('Exit Vault'),
+                title: const Text('Exit Vault'),
                 onTap: () {
+
                   Navigator.of(context).pushAndRemoveUntil(
                     PageRouteBuilder(
-                      transitionDuration: Duration(milliseconds: 300),
-                      pageBuilder: (_, __, ___) => LoginScreen(),
-                      transitionsBuilder: (_, animation, __, child) {
-                        final offset = Tween<Offset>(
-                          begin: Offset(0, -1),
-                          end: Offset.zero,
-                        ).animate(animation);
-                        return SlideTransition(position: offset, child: child);
-                      },
+                      pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(-1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      }
                     ),
                     (route) => false,
                   );
+                  
+                  // Navigator.of(context).pushAndRemoveUntil(
+                  //   PageRouteBuilder(
+                  //     transitionDuration: Duration(milliseconds: 300),
+                  //     pageBuilder: (_, __, ___) => LoginScreen(),
+                  //     transitionsBuilder: (_, animation, __, child) {
+                  //       final offset = Tween<Offset>(
+                  //         begin: Offset(0, -1),
+                  //         end: Offset.zero,
+                  //       ).animate(animation);
+                  //       return SlideTransition(position: offset, child: child);
+                  //     },
+                  //   ),
+                  //   (route) => false,
+                  // );
                 },
               ),
             ],

@@ -203,9 +203,9 @@ class _GetStartedState extends State<GetStarted> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
-                    "Get Started".toUpperCase(),
-                    style: const TextStyle(
+                  child: const Text(
+                    "Get Started",
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -213,20 +213,17 @@ class _GetStartedState extends State<GetStarted> {
                     Navigator.pushReplacement(
                       context,
                       PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            CreateVault(),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
+                        pageBuilder: (context, animation, secondaryAnimation) => CreateVault(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
                           const begin = Offset(1.0, 0.0);
                           const end = Offset.zero;
                           const curve = Curves.easeInOut;
-                          var tween = Tween(begin: begin, end: end)
-                              .chain(CurveTween(curve: curve));
+                          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
                           return SlideTransition(
                             position: animation.drive(tween),
                             child: child,
                           );
-                        },
+                        }
                       ),
                     );
                   },
@@ -286,7 +283,7 @@ List<Map<String, dynamic>> description = [
   //Slide 2: Key Features
   {
     "title": "🔐 Encrypted Vault",
-    "text": "Your vault is protected with AES-256 encryption — trusted by banks and governments.",
+    "text": "Your vault is protected with secure AES-256 encryption.",
   },
   {
     "title": "📥 Backup / Restore",

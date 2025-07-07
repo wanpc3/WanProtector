@@ -67,18 +67,31 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 300),
-            pageBuilder: (_, __, ___) => HomeScreen(),
-            transitionsBuilder: (_, animation, __, child) {
+            pageBuilder: (context, animation, secondaryAnimation) => HomeScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
               return SlideTransition(
-                position: Tween<Offset>(
-                  begin: Offset(0.0, 1.0),
-                  end: Offset.zero,
-                ).animate(animation),
+                position: animation.drive(tween),
                 child: child,
               );
-            },
+            }
           ),
+          // PageRouteBuilder(
+          //   transitionDuration: const Duration(milliseconds: 300),
+          //   pageBuilder: (_, __, ___) => HomeScreen(),
+          //   transitionsBuilder: (_, animation, __, child) {
+          //     return SlideTransition(
+          //       position: Tween<Offset>(
+          //         begin: Offset(0.0, 1.0),
+          //         end: Offset.zero,
+          //       ).animate(animation),
+          //       child: child,
+          //     );
+          //   },
+          // ),
         );
       } else {
         setState(() {

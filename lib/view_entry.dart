@@ -417,6 +417,8 @@ class _ViewEntryState extends State<ViewEntry> {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text("Last updated at: ${formatDateTime(_currentEntry.lastUpdated)}"),
             ),
+
+            const SizedBox(height: 16),
           ],
         ),
       ),
