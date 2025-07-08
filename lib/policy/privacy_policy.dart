@@ -233,12 +233,6 @@ class PrivacyPolicy extends StatelessWidget {
                 PolicyPage.child_privacy_text_2,
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 8.0),
-              //Children's Privacy - Text3
-              Text(
-                PolicyPage.child_privacy_text_3,
-                style: TextStyle(fontSize: 16),
-              ),
 
               const SizedBox(height: 20),
 

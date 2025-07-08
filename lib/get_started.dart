@@ -95,81 +95,86 @@ class _GetStartedState extends State<GetStarted> {
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0), // Added vertical padding
-                      child: Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        color: cardColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (index == 0) ...[
-                                Text(
-                                  "Get Started with WanProtector Password Manager 🔑",
-                                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 24.0),
-                                ...description.take(3).map((item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item["title"],
-                                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: pointTitleColor,
-                                        ),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.65,
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          color: cardColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (index == 0) ...[
+                                    Text(
+                                      "Get Started with WanProtector Password Manager 🔑",
+                                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
-                                      const SizedBox(height: 4.0),
-                                      Text(
-                                        item["text"],
-                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                          color: textColor,
-                                        ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 24.0),
+                                    ...description.take(3).map((item) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item["title"],
+                                            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: pointTitleColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4.0),
+                                          Text(
+                                            item["text"],
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                              color: textColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                )).toList(),
-                              ] else if (index == 1) ...[
-                                // Text(
-                                //   "Key Features",
-                                //   style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                                //     fontWeight: FontWeight.bold,
-                                //     color: textColor,
-                                //   ),
-                                //   textAlign: TextAlign.center,
-                                // ),
-                                const SizedBox(height: 24.0),
-                                ...description.sublist(3, 8).map((item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item["title"],
-                                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: pointTitleColor,
-                                        ),
+                                    )).toList(),
+                                  ] else if (index == 1) ...[
+                                    Text(
+                                      "Key Features",
+                                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
-                                      const SizedBox(height: 4.0),
-                                      Text(
-                                        item["text"],
-                                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                          color: textColor,
-                                        ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 24.0),
+                                    ...description.sublist(3, 8).map((item) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 16.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item["title"],
+                                            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: pointTitleColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4.0),
+                                          Text(
+                                            item["text"],
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                              color: textColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                )).toList(),
-                              ]
-                            ],
+                                    )).toList(),
+                                  ]
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

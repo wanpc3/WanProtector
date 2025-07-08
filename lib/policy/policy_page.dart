@@ -41,12 +41,11 @@ class PolicyPage {
   static const String data_storage_text4 =
     "We also employ constant-time comparisons to guard against timing attacks and provide key backup functionality to support secure migration or recovery across devices.";
 
-  //5. Children’s Privacy
-  static const String child_privacy_header = "5. Children’s Privacy";
-  static const String child_privacy_text_1 = "WanProtector is intended for users aged 13 and above. It does not require account creation and does not knowingly collect any personal data from users, including children under the age of 13.";
-  static const String child_privacy_text_2 = "If we become aware that a child under 13 is using the app and personal data has been unintentionally collected, we will take appropriate steps to delete such information as required by law.";
-  static const String child_privacy_text_3 = "We recommend parental supervision for users aged 13 to 17, especially when using password management tools.";
-
+  // 5. Children’s Privacy  
+  static const String child_privacy_header = "5. Children’s Privacy";  
+  static const String child_privacy_text_1 = "WanProtector is designed for users aged 13 and above. Since the app operates locally without accounts or data collection, we do not knowingly gather or store any personal information—including from children under 13.";  
+  static const String child_privacy_text_2 = "We recommend parental supervision for users aged 13 to 17, especially when using password management features.";  
+    
   //6. Third-Party Services
   static const String third_party_header = "6. Third-Party Services";
   static const String third_party_text = "WanProtector stores all password data locally on your device. However, if you choose to enable backup functionality, you may opt to save your data to Google Drive or another cloud storage provider of your choice. This is entirely optional and user-initiated.";
