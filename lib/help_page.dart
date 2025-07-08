@@ -17,7 +17,7 @@ class HelpPage{
     static const String help_2_text3 = "✅ Caps Lock is off.";
     static const String help_2_text4 = "✅ Double-check for any typos.";
     //static const String help_2_text5 = "✅ Ensure you select the right vault.";
-    static const String help_2_text6 = "✅ Restart the app or your device and try again.";
+    //static const String help_2_text6 = "✅ Restart the app or your device and try again.";
 
     //Third point
     /*

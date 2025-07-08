@@ -236,7 +236,7 @@ class _AddEntryState extends State<AddEntry> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
                 ElevatedButton(
                   onPressed: _submitForm, 

@@ -96,7 +96,7 @@ class Help extends StatelessWidget {
                 HelpPage.help_2_text4,
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 4.0),
+              //const SizedBox(height: 4.0),
               /*
               Text(
                 HelpPage.help_2_text5,
@@ -104,10 +104,12 @@ class Help extends StatelessWidget {
               ),
               const SizedBox(height: 4.0),
               */
+              /*
               Text(
                 HelpPage.help_2_text6,
                 style: TextStyle(fontSize: 16),
               ),
+              */
 
               const SizedBox(height: 20.0),
 
