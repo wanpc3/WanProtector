@@ -17,6 +17,7 @@ import 'password_generator.dart';
 import 'settings.dart';
 import 'login_screen.dart';
 import 'get_started.dart';
+import 'screenshot_util.dart';
 import 'app_update.dart';
 
 void main() async {
@@ -24,11 +25,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
-
-  //Allow Screenshot State Management
-  if (!prefs.containsKey('allowScreenshot')) {
-    await prefs.setBool('allowScreenshot', false);
-  }
+  final allowScreenshot = prefs.getBool('allowScreenshot') ?? false;
+  toggleScreenshot(allowScreenshot);
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await EncryptionHelper.initialize();
@@ -65,6 +63,10 @@ void main() async {
     bool isMasterPasswordSet = await dbHelper.isMasterPasswordSet();
 
     if (isMasterPasswordSet) {
+      final prefs = await SharedPreferences.getInstance();
+      final allowScreenshot = prefs.getBool('allowScreenshot') ?? false;
+      toggleScreenshot(allowScreenshot);
+
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => LoginScreen()),
         (route) => false,

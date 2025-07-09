@@ -10,6 +10,7 @@ import 'change_mp.dart';
 import 'auto_lock.dart';
 import 'alerts.dart';
 import 'sort_provider.dart';
+import 'screenshot_util.dart';
 
 class Settings extends StatefulWidget {
 
@@ -23,7 +24,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
 
-  static const platform = MethodChannel('com.ilhanidriss.wan_protector/screen');
+  //static const platform = MethodChannel('com.ilhanidriss.wan_protector/screen');
   bool _allowScreenshot = true;
 
   @override
@@ -86,15 +87,6 @@ class _SettingsState extends State<Settings> {
     const Color(0xFFFFC107),
     const Color(0xFFF44336),
   ];
-
-  //Toggle Screenshot
-  Future<void> toggleScreenshot(bool allow) async {
-    try {
-      await platform.invokeMethod(allow ? 'enableScreenshot' : 'disableScreenshot');
-    } catch (e) {
-      debugPrint('Failed to toggle screenshot: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
