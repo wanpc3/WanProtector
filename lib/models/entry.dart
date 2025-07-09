@@ -25,13 +25,13 @@ class Entry {
   static Future<Entry> fromMapAsync(Map<String, dynamic> map) async {
     return Entry(
       id: map['id'],
-      title: map['title'],
-      username: await EncryptionHelper.decryptText(map['username']),
-      password: await EncryptionHelper.decryptText(map['password']),
-      url: map['url'],
-      notes: await EncryptionHelper.decryptText(map['notes']),
-      createdAt: map['created_at'],
-      lastUpdated: map['last_updated'],
+      title: map['title'] ?? '',
+      username: await EncryptionHelper.decryptText(map['username'] ?? ''),
+      password: map['password'] != null ? await EncryptionHelper.decryptText(map['password']) : null,
+      url: map['url'] ?? '',
+      notes: map['notes'] != null ? await EncryptionHelper.decryptText(map['notes']) : null,
+      createdAt: map['created_at'] ?? '',
+      lastUpdated: map['last_updated'] ?? '',
     );
   }
 

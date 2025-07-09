@@ -45,9 +45,9 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
   void _updateControllers(DeletedEntry deletedEntry) {
     _titleController.text = deletedEntry.title;
     _usernameController.text = deletedEntry.username;
-    _passwordController.text = deletedEntry.password!;
-    _urlController.text = deletedEntry.url!;
-    _notesController.text = deletedEntry.notes!;
+    _passwordController.text = deletedEntry.password ?? '';
+    _urlController.text = deletedEntry.url ?? '';
+    _notesController.text = deletedEntry.notes ?? '';
   }
 
   //To restore deleted entry
@@ -238,7 +238,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     labelText: "Title",
                   ),
                   enabled: false,
-                  maxLines: null,
+                  maxLines: 1,
                   minLines: 1,
                 ),
               ),
@@ -260,7 +260,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         decoration: InputDecoration(
                           labelText: "Username",
                         ),
-                        maxLines: null,
+                        maxLines: 1,
                       ),
                     ),
                     IconButton(
@@ -295,7 +295,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
             //Password
             Hero(
-              tag: 'password-${_currentDeletedEntry.password}',
+              tag: 'password-${_currentDeletedEntry.password ?? 'empty'}',
               child: Material(
                 type: MaterialType.transparency,
                 child: Row(
@@ -308,7 +308,8 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         decoration: InputDecoration(
                           labelText: "Password",
                         ),
-                        maxLines: null,
+                        minLines: 1,
+                        maxLines: _obscurePassword ? 1 : null,
                       ),
                     ),
 
@@ -396,7 +397,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Hero(
-                  tag: 'url-${_currentDeletedEntry.url}',
+                  tag: 'url-${_currentDeletedEntry.url ?? 'empty'}',
                   child: Material(
                     type: MaterialType.transparency,
                     child: TextFormField(
@@ -406,7 +407,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                         suffixIcon: Icon(Icons.open_in_new, size: 18),
                       ),
                       enabled: false,
-                      maxLines: null,
+                      maxLines: 1,
                       style: TextStyle(color: Colors.blue[800]),
                     ),
                   ),
@@ -418,7 +419,7 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
             //Notes
             Hero(
-              tag: 'notes-${_currentDeletedEntry.notes}',
+              tag: 'notes-${_currentDeletedEntry.notes ?? 'empty'}',
               child: Material(
                 type: MaterialType.transparency,
                 child: ConstrainedBox(

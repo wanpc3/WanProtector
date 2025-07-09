@@ -45,9 +45,9 @@ class _ViewEntryState extends State<ViewEntry> {
   void _updateControllers(Entry entry) {
     _titleController.text = entry.title;
     _usernameController.text = entry.username;
-    _passwordController.text = entry.password!;
-    _urlController.text = entry.url!;
-    _notesController.text = entry.notes!;
+    _passwordController.text = entry.password ?? '';
+    _urlController.text = entry.url ?? '';
+    _notesController.text = entry.notes ?? '';
   }
 
   @override
@@ -207,7 +207,7 @@ class _ViewEntryState extends State<ViewEntry> {
                     labelText: "Title",
                   ),
                   enabled: false,
-                  maxLines: null,
+                  maxLines: 1,
                   minLines: 1,
                 ),
               ),
@@ -229,7 +229,7 @@ class _ViewEntryState extends State<ViewEntry> {
                         decoration: InputDecoration(
                           labelText: "Username",
                         ),
-                        maxLines: null,
+                        maxLines: 1,
                       ),
                     ),
                     IconButton(
@@ -264,7 +264,7 @@ class _ViewEntryState extends State<ViewEntry> {
 
             //Password
             Hero(
-              tag: 'password-${_currentEntry.password}',
+              tag: 'password-${_currentEntry.password ?? 'empty'}',
               child: Material(
                 type: MaterialType.transparency,
                 child: Row(
@@ -277,7 +277,8 @@ class _ViewEntryState extends State<ViewEntry> {
                         decoration: InputDecoration(
                           labelText: "Password",
                         ),
-                        maxLines: null,
+                        minLines: 1,
+                        maxLines: _obscurePassword ? 1 : null,
                       ),
                     ),
 
@@ -365,7 +366,7 @@ class _ViewEntryState extends State<ViewEntry> {
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Hero(
-                  tag: 'url-${_currentEntry.url}',
+                  tag: 'url-${_currentEntry.url ?? 'empty'}',
                   child: Material(
                     type: MaterialType.transparency,
                     child: TextFormField(
@@ -375,7 +376,7 @@ class _ViewEntryState extends State<ViewEntry> {
                         suffixIcon: Icon(Icons.open_in_new, size: 18),
                       ),
                       enabled: false,
-                      maxLines: null,
+                      maxLines: 1,
                       style: TextStyle(color: Colors.blue[800]),
                     ),
                   ),
@@ -387,7 +388,7 @@ class _ViewEntryState extends State<ViewEntry> {
 
             //Notes
             Hero(
-              tag: 'notes-${_currentEntry.notes}',
+              tag: 'notes-${_currentEntry.notes ?? 'empty'}',
               child: Material(
                 type: MaterialType.transparency,
                 child: ConstrainedBox(

@@ -171,11 +171,13 @@ class Vault {
       }
 
       //2) Request permissions
+      /*
       if (!await _requestStoragePermissions()) {
         if (isDialogShowing) Navigator.of(context).pop();
         _showErrorSnackBar(context, "Storage permission denied");
         return "Storage permission denied";
       }
+      */
 
       //3) Get database file and encryption key
       if (isCancelled) {
@@ -323,11 +325,13 @@ class Vault {
       }
 
       // 1. Request permissions
+      /*
       if (!await _requestStoragePermissions()) {
         if (isDialogShowing) Navigator.of(context).pop();
         _showErrorSnackBar(context, "Storage permission denied");
         return "Storage permission denied";
       }
+      */
 
       // 2. Pick backup file
       final result = await FilePicker.platform.pickFiles(
@@ -609,8 +613,9 @@ class Vault {
       );
     }
   }
-  
+
   //Request Storage Permission: For Backup and Restore Vault
+  /*
   Future<bool> _requestStoragePermissions() async {
     try {
       if (Platform.isAndroid) {
@@ -634,6 +639,7 @@ class Vault {
       return false;
     }
   }
+  */
 
   //Verify Mastear Password Consistency
   Future<bool> verifyMasterPasswordConsistency() async {

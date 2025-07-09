@@ -202,7 +202,7 @@ class _EditEntryState extends State<EditEntry> {
                           decoration: InputDecoration(
                             labelText: "Title",
                           ),
-                          maxLines: null,
+                          maxLines: 1,
                           minLines: 1,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -229,7 +229,7 @@ class _EditEntryState extends State<EditEntry> {
                                 decoration: InputDecoration(
                                   labelText: "Username",
                                 ),
-                                maxLines: null,
+                                maxLines: 1,
                               ),
                             ),
                             IconButton(
@@ -261,7 +261,7 @@ class _EditEntryState extends State<EditEntry> {
                                 decoration: InputDecoration(
                                   labelText: "Password",
                                 ),
-                                maxLines: null,
+                                maxLines: 1,
                               ),
                             ),
                             IconButton(

@@ -25,13 +25,13 @@ class DeletedEntry {
   static Future<DeletedEntry> fromMapAsync(Map<String, dynamic> map) async {
     return DeletedEntry(
       deletedId: map['deleted_id'],
-      title: map['title'],
-      username: await EncryptionHelper.decryptText(map['username']),
-      password: await EncryptionHelper.decryptText(map['password']),
-      url: map['url'],
-      notes: await EncryptionHelper.decryptText(map['notes']),
-      createdAt: map['created_at'],
-      lastUpdated: map['last_updated'],
+      title: map['title'] ?? '',
+      username: await EncryptionHelper.decryptText(map['username'] ?? ''),
+      password: map['password'] != null ? await EncryptionHelper.decryptText(map['password']) : null,
+      url: map['url'] ?? '',
+      notes: map['notes'] != null ? await EncryptionHelper.decryptText(map['notes']) : null,
+      createdAt: map['created_at'] ?? '',
+      lastUpdated: map['last_updated'] ?? '',
     );
   }
 
@@ -41,7 +41,7 @@ class DeletedEntry {
       'title': title,
       'username': await EncryptionHelper.encryptText(username),
       'password': await EncryptionHelper.encryptText(password ?? ''),
-      'url': url,
+      'url': url ?? '',
       'notes': await EncryptionHelper.encryptText(notes ?? ''),
       'created_at': createdAt,
       'last_updated': lastUpdated,
