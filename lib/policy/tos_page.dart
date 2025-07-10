@@ -13,7 +13,7 @@ class TermsOfServicePage {
   static const String tos_2_text2 = "• The app does not require payment.";
   static const String tos_2_text3 = "• The app does not contain ads.";
   static const String tos_2_text4 = "• The app does not use analytics or retargeting tools.";
-  static const String tos_2_text5 = "• The app is offered to users of all ages, including users under 13, with the expectation that parents or guardians provide supervision when necessary.";
+  static const String tos_2_text5 = "• The app is offered to users over 13 years old.";
 
   //3. User Data and Privacy
   static const String tos_3_header = "3. User Data and Privacy";
