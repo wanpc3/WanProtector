@@ -4,6 +4,7 @@ import 'models/entry.dart';
 import 'vault.dart';
 import 'alerts.dart';
 import 'normalize_url.dart';
+import 'generate_password.dart';
 
 class AddEntry extends StatefulWidget {
 
@@ -198,18 +199,54 @@ class _AddEntryState extends State<AddEntry> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  minLines: 1,
+                  maxLines: _obscurePassword ? 1 : null,
                   decoration: InputDecoration(
                     labelText: "Password",
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    )
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.vpn_key),
+                          tooltip: "Generate Password",
+                          onPressed: () async {
+                            final generatedPassword = await Navigator.push<String>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PasswordGenerator(
+                                  existingPassword: _passwordController.text
+                                ),
+                              ),
+                            );
+                            if (generatedPassword != null && generatedPassword.isNotEmpty) {
+                              setState(() {
+                                _passwordController.text = generatedPassword;
+                              });
+                            }
+                          },
+                        )
+                      ],
+                    ),
+                    // suffixIcon: IconButton(
+                    //   icon: Icon(
+                    //     _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    //   ),
+                    //   onPressed: () {
+                    //     setState(() {
+                    //       _obscurePassword = !_obscurePassword;
+                    //     });
+                    //   },
+                    // )
                   ),
                 ),
                 const SizedBox(height: 16),

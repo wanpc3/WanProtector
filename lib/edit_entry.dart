@@ -164,7 +164,7 @@ class _EditEntryState extends State<EditEntry> {
         appBar: AppBar(
           title: const Text("Edit Entry"),
           leading: IconButton(
-            icon: Icon(Icons.close),
+            icon: const Icon(Icons.close),
             onPressed: () async {
               final canPop = await _onWillPop();
               if (canPop) {
