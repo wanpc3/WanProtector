@@ -206,6 +206,7 @@ class _AddEntryState extends State<AddEntry> {
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+
                         IconButton(
                           icon: Icon(
                             _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -216,8 +217,9 @@ class _AddEntryState extends State<AddEntry> {
                             });
                           },
                         ),
+                        
                         IconButton(
-                          icon: const Icon(Icons.vpn_key),
+                          icon: const Icon(Icons.key),
                           tooltip: "Generate Password",
                           onPressed: () async {
                             final generatedPassword = await Navigator.push<String>(

@@ -6,6 +6,7 @@ import 'models/entry.dart';
 import 'vault.dart';
 import 'normalize_url.dart';
 import 'alerts.dart';
+import 'generate_password.dart';
 
 class EditEntry extends StatefulWidget {
   final Entry? entry;
@@ -264,6 +265,8 @@ class _EditEntryState extends State<EditEntry> {
                                 maxLines: 1,
                               ),
                             ),
+
+                            /*
                             IconButton(
                               icon: Icon(Icons.copy),
                               onPressed: () {
@@ -272,6 +275,8 @@ class _EditEntryState extends State<EditEntry> {
                                 );
                               },
                             ),
+                            */
+
                             IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -280,6 +285,26 @@ class _EditEntryState extends State<EditEntry> {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
                                 });
+                              },
+                            ),
+
+                            IconButton(
+                              icon: const Icon(Icons.key),
+                              tooltip: "Generate Password",
+                              onPressed: () async {
+                                final generatedPassword = await Navigator.push<String>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PasswordGenerator(
+                                      existingPassword: _passwordController.text,
+                                    ),
+                                  ),
+                                );
+                                if (generatedPassword != null && generatedPassword.isNotEmpty) {
+                                  setState(() {
+                                    _passwordController.text = generatedPassword;
+                                  });
+                                }
                               },
                             ),
                           ],
