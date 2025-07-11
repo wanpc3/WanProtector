@@ -223,6 +223,8 @@ class _EditEntryState extends State<EditEntry> {
         if (context.mounted) Navigator.pop(context, true);
 
         Navigator.pop(context);
+      } else {
+        Navigator.pop(context);
       }
 
     } catch (e) {
@@ -395,6 +397,8 @@ class _EditEntryState extends State<EditEntry> {
                                   setState(() {
                                     _passwordController.text = generatedPassword;
                                   });
+
+                                  //FocusScope.of(context).unfocus();
                                 }
                               },
                             ),

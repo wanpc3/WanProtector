@@ -109,6 +109,9 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
             onPressed: _canApply
                 ? () async {
 
+                  //Hide keyboard first
+                  FocusScope.of(context).unfocus();
+
                     //Alert Dialog
                     if (widget.existingPassword != null && widget.existingPassword!.isNotEmpty) {
                       final confirm = await showDialog<bool>(
@@ -151,7 +154,9 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
                         ),
                       );
                     }
+
                     Navigator.pop(context, controller.text);
+
                   }
                 : null,
             child: Text(
