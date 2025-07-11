@@ -7,13 +7,14 @@ import 'vault.dart';
 import 'normalize_url.dart';
 import 'alerts.dart';
 import 'generate_password.dart';
+import 'deleted_state.dart';
 
 class EditEntry extends StatefulWidget {
-  final Entry? entry;
+  final Entry entry;
 
   const EditEntry({
     Key? key,
-    this.entry,
+    required this.entry,
   }): super(key: key);
 
   @override
@@ -32,30 +33,32 @@ class _EditEntryState extends State<EditEntry> {
   final Vault _dbHelper = Vault();
   bool _hasChanges = false;
 
+  late Entry _currentEntry;
+
   @override
   void initState() {
     super.initState();
-    if (widget.entry != null) {
-      _titleController.text = widget.entry!.title;
-      _usernameController.text = widget.entry!.username;
-      _passwordController.text = widget.entry!.password!;
-      _urlController.text = widget.entry!.url!;
-      _notesController.text = widget.entry!.notes!;
-    }
-
+    _titleController.text = widget.entry.title;
+    _usernameController.text = widget.entry.username;
+    _passwordController.text = widget.entry.password!;
+    _urlController.text = widget.entry.url!;
+    _notesController.text = widget.entry.notes!;
+  
     _titleController.addListener(_checkForChanges);
     _usernameController.addListener(_checkForChanges);
     _passwordController.addListener(_checkForChanges);
     _urlController.addListener(_checkForChanges);
     _notesController.addListener(_checkForChanges);
+
+    _currentEntry = widget.entry;
   }
 
   void _checkForChanges() {
-    final newState = _titleController.text != widget.entry!.title ||
-        _usernameController.text != widget.entry!.username ||
-        _passwordController.text != (widget.entry!.password) ||
-        _urlController.text != (widget.entry!.url) ||
-        _notesController.text != (widget.entry!.notes);
+    final newState = _titleController.text != widget.entry.title ||
+        _usernameController.text != widget.entry.username ||
+        _passwordController.text != (widget.entry.password) ||
+        _urlController.text != (widget.entry.url) ||
+        _notesController.text != (widget.entry.notes);
 
     if (newState != _hasChanges) {
       setState(() {
@@ -104,12 +107,13 @@ class _EditEntryState extends State<EditEntry> {
     return shouldPop ?? false;
   }
 
+  //Save Entry
   void _saveEntry() async {
     if (_formKey.currentState!.validate()) {
 
       await Future.delayed(Duration(microseconds: 300));
 
-      final id = widget.entry!.id;
+      final id = widget.entry.id;
       final newTitle = _titleController.text.trim();
       final newUsername = _usernameController.text.trim();
       final newPassword = _passwordController.text.trim();
@@ -156,6 +160,60 @@ class _EditEntryState extends State<EditEntry> {
     }
   }
 
+  //Remove Entry
+  void _removeEntry(int id) async {
+    showDialog(
+      context: context,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      await _dbHelper.softDeleteEntry(id);
+
+      final stateManager = context.read<EntriesState>();
+      await stateManager.refreshEntries();
+
+      final deletedStateManager = context.read<DeletedState>();
+      await deletedStateManager.refreshDeletedEntries();
+
+      if (context.mounted) Navigator.of(context).pop();
+
+      //Snackbar message
+      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+      if (alertsEnabled && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${_currentEntry.title} moved to Deleted Entries',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red[400],
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+
+      if (context.mounted) Navigator.pop(context, true);
+
+      Navigator.pop(context);
+
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -176,9 +234,21 @@ class _EditEntryState extends State<EditEntry> {
           backgroundColor: const Color(0xFF424242),
           foregroundColor: Colors.white,
           actions: [
+
+            //Check button
+            /*
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _saveEntry,
+            ),
+            */
+
+            //Remove Icon
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                _removeEntry(widget.entry.id!);
+              },
             ),
           ],
         ),
@@ -195,7 +265,7 @@ class _EditEntryState extends State<EditEntry> {
                   children: [
                     //Title
                     Hero(
-                      tag: 'title-${widget.entry!.id}',
+                      tag: 'title-${widget.entry.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(
@@ -219,7 +289,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     //Username
                     Hero(
-                      tag: 'username-${widget.entry!.id}',
+                      tag: 'username-${widget.entry.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: Row(
@@ -250,7 +320,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     //Password
                     Hero(
-                      tag: 'password-${widget.entry!.id}',
+                      tag: 'password-${widget.entry.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: Row(
@@ -316,7 +386,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     //Url
                     Hero(
-                      tag: 'url-${widget.entry!.id}',
+                      tag: 'url-${widget.entry.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(
@@ -332,7 +402,7 @@ class _EditEntryState extends State<EditEntry> {
 
                     //Notes
                     Hero(
-                      tag: 'notes-${widget.entry!.id}',
+                      tag: 'notes-${widget.entry.id}',
                       child: Material(
                         type: MaterialType.transparency,
                         child: TextFormField(
@@ -346,6 +416,27 @@ class _EditEntryState extends State<EditEntry> {
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 16),
+
+                    //Ok Button
+                    ElevatedButton(
+                      onPressed: _saveEntry,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Colors.amber,
+                        foregroundColor: const Color(0xFF212121),
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: const Text(
+                        "OK",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).viewInsets.bottom
+                    )
                   ],
                 ),
               )

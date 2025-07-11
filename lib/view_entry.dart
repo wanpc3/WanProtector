@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'models/entry.dart';
-import 'deleted_state.dart';
-import 'entries_state.dart';
+// import 'deleted_state.dart';
+// import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
 import 'normalize_url.dart';
@@ -61,6 +61,7 @@ class _ViewEntryState extends State<ViewEntry> {
   }
 
   //Entry removal
+  /*
   void _removeEntry(int id) async {
     showDialog(
       context: context,
@@ -111,6 +112,7 @@ class _ViewEntryState extends State<ViewEntry> {
       }
     }
   }
+  */
 
   void _navigateToEditEntry(Entry entry) async {
     final result = await Navigator.push(
@@ -176,14 +178,21 @@ class _ViewEntryState extends State<ViewEntry> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) async {
+              
+              if (value == 'Edit') {
+                _navigateToEditEntry(_currentEntry);
+              }
+
+              /*
               if (value == 'Delete') {
                 _removeEntry(widget.entry.id!);
               } else if (value == 'Edit') {
                 _navigateToEditEntry(_currentEntry);
               }
+              */
             },
             itemBuilder: (_) => const [
-              PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
+              //PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
               PopupMenuItem(value: 'Edit', child: Text("Edit Entry")),
             ],
           )
