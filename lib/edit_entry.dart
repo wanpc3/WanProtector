@@ -171,38 +171,59 @@ class _EditEntryState extends State<EditEntry> {
     );
 
     try {
-      await _dbHelper.softDeleteEntry(id);
 
-      final stateManager = context.read<EntriesState>();
-      await stateManager.refreshEntries();
-
-      final deletedStateManager = context.read<DeletedState>();
-      await deletedStateManager.refreshDeletedEntries();
-
-      if (context.mounted) Navigator.of(context).pop();
-
-      //Snackbar message
-      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${_currentEntry.title} moved to Deleted Entries',
-              style: TextStyle(color: Colors.white),
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Remove Entry?'),
+          content: Text('${_currentEntry.title} will be moved to Deleted Entries page'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
             ),
-            backgroundColor: Colors.red[400],
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Proceed'),
             ),
-          ),
-        );
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        await _dbHelper.softDeleteEntry(id);
+
+        final stateManager = context.read<EntriesState>();
+        await stateManager.refreshEntries();
+
+        final deletedStateManager = context.read<DeletedState>();
+        await deletedStateManager.refreshDeletedEntries();
+
+        if (context.mounted) Navigator.of(context).pop();
+
+        //Snackbar message
+        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+        if (alertsEnabled && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${_currentEntry.title} moved to Deleted Entries',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red[400],
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+
+        if (context.mounted) Navigator.pop(context, true);
+
+        Navigator.pop(context);
       }
-
-      if (context.mounted) Navigator.pop(context, true);
-
-      Navigator.pop(context);
 
     } catch (e) {
       if (context.mounted) {

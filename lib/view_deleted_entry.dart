@@ -191,16 +191,16 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text("Permanently Delete?"),
-                    content: Text('This action cannot be undone. Are you sure?'),
+                    title: const Text('Permanently Delete?'),
+                    content: const Text('This action cannot be undone. Are you sure?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: Text('Cancel')
+                        child: const Text('Cancel')
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true), 
-                        child: Text('Delete')
+                        child: const Text('Delete')
                       ),
                     ],
                   ),
