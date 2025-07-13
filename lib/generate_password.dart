@@ -144,7 +144,7 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
                         SnackBar(
                           content: const Text(
                             'Password Applied',
-                            style: TextStyle(color: Colors.white),
+                            //style: TextStyle(color: Colors.white),
                           ),
                           duration: const Duration(seconds: 2),
                           behavior: SnackBarBehavior.floating,

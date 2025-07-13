@@ -144,7 +144,7 @@ class _ViewEntryState extends State<ViewEntry> {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.fastLinearToSlowEaseIn;
-        
+
         return SlideTransition(
           position: animation.drive(
             Tween(begin: begin, end: end).chain(CurveTween(curve: curve))
