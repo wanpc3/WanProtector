@@ -7,7 +7,7 @@ import 'vault.dart';
 import 'normalize_url.dart';
 import 'alerts.dart';
 import 'generate_password.dart';
-import 'deleted_state.dart';
+//import 'deleted_state.dart';
 
 class EditEntry extends StatefulWidget {
   final Entry entry;
@@ -33,7 +33,7 @@ class _EditEntryState extends State<EditEntry> {
   final Vault _dbHelper = Vault();
   bool _hasChanges = false;
 
-  late Entry _currentEntry;
+  //late Entry _currentEntry;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _EditEntryState extends State<EditEntry> {
     _urlController.addListener(_checkForChanges);
     _notesController.addListener(_checkForChanges);
 
-    _currentEntry = widget.entry;
+    //_currentEntry = widget.entry;
   }
 
   void _checkForChanges() {
@@ -161,6 +161,7 @@ class _EditEntryState extends State<EditEntry> {
   }
 
   //Remove Entry
+  /*
   void _removeEntry(int id) async {
     showDialog(
       context: context,
@@ -236,6 +237,7 @@ class _EditEntryState extends State<EditEntry> {
       }
     }
   }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -259,20 +261,20 @@ class _EditEntryState extends State<EditEntry> {
           actions: [
 
             //Check button
-            /*
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _saveEntry,
             ),
-            */
 
             //Remove Icon
+            /*
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
                 _removeEntry(widget.entry.id!);
               },
             ),
+            */
           ],
         ),
         body: SingleChildScrollView(
@@ -445,6 +447,7 @@ class _EditEntryState extends State<EditEntry> {
                     const SizedBox(height: 16),
 
                     //Ok Button
+                    /*
                     ElevatedButton(
                       onPressed: _saveEntry,
                       style: ElevatedButton.styleFrom(
@@ -461,7 +464,10 @@ class _EditEntryState extends State<EditEntry> {
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).viewInsets.bottom
-                    )
+                    ),
+
+                    const SizedBox(height: 16),
+                    */
                   ],
                 ),
               )

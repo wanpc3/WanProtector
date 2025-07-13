@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'models/entry.dart';
-// import 'deleted_state.dart';
-// import 'entries_state.dart';
+import 'deleted_state.dart';
+import 'entries_state.dart';
 import 'vault.dart';
 import 'edit_entry.dart';
 import 'normalize_url.dart';
@@ -61,7 +61,6 @@ class _ViewEntryState extends State<ViewEntry> {
   }
 
   //Entry removal
-  /*
   void _removeEntry(int id) async {
     showDialog(
       context: context,
@@ -72,33 +71,54 @@ class _ViewEntryState extends State<ViewEntry> {
     );
 
     try {
-      await _dbHelper.softDeleteEntry(id);
-
-      final stateManager = context.read<EntriesState>();
-      await stateManager.refreshEntries();
-
-      final deletedStateManager = context.read<DeletedState>();
-      await deletedStateManager.refreshDeletedEntries();
-
-      if (context.mounted) Navigator.of(context).pop();
-
-      //Snackbar message
-      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${_currentEntry.title} moved to Deleted Entries',
-              style: TextStyle(color: Colors.white),
+      
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Remove Entry?'),
+          content: Text('${_currentEntry.title} will be moved to Deleted Entries page'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
             ),
-            backgroundColor: Colors.red[400],
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Proceed'),
             ),
-          ),
-        );
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        await _dbHelper.softDeleteEntry(id);
+
+        final stateManager = context.read<EntriesState>();
+        await stateManager.refreshEntries();
+
+        final deletedStateManager = context.read<DeletedState>();
+        await deletedStateManager.refreshDeletedEntries();
+
+        if (context.mounted) Navigator.of(context).pop();
+
+        //Snackbar message
+        final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+        if (alertsEnabled && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${_currentEntry.title} moved to Deleted Entries',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red[400],
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
       }
 
       if (context.mounted) Navigator.pop(context, true);
@@ -112,7 +132,6 @@ class _ViewEntryState extends State<ViewEntry> {
       }
     }
   }
-  */
 
   void _navigateToEditEntry(Entry entry) async {
     final result = await Navigator.push(
@@ -179,20 +198,21 @@ class _ViewEntryState extends State<ViewEntry> {
             icon: const Icon(Icons.more_vert),
             onSelected: (value) async {
               
+              /*
               if (value == 'Edit') {
                 _navigateToEditEntry(_currentEntry);
               }
+              */
 
-              /*
               if (value == 'Delete') {
                 _removeEntry(widget.entry.id!);
               } else if (value == 'Edit') {
                 _navigateToEditEntry(_currentEntry);
               }
-              */
+              
             },
             itemBuilder: (_) => const [
-              //PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
+              PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
               PopupMenuItem(value: 'Edit', child: Text("Edit Entry")),
             ],
           )

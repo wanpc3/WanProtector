@@ -53,37 +53,58 @@ class _ChangeMpScreen extends State<ChangeMp> {
       });
     }
 
-    //1) Update password via Vault with encryption
-    await Vault().updateMasterPassword(newPassword);
-
-    //2) Overwrite secure token
-    final encryptedNewPassword = await EncryptionHelper.encryptText(newPassword);
-    await _secureStorage.write(key: 'auth_token', value: encryptedNewPassword);
-
-    //3) Force logout for security reasons
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Your master password has been changed. For security reasons, you will now be logged out.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(),
-                  ),
-                  (route) => false,
-                );
-              },
-            ),
-          ],
-        );
-      },
+    //Alert before proceed
+    final confirm = await showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: const Text('Change Master Password'),
+        content: const Text('You are about to change your master password. Do you wish to proceed?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Proceed'),
+          ),
+        ],
+      ),
     );
+
+    if (confirm == true) {
+      //1) Update password via Vault with encryption
+      await Vault().updateMasterPassword(newPassword);
+
+      //2) Overwrite secure token
+      final encryptedNewPassword = await EncryptionHelper.encryptText(newPassword);
+      await _secureStorage.write(key: 'auth_token', value: encryptedNewPassword);
+
+      //3) Force logout for security reasons
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Success'),
+            content: const Text('Your master password has been changed. For security reasons, you will now be logged out.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(),
+                    ),
+                    (route) => false,
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override

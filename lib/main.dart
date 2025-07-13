@@ -386,24 +386,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.redAccent,
                 ),
                 title: const Text('Exit Vault'),
-                onTap: () {
+                onTap: () async {
 
-                  Navigator.of(context).pushAndRemoveUntil(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(-1.0, 0.0);
-                        const end = Offset.zero;
-                        const curve = Curves.easeInOut;
-                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      }
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Exit Vault?'),
+                      content: const Text('You will be logged out from the vault. Do you wish to proceed?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false), 
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Proceed'),
+                        ),
+                      ],
                     ),
-                    (route) => false,
                   );
+
+                  if (confirm == true) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(-1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.easeInOut;
+                          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                          return SlideTransition(
+                            position: animation.drive(tween),
+                            child: child,
+                          );
+                        }
+                      ),
+                      (route) => false,
+                    );
+                  }
                   
                   // Navigator.of(context).pushAndRemoveUntil(
                   //   PageRouteBuilder(
