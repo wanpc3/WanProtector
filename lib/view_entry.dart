@@ -155,48 +155,7 @@ Notes: $decryptedNotes
 
   void _shareEntry(String title) async {
     final content = await generateShareableEntryText(_currentEntry);
-
-    try {
-      await Share.share(content, subject: '$title');
-
-      //Show success Snackbar
-      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Entry shared successfully',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.green[400],
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      //Show error Snackbar
-      final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Failed to share entry',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red[400],
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-      }
-    }
+    await Share.share(content, subject: '$title');
   }
 
   void _navigateToEditEntry(Entry entry) async {
