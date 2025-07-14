@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'models/entry.dart';
 import 'deleted_state.dart';
 import 'entries_state.dart';
@@ -60,8 +61,8 @@ class _ViewEntryState extends State<ViewEntry> {
     super.dispose();
   }
 
-  //Entry removal
-  void _removeEntry(int id) async {
+  //Delete Entry
+  void _deleteEntry(int id) async {
     showDialog(
       context: context,
       builder: (_) => const Center(
@@ -75,7 +76,7 @@ class _ViewEntryState extends State<ViewEntry> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Remove Entry?'),
+          title: const Text('Delete Entry?'),
           content: Text('${_currentEntry.title} will be moved to Deleted Entries page'),
           actions: [
             TextButton(
@@ -131,6 +132,30 @@ class _ViewEntryState extends State<ViewEntry> {
         );
       }
     }
+  }
+
+  //Share Entry
+  Future<String> generateShareableEntryText(Entry entry) async {
+    final decryptedUsername = entry.username;
+    final decryptedPassword = entry.password ?? '-';
+    final decryptedNotes = entry.notes ?? '-';
+    final url = entry.url ?? '-';
+
+    return '''
+${entry.title}
+
+Title: ${entry.title}
+Username: $decryptedUsername
+Password: $decryptedPassword
+URL: $url
+Notes: $decryptedNotes
+
+''';
+  }
+
+  void _shareEntry(String title) async {
+    final content = await generateShareableEntryText(_currentEntry);
+    Share.share(content, subject: '$title');
   }
 
   void _navigateToEditEntry(Entry entry) async {
@@ -205,15 +230,18 @@ class _ViewEntryState extends State<ViewEntry> {
               */
 
               if (value == 'Delete') {
-                _removeEntry(widget.entry.id!);
+                _deleteEntry(widget.entry.id!);
               } else if (value == 'Edit') {
                 _navigateToEditEntry(_currentEntry);
+              } else if (value == 'Share') {
+                _shareEntry(widget.entry.title);
               }
               
             },
             itemBuilder: (_) => const [
-              PopupMenuItem(value: 'Delete', child: Text("Delete Entry")),
-              PopupMenuItem(value: 'Edit', child: Text("Edit Entry")),
+              PopupMenuItem(value: 'Delete', child: Text("Delete")),
+              PopupMenuItem(value: 'Edit', child: Text("Edit")),
+              PopupMenuItem(value: 'Share', child: Text("Share"),),
             ],
           )
         ],

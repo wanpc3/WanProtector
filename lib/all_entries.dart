@@ -31,7 +31,7 @@ class AllEntries extends StatefulWidget {
 class AllEntriesState extends State<AllEntries> {
   Timer? _searchDebounce;
   bool _showSwipeTip = true;
-  bool _hideSwipeTip = false;
+  //bool _hideSwipeTip = false;
 
   @override
   void initState() {
@@ -198,6 +198,7 @@ class AllEntriesState extends State<AllEntries> {
                 : ListView.builder(
                     itemCount: sortedEntries.length,
                     itemBuilder: (context, index) {
+
                       final entry = sortedEntries[index];
 
                       return Column(
@@ -220,7 +221,7 @@ class AllEntriesState extends State<AllEntries> {
                                     final confirm = await showDialog<bool>(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: const Text('Remove Entry?'),
+                                        title: const Text('Delete Entry?'),
                                         content: Text('${entry.title} will be moved to Deleted Entries page'),
                                         actions: [
                                           TextButton(
@@ -245,7 +246,10 @@ class AllEntriesState extends State<AllEntries> {
                                       if (alertsEnabled && context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text('${entry.title} moved to Deleted Entries'),
+                                            content: Text(
+                                              '${entry.title} moved to Deleted Entries',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
                                             backgroundColor: Colors.red[400],
                                             behavior: SnackBarBehavior.floating,
                                             shape: RoundedRectangleBorder(

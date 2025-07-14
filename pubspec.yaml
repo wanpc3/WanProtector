@@ -22,6 +22,7 @@ dependencies:
   open_file: ^3.5.10
   shared_preferences: ^2.5.3
   flutter_slidable: ^4.0.0
+  share_plus: ^11.0.0
   in_app_update: ^4.2.3
 
   #Security
