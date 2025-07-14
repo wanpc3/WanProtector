@@ -120,7 +120,7 @@ class AllEntriesState extends State<AllEntries> {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            Icon(Icons.gesture, color: Theme.of(context).primaryColor),
+            //Icon(Icons.gesture, color: Theme.of(context).primaryColor),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
