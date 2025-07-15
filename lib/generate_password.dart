@@ -139,18 +139,29 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
 
                     //Show SnackBar
                     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                    if (alertsEnabled && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                      ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
                         SnackBar(
-                          content: const Text(
-                            'Password Applied',
-                            //style: TextStyle(color: Colors.white),
+                          content: Center(
+                            child: const Text(
+                              '🔑 Password Applied',
+                            ),
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 40.0,
+                            vertical: 20.0,
+                          ),
+                          shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
                           ),
                           duration: const Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                         ),
                       );
                     }

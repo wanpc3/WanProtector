@@ -148,12 +148,16 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
                                   //Snackbar message
                                   final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                                  if (alertsEnabled && context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                  if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                                    ScaffoldMessenger.of(context)
+                                    ..hideCurrentSnackBar()
+                                    ..showSnackBar(
                                       SnackBar(
-                                        content: Text(
-                                          '${deletedEntry.title} Restored',
-                                          style: TextStyle(color: Colors.white),
+                                        content: Center(
+                                          child: Text(
+                                            '${deletedEntry.title} Restored',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
                                         ),
                                         backgroundColor: Colors.green[400],
                                         duration: Duration(seconds: 2),
@@ -197,8 +201,10 @@ class DeletedEntriesState extends State<DeletedEntries> {
 
                                     //Snackbar message
                                     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                                    if (alertsEnabled && context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                    if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                                      ScaffoldMessenger.of(context)
+                                      ..hideCurrentSnackBar()
+                                      ..showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             '${deletedEntry.title} permanently deleted',

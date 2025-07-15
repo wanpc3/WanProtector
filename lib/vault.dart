@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:permission_handler/permission_handler.dart';
+//import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
@@ -575,19 +575,31 @@ class Vault {
   //Show Cancel Snackbar
   void _showCancellationSnackBar(BuildContext context, String message) {
     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-    if (alertsEnabled && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+      ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(color: Colors.white),
+          content: Center(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.symmetric(
+            horizontal: 40.0,
+            vertical: 20.0,
+            ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 12,
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -596,19 +608,31 @@ class Vault {
   //Show Error Snackbar
   void _showErrorSnackBar(BuildContext context, String message) {
     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-    if (alertsEnabled && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+      ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            style: TextStyle(color: Colors.white),
+          content: Center(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.symmetric(
+            horizontal: 40.0,
+            vertical: 20.0,
+            ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 12,
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -1049,6 +1073,7 @@ class Vault {
             'url': deletedEntry.first['url'],
             'notes': deletedEntry.first['notes'],
             'created_at': deletedEntry.first['created_at'],
+            'last_updated': DateTime.now().toIso8601String(),
           });
 
           // 3. Remove from deleted table

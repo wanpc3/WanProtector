@@ -9,6 +9,7 @@ import 'deleted_state.dart';
 import 'alerts.dart';
 import 'vault.dart';
 import 'normalize_url.dart';
+import 'copy_to_clipboard.dart';
 
 class ViewDeletedEntry extends StatefulWidget {
   final DeletedEntry deletedEntry;
@@ -75,12 +76,16 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
       //Snackbar message
       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+        ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
           SnackBar(
-            content: Text(
-              '${_currentDeletedEntry.title} Restored',
-              style: TextStyle(color: Colors.white),
+            content: Center(
+              child: Text(
+                '${_currentDeletedEntry.title} Restored',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             backgroundColor: Colors.green[400],
             duration: Duration(seconds: 2),
@@ -124,12 +129,16 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
 
       //Snackbar message
       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+        ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
           SnackBar(
-            content: Text(
-              '${_currentDeletedEntry.title} permanently deleted',
-              style: TextStyle(color: Colors.white),
+            content: Center(
+              child: Text(
+                '${_currentDeletedEntry.title} permanently deleted',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             backgroundColor: Colors.red[400],
             duration: Duration(seconds: 2),
@@ -266,23 +275,9 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     IconButton(
                       icon: Icon(Icons.copy),
                       onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _usernameController.text),
-                        );
-
-                        //Snackbar message
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                        if (alertsEnabled && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Username copied to clipboard'),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
+                        if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                          copyToClipboardWithFeedback(context, '👤', 'Username', _usernameController.text);
                         }
                       },
                     ),
@@ -318,23 +313,9 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                     IconButton(
                       icon: Icon(Icons.copy),
                       onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _passwordController.text),
-                        );
-
-                        //Snackbar message
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                        if (alertsEnabled && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Password copied to clipboard'),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              duration: const Duration(seconds: 1),
-                            ),
-                          );
+                        if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                          copyToClipboardWithFeedback(context, '🔑', 'Password', _passwordController.text);
                         }
                       },
                     ),
@@ -361,17 +342,39 @@ class _ViewDeletedEntryState extends State<ViewDeletedEntry> {
                 
                 final rawUrl = _currentDeletedEntry.url ?? '';
                 final formattedUrl = NormalizeUrl.urlFormatter(rawUrl);
+                final alertsEnabled = context.read<AlertsProvider>().showAlerts;
 
-                if (formattedUrl.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: const Text('The URL field is empty.')),
+                if (alertsEnabled && formattedUrl.isEmpty && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                  ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    SnackBar(
+                      content: Center(
+                        child: const Text('🔗 The URL field is empty'),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 40.0,
+                        vertical: 20.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
                   );
                   return;
                 }
 
+                if (!alertsEnabled && formattedUrl.isEmpty) return;
+
                 //Ask permission to leave the app to access clicked link
                 final confirmed = await showDialog(
-                  context: context, 
+                  context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text("Open Link in Browser?"),

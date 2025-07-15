@@ -85,19 +85,23 @@ class _AddEntryState extends State<AddEntry> {
 
       //Snackbar message
       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-      if (alertsEnabled && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+        ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
           SnackBar(
-            content: const Text(
-              'New Entry Added',
-              style: TextStyle(color: Colors.white),
+            content: Center(
+              child: const Text(
+                'New Entry Added',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             backgroundColor: Colors.green[400],
-            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            duration: const Duration(seconds: 2),
           ),
         );
       }

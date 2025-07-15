@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 import 'alerts.dart';
+import 'copy_to_clipboard.dart';
 
 class PasswordGenerator extends StatefulWidget {
 
@@ -136,17 +137,7 @@ class _PasswordGeneratorState extends State<PasswordGenerator> {
                     //Snackbar message
                     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                     if (alertsEnabled && context.mounted) {
-                      Clipboard.setData(ClipboardData(text: controller.text));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Copied to clipboard'),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
+                      copyToClipboardWithFeedback(context, '🔑', 'Password', controller.text);
                     }
 
                   },

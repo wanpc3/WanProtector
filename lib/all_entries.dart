@@ -243,14 +243,18 @@ class AllEntriesState extends State<AllEntries> {
 
                                       //Snackbar message
                                       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                                      if (alertsEnabled && context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                                        ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(
                                           SnackBar(
-                                            content: Text(
-                                              '${entry.title} moved to Deleted Entries',
-                                              style: TextStyle(color: Colors.white),
+                                            content: Center(
+                                              child: Text(
+                                                '${entry.title} moved to Deleted Entries',
+                                                style: TextStyle(color: Colors.white),
+                                              ),
                                             ),
-                                            backgroundColor: Colors.red[400],
+                                            backgroundColor: Colors.red[400], 
                                             behavior: SnackBarBehavior.floating,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),

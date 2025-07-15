@@ -159,15 +159,25 @@ class _SettingsState extends State<Settings> {
 
                       //Snackbar message
                       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                      if (alertsEnabled && context.mounted) {
+                      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text('Screenshot Allowed'),
-                            duration: const Duration(seconds: 1),
+                            content: Center(
+                              child: const Text('Screenshot Allowed'),
+                            ),
                             behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 40.0,
+                              vertical: 20.0,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            duration: const Duration(seconds: 1),
                           ),
                         );
                       }
@@ -181,15 +191,25 @@ class _SettingsState extends State<Settings> {
 
                       //Snackbar message
                       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                      if (alertsEnabled && context.mounted) {
+                      if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text('Screenshot Not Allowed'),
-                            duration: const Duration(seconds: 1),
+                            content: Center(
+                              child: const Text('Screenshot Not Allowed'),
+                            ),
                             behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 40.0,
+                              vertical: 20.0,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            duration: const Duration(seconds: 1),
                           ),
                         );
                       }
@@ -223,15 +243,25 @@ class _SettingsState extends State<Settings> {
 
                     //Snackbar message
                     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-                    if (alertsEnabled && context.mounted) {
+                    if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Entries Sorted by "$value"'),
-                          duration: const Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                          content: Center(
+                            child: Text('Entries Sorted by "$value"'),
                           ),
+                          behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 40.0,
+                              vertical: 20.0,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            duration: const Duration(seconds: 1),
                         ),
                       );
                     }
