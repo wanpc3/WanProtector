@@ -11,13 +11,14 @@ import 'auto_lock.dart';
 import 'alerts.dart';
 import 'sort_provider.dart';
 import 'screenshot_util.dart';
+import 'settings_alert.dart';
 
 class Settings extends StatefulWidget {
 
   const Settings({
     Key? key,
   }): super(key: key);
-  
+
   @override
   _SettingsState createState() => _SettingsState();
 }
@@ -154,32 +155,13 @@ class _SettingsState extends State<Settings> {
                   if (value) {
                     //Enable screenshots
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      
+
                       toggleScreenshot(true);
 
                       //Snackbar message
                       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                       if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Center(
-                              child: const Text('Screenshot Allowed'),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 40.0,
-                              vertical: 20.0,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
+                        settingsAlertMessage(context, '📱', 'Screenshot Allowed');
                       }
 
                     });
@@ -192,26 +174,7 @@ class _SettingsState extends State<Settings> {
                       //Snackbar message
                       final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                       if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Center(
-                              child: const Text('Screenshot Not Allowed'),
-                            ),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 40.0,
-                              vertical: 20.0,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
+                        settingsAlertMessage(context, '📱', 'Screenshot Not Allowed');
                       }
                     });
                   }
@@ -244,26 +207,7 @@ class _SettingsState extends State<Settings> {
                     //Snackbar message
                     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                     if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Center(
-                            child: Text('Entries Sorted by "$value"'),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 40.0,
-                              vertical: 20.0,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            duration: const Duration(seconds: 1),
-                        ),
-                      );
+                      sortEntriesMessage(context, '📶', 'Entries Sorted by', value);
                     }
                   }
                 },

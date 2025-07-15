@@ -256,10 +256,14 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isExiting) {
           _lastBackPressed = now;
           final alertsEnabled = context.read<AlertsProvider>().showAlerts;
-          if (alertsEnabled && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+            ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
               SnackBar(
-                content: const Text('Press back again to exit and log out'),
+                content: Center(
+                  child: const Text('Press back again to exit and log out'),
+                ),
                 duration: Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(

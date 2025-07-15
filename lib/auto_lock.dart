@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'alerts.dart';
+import 'settings_alert.dart';
 
 /*
 class AutoLock extends StatelessWidget {
@@ -67,28 +68,29 @@ class AutoLockState extends ChangeNotifier {
     final alertsEnabled = context.read<AlertsProvider>().showAlerts;
     if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
       final message = _isAutoLockEnabled ? 'Auto-Lock Enabled' : 'Auto-Lock Disabled';
-      ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Center(
-            child: Text(message),
-          ),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.symmetric(
-            horizontal: 40.0,
-            vertical: 20.0,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
-          ),
-          duration: const Duration(seconds: 1),
-        ),
-      );
+        settingsAlertMessage(context, '🔒', message);
+      // ScaffoldMessenger.of(context)
+      // ..hideCurrentSnackBar()
+      // ..showSnackBar(
+      //   SnackBar(
+      //     content: Center(
+      //       child: Text(message),
+      //     ),
+      //     behavior: SnackBarBehavior.floating,
+      //     margin: const EdgeInsets.symmetric(
+      //       horizontal: 40.0,
+      //       vertical: 20.0,
+      //     ),
+      //     shape: RoundedRectangleBorder(
+      //       borderRadius: BorderRadius.circular(12),
+      //     ),
+      //     padding: const EdgeInsets.symmetric(
+      //       horizontal: 20,
+      //       vertical: 12,
+      //     ),
+      //     duration: const Duration(seconds: 1),
+      //   ),
+      // );
     }
   }
 }

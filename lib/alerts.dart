@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 //import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'settings_alert.dart';
 
 /*
 class Alerts extends StatelessWidget {
@@ -69,27 +70,6 @@ class AlertsProvider extends ChangeNotifier {
 
     //Snackbar message
     final message = _showAlerts ? 'Alert Messages Enabled' : 'Alert Messages Disabled';
-    ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Center(
-          child: Text(message),
-        ),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.symmetric(
-          horizontal: 40.0,
-          vertical: 20.0,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 12,
-          ),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    settingsAlertMessage(context, '🔔', message);
   }
 }
