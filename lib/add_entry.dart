@@ -159,6 +159,23 @@ class _AddEntryState extends State<AddEntry> {
           title: const Text("Add Entry"),
           backgroundColor: const Color(0xFF424242),
           foregroundColor: Colors.white,
+          actions: [
+
+            //OK button (i.e. submit button)
+            TextButton(
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () {
+
+                //Submit entry detail
+                _submitForm();
+
+              }
+            ),
+
+          ],
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16.0),
@@ -281,6 +298,7 @@ class _AddEntryState extends State<AddEntry> {
 
                 const SizedBox(height: 16),
 
+                /*
                 ElevatedButton(
                   onPressed: _submitForm, 
                   style: ElevatedButton.styleFrom(
@@ -298,6 +316,7 @@ class _AddEntryState extends State<AddEntry> {
                 SizedBox(
                   height: MediaQuery.of(context).viewInsets.bottom
                 ),
+                */
               ],
             ),
           ),

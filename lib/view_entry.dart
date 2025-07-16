@@ -265,8 +265,19 @@ Notes: $decryptedNotes
                 type: MaterialType.transparency,
                 child: TextFormField(
                   controller: _titleController,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                   decoration: InputDecoration(
                     labelText: "Title",
+                    labelStyle: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                    ),
+                    disabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                      ),
+                    ),
                   ),
                   enabled: false,
                   maxLines: 1,
@@ -288,8 +299,19 @@ Notes: $decryptedNotes
                       child: TextFormField(
                         controller: _usernameController,
                         enabled: false,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                         decoration: InputDecoration(
                           labelText: "Username",
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                          ),
+                          disabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                            ),
+                          ),
                         ),
                         maxLines: 1,
                       ),
@@ -300,6 +322,8 @@ Notes: $decryptedNotes
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                         if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
                           copyToClipboardWithFeedback(context, '👤', 'Username', _usernameController.text);
+                        } else {
+                          Clipboard.setData(ClipboardData(text: _usernameController.text));
                         }
                       },
                     ),
@@ -322,8 +346,19 @@ Notes: $decryptedNotes
                         controller: _passwordController,
                         enabled: false,
                         obscureText: _obscurePassword,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                         decoration: InputDecoration(
                           labelText: "Password",
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                          ),
+                          disabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                            ),
+                          ),
                         ),
                         minLines: 1,
                         maxLines: _obscurePassword ? 1 : null,
@@ -338,6 +373,8 @@ Notes: $decryptedNotes
                         final alertsEnabled = context.read<AlertsProvider>().showAlerts;
                         if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
                           copyToClipboardWithFeedback(context, '🔑', 'Password', _passwordController.text);
+                        } else {
+                          Clipboard.setData(ClipboardData(text: _passwordController.text));
                         }
                       },
                     ),
@@ -425,15 +462,42 @@ Notes: $decryptedNotes
                   tag: 'url-${_currentEntry.url ?? 'empty'}',
                   child: Material(
                     type: MaterialType.transparency,
-                    child: TextFormField(
-                      controller: _urlController,
-                      decoration: InputDecoration(
-                        labelText: "Url",
-                        suffixIcon: Icon(Icons.open_in_new, size: 18),
-                      ),
-                      enabled: false,
-                      maxLines: 1,
-                      style: TextStyle(color: Colors.blue[800]),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _urlController,
+                            decoration: InputDecoration(
+                              labelText: "Url",
+                              labelStyle: TextStyle(
+                                color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                              ),
+                              disabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                                ),
+                              ),
+                            ),
+                            enabled: false,
+                            maxLines: 1,
+                            style: TextStyle(color: Colors.blue[800]),
+                          ),
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        IconButton(
+                          icon: const Icon(Icons.copy),
+                          onPressed: () {
+                            final alertsEnabled = context.read<AlertsProvider>().showAlerts;
+                            if (alertsEnabled && context.mounted && ModalRoute.of(context)?.isCurrent == true) {
+                              copyToClipboardWithFeedback(context, '🔗', 'URL', _urlController.text);
+                            } else {
+                              Clipboard.setData(ClipboardData(text: _urlController.text));
+                            }
+                          }
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -451,8 +515,19 @@ Notes: $decryptedNotes
                   constraints: BoxConstraints(minHeight: 100),
                   child: TextFormField(
                     controller: _notesController,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     decoration: InputDecoration(
                       labelText: "Notes",
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
+                      ),
+                      disabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                        ),
+                      ),
                       alignLabelWithHint: true,
                     ),
                     minLines: 3,

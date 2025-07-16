@@ -332,14 +332,6 @@ class _EditEntryState extends State<EditEntry> {
                                 maxLines: 1,
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.copy),
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: _usernameController.text)
-                                );
-                              },
-                            ),
                           ],
                         ),
                       ),
@@ -361,20 +353,10 @@ class _EditEntryState extends State<EditEntry> {
                                 decoration: InputDecoration(
                                   labelText: "Password",
                                 ),
-                                maxLines: 1,
+                                minLines: 1,
+                                maxLines: _obscurePassword ? 1 : null,
                               ),
                             ),
-
-                            /*
-                            IconButton(
-                              icon: Icon(Icons.copy),
-                              onPressed: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: _passwordController.text)
-                                );
-                              },
-                            ),
-                            */
 
                             IconButton(
                               icon: Icon(
