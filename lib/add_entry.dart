@@ -165,7 +165,10 @@ class _AddEntryState extends State<AddEntry> {
             TextButton(
               child: const Text(
                 'OK',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               onPressed: () {
 

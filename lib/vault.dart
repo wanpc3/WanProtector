@@ -912,8 +912,9 @@ class Vault {
   Future<Entry?> getEntryById(int id) async {
 
     //1) Check memory cache
-    if (EntryCache().getEntry(id) != null) {
-      return EntryCache().getEntry(id);
+    final cachedEntry = EntryCache().getEntry(id);
+    if (cachedEntry != null) {
+      return cachedEntry;
     }
 
     //2) Fetch from database
@@ -923,8 +924,11 @@ class Vault {
       where: 'id = ?',
       whereArgs: [id],
     );
-
-    if (maps.isEmpty) return null;
+    
+    if (maps.isEmpty) {
+      EntryCache().invalidate(id);
+      return null;
+    }
     
     //3) Decrypt and cache
     final entry = await Entry.fromMapAsync(maps.first);

@@ -316,7 +316,7 @@ Notes: $decryptedNotes
     await Share.share(content, subject: entry.title);
   }
 
-  // Helper function to build a consistent detail row
+  //Helper function to build a consistent detail row
   Widget _buildDetailRow(BuildContext context, String label, String value, {bool obscureText = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
