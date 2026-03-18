@@ -1,5 +1,5 @@
 name: WanProtector
-description: "A standalone password manager app available on Google Play"
+description: "A standalone password manager application"
 publish_to: 'none'
 version: 1.0.0+17
 
